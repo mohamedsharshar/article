@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
         labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو'],
         datasets: [{
           label: 'عدد المقالات',
-          data: [12, 19, 3, 5, 2], // يمكنك جلب البيانات ديناميكياً من PHP
+          data: [12, 19, 3, 5, 2], 
           backgroundColor: '#3a86ff'
         }]
       },
