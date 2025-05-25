@@ -39,7 +39,7 @@ $latest_articles = $pdo->query('SELECT * FROM articles ORDER BY created_at DESC 
         </header>
         <main class="main-content">
             <h1 class="dashboard-title animate__animated animate__fadeInDown">لوحة التحكم</h1>
-            <div class="stats-cards">
+            <div class="stats-cards"></div>
                 <div class="stat-card animate__animated animate__fadeInUp">
                     <i class="fa fa-users"></i>
                     <div>
@@ -75,7 +75,7 @@ $latest_articles = $pdo->query('SELECT * FROM articles ORDER BY created_at DESC 
         </main>
         <aside class="sidebar">
             <div class="user-info">
-                <p>مرحبًا، <?= htmlspecialchars($_SESSION['admin_name']) ?></p>
+                <p>مرحبًا، <?= isset($_SESSION['admin_username']) ? htmlspecialchars($_SESSION['admin_username']) : 'مشرف' ?></p>
             </div>
             <nav class="sidebar-nav">
                 <ul>
