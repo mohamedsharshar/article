@@ -26,14 +26,16 @@ body {
 }
 .login input[type="text"],
 .login input[type="password"] {
-    width: 90%;
-    margin: 0 auto 18px auto;
+    width: 95%;
+    display: block;
+    margin: 0 0 18px 0;
     padding: 10px 8px;
     border: 1px solid #dbeafe;
     border-radius: 8px;
     background: #f1f5f9;
     font-size: 1rem;
     transition: border 0.2s;
+    text-align: right;
 }
 .login input:focus {
     border-color: #3a86ff;

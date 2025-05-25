@@ -1,5 +1,36 @@
 <?php
-// يمكنك إضافة منطق التسجيل هنا لاحقًا
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+   
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
+    
+    require_once 'db.php'; 
+    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+    if ($password !== $confirm_password) {
+        echo "<script>alert('كلمات المرور غير متطابقة.'); window.history.back();</script>";
+        exit();
+    } 
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ? OR email = ?");
+    $stmt->execute([$username, $email]);
+    if ($stmt->fetchColumn() > 0) {
+        echo "<script>alert('اسم المستخدم أو البريد الإلكتروني مستخدم من قبل.'); window.history.back();</script>";
+        exit();
+    }
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    
+    $stmt = $pdo->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+    if ($stmt->execute([$username, $email, $hashed_password])) {
+        echo "<script>alert('تم إنشاء الحساب بنجاح!'); window.location.href='login.php';</script>";
+        exit();
+    } else {
+        echo "<script>alert('حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.'); window.history.back();</script>";
+        exit();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="ar">
