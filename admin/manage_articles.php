@@ -1,6 +1,22 @@
 <?php
 session_start();
 require_once '../db.php';
+
+// معالجة إضافة مقال جديد من نفس الصفحة
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_article'])) {
+    $title = trim($_POST['title']);
+    $content = trim($_POST['content']);
+    if ($title && $content) {
+        $stmt = $pdo->prepare('INSERT INTO articles (title, content, created_at) VALUES (?, ?, NOW())');
+        $stmt->execute([$title, $content]);
+        header('Location: manage_articles.php?success=1');
+        exit();
+    } else {
+        header('Location: manage_articles.php?error=1');
+        exit();
+    }
+}
+
 $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -9,11 +25,12 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة المقالات</title>
-    <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="./css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/manage_articles.css">
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
@@ -46,7 +63,7 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
     </table>
     <!-- نموذج إضافة مقال جديد (يظهر عند الضغط على الزر) -->
     <div class="add-article-modal" style="display:none;">
-        <form action="articles.php" method="post">
+        <form action="manage_articles.php" method="post">
             <input type="text" name="title" placeholder="عنوان المقال" required>
             <textarea name="content" rows="4" placeholder="محتوى المقال" required></textarea>
             <button type="submit" name="add_article">إضافة</button>
@@ -54,6 +71,6 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
         </form>
     </div>
 </main>
-<script src="js/articles.js"></script>
+<script src="./js/articles.js"></script>
 </body>
 </html>
