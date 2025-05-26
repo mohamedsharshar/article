@@ -36,12 +36,12 @@ $latest_articles = $pdo->query('SELECT * FROM articles ORDER BY created_at DESC 
         }
         .dashboard {
             min-height: 100vh;
-            background: #f7f8fa;
-            /* أضف هامش يمين يساوي عرض السايدبار حتى لا يغطي السايدبار المحتوى */
-            margin-right: 220px;
+            background: #f7f8fa;            
+            margin-inline-end: 0px;
             position: relative;
+            transition: margin-inline-end 0.3s;
         }
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .dashboard {
                 margin-right: 0 !important;
             }
@@ -104,10 +104,16 @@ $latest_articles = $pdo->query('SELECT * FROM articles ORDER BY created_at DESC 
         .main-content {
             padding: 2rem 2.5vw 1rem 2.5vw;
             margin-right: 0;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
         }
         @media (max-width: 900px) {
             .main-content {
+                padding: 1rem 1vw;
                 margin-right: 0 !important;
+                margin-left: 0 !important;
+                max-width: 100vw;
             }
         }
         .dashboard-title {
@@ -233,6 +239,9 @@ $latest_articles = $pdo->query('SELECT * FROM articles ORDER BY created_at DESC 
     <div class="charts-section">
         <h2 style="font-size:1.2rem;color:#4262ed;margin-bottom:18px;">إحصائيات المقالات آخر 12 شهر</h2>
         <canvas id="articlesChart"></canvas>
+        <hr style="margin:32px 0 24px 0;border:none;border-top:1.5px solid #e3e6f0;">
+        <h2 style="font-size:1.2rem;color:#4262ed;margin-bottom:18px;">إحصائيات التعليقات آخر 12 شهر</h2>
+        <canvas id="commentsChart"></canvas>
     </div>
 </main>
 
@@ -264,6 +273,35 @@ fetch('api_articles_stats.php')
         scales: {
           x: { title: { display: true, text: 'الشهر' } },
           y: { title: { display: true, text: 'عدد المقالات' }, beginAtZero: true, stepSize: 1 }
+        }
+      }
+    });
+  });
+// رسم رسم بياني ديناميكي للتعليقات آخر 12 شهر
+fetch('api_comments_stats.php')
+  .then(res => res.json())
+  .then(stats => {
+    const ctx = document.getElementById('commentsChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: stats.labels.map(m => m.replace('-', '/')),
+        datasets: [{
+          label: 'عدد التعليقات',
+          data: stats.data,
+          backgroundColor: '#36b9cc',
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { rtl: true, callbacks: { label: ctx => 'عدد التعليقات: ' + ctx.parsed.y } }
+        },
+        scales: {
+          x: { title: { display: true, text: 'الشهر' } },
+          y: { title: { display: true, text: 'عدد التعليقات' }, beginAtZero: true, stepSize: 1 }
         }
       }
     });
