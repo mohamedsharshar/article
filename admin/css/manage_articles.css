@@ -79,29 +79,46 @@
     background: #3a86ff;
     color: #fff;
 }
-.add-article-modal {
+.add-article-modal,
+.edit-article-modal,
+.view-article-modal,
+.delete-article-modal {
     position: fixed;
     top: 0; right: 0; left: 0; bottom: 0;
     background: rgba(60, 60, 90, 0.13);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 9999;
     animation: fadeIn 0.3s;
 }
-.add-article-modal form {
+.add-article-modal.active,
+.edit-article-modal.active,
+.view-article-modal.active,
+.delete-article-modal.active {
+    display: flex;
+}
+.add-article-modal form,
+.edit-article-modal form,
+.view-article-modal .view-content,
+.delete-article-modal .delete-content {
     background: #fff;
     border-radius: 14px;
     box-shadow: 0 4px 24px rgba(67,97,238,0.13);
     padding: 32px 28px 24px 28px;
     min-width: 320px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 16px;
     animation: bounceIn 0.5s;
 }
 .add-article-modal input[type="text"],
-.add-article-modal textarea {
+.add-article-modal textarea,
+.edit-article-modal input[type="text"],
+.edit-article-modal textarea {
     border: 1px solid #dbeafe;
     border-radius: 8px;
     padding: 10px 8px;
@@ -111,11 +128,15 @@
     resize: none;
 }
 .add-article-modal input:focus,
-.add-article-modal textarea:focus {
+.add-article-modal textarea:focus,
+.edit-article-modal input:focus,
+.edit-article-modal textarea:focus {
     border-color: #3a86ff;
     outline: none;
 }
-.add-article-modal button[type="submit"] {
+.add-article-modal button[type="submit"],
+.edit-article-modal button[type="submit"],
+.delete-btn-confirm {
     background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
     color: #fff;
     border: none;
@@ -126,10 +147,21 @@
     cursor: pointer;
     transition: background 0.2s;
 }
-.add-article-modal button[type="submit"]:hover {
+.add-article-modal button[type="submit"]:hover,
+.edit-article-modal button[type="submit"]:hover,
+.delete-btn-confirm:hover {
     background: linear-gradient(90deg, #4361ee 0%, #3a86ff 100%);
 }
-.add-article-modal .close-modal {
+.delete-btn-confirm {
+    background: linear-gradient(90deg, #e63946 0%, #ff6b6b 100%);
+}
+.delete-btn-confirm:hover {
+    background: linear-gradient(90deg, #ff6b6b 0%, #e63946 100%);
+}
+.add-article-modal .close-modal,
+.edit-article-modal .close-edit-modal,
+.view-article-modal .close-view-modal,
+.delete-article-modal .close-delete-modal {
     background: #f8fafc;
     color: #3a86ff;
     border: none;
@@ -141,7 +173,10 @@
     margin-top: 6px;
     transition: background 0.2s, color 0.2s;
 }
-.add-article-modal .close-modal:hover {
+.add-article-modal .close-modal:hover,
+.edit-article-modal .close-edit-modal:hover,
+.view-article-modal .close-view-modal:hover,
+.delete-article-modal .close-delete-modal:hover {
     background: #3a86ff;
     color: #fff;
 }
@@ -150,7 +185,10 @@
         padding: 10px 6px;
         font-size: 0.98rem;
     }
-    .add-article-modal form {
+    .add-article-modal form,
+    .edit-article-modal form,
+    .view-article-modal .view-content,
+    .delete-article-modal .delete-content {
         min-width: 90vw;
         padding: 18px 8px 16px 8px;
     }
