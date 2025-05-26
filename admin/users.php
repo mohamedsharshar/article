@@ -24,6 +24,20 @@ if (isset($_POST['edit_user_id'])) {
     }
 }
 
+// إضافة مستخدم جديد
+if (isset($_POST['add_user'])) {
+    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
+    if ($username && $email && $password) {
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare('INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, NOW())');
+        $stmt->execute([$username, $email, $hashed]);
+        header('Location: users.php?success=1');
+        exit();
+    }
+}
+
 $users = $pdo->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -139,6 +153,16 @@ $users = $pdo->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll(P
         .action-btn:hover {
             background: #3a86ff;
             color: #fff;
+        }
+        .add-btn {
+            background: linear-gradient(90deg,#3a86ff 0%,#4361ee 100%) !important;
+            color: #fff !important;
+            padding: 7px 16px !important;
+            font-size: 1rem !important;
+            margin-right: 6px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 5px !important;
         }
         .modal {
             display: none;
@@ -270,6 +294,15 @@ $users = $pdo->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll(P
             background: #3a86ff;
             color: #fff;
         }
+        .search-input {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: 1px solid #dbeafe;
+            font-size: 1.05rem;
+            width: 100%;
+            max-width: 100%;
+            background: #f8fafc;
+        }
         @media (max-width: 700px) {
             .main-content {
                 padding: 1rem 0.2vw;
@@ -288,7 +321,10 @@ $users = $pdo->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll(P
 <?php include 'sidebar.php'; ?>
 <main class="main-content">
     <h1 class="dashboard-title animate__animated animate__fadeInDown">إدارة المستخدمين</h1>
-    <input type="text" id="searchUser" placeholder="بحث عن مستخدم..." class="search-input" style="margin-bottom:18px;padding:10px 18px;border-radius:8px;border:1px solid #dbeafe;font-size:1.05rem;width:320px;max-width:100%;background:#f8fafc;">
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:18px;">
+        <input type="text" id="searchUser" placeholder="بحث عن مستخدم..." class="search-input">
+        <button type="button" id="searchUserBtn" class="action-btn" style="background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;font-weight:bold;padding:10px 24px;min-width:120px;display:flex;align-items:center;gap:7px;"><i class="fa fa-search"></i> بحث</button>
+    </div>
     <table class="data-table users-table">
         <thead>
             <tr>
@@ -304,15 +340,41 @@ $users = $pdo->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll(P
                 <td><?= htmlspecialchars($user['username']) ?></td>
                 <td><?= htmlspecialchars($user['email']) ?></td>
                 <td><?= htmlspecialchars($user['created_at']) ?></td>
-                <td>
+                <td style="display:flex;gap:4px;align-items:center;">
                     <button class="action-btn edit-btn" onclick="openEditUserModal(<?= $user['id'] ?>, '<?= htmlspecialchars(addslashes($user['username'])) ?>', '<?= htmlspecialchars(addslashes($user['email'])) ?>')"><i class="fa fa-edit"></i></button>
                     <button class="action-btn delete-btn" onclick="openDeleteUserModal(<?= $user['id'] ?>, '<?= htmlspecialchars(addslashes($user['username'])) ?>')"><i class="fa fa-trash"></i></button>
+                    <button class="action-btn add-btn" style="background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;padding:7px 16px;font-size:1rem;margin-right:6px;display:inline-flex;align-items:center;gap:5px;" title="إضافة مستخدم جديد" onclick="document.querySelector('.add-user-modal').classList.add('active')">
+                        <i class="fa fa-plus"></i> إضافة
+                    </button>
                 </td>
             </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
-
+    <!-- مودال إضافة مستخدم -->
+    <div class="add-user-modal modal">
+        <form action="users.php" method="post">
+            <div class="modal-content">
+                <div class="modal-header">إضافة مستخدم جديد</div>
+                <div class="form-group">
+                    <label for="username">اسم المستخدم</label>
+                    <input type="text" name="username" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">البريد الإلكتروني</label>
+                    <input type="email" name="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">كلمة المرور</label>
+                    <input type="password" name="password" id="password" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" name="add_user" class="add-user-btn">إضافة</button>
+                    <button type="button" class="close-modal">إلغاء</button>
+                </div>
+            </div>
+        </form>
+    </div>
     <!-- مودال تعديل مستخدم -->
     <div class="modal edit-user-modal" style="display:none;">
         <div class="modal-content">
@@ -350,18 +412,21 @@ $users = $pdo->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll(P
         </div>
     </div>
 </main>
-<script src="js/users.js"></script>
+<script src="./js/users.js"></script>
 <script>
-// بحث مباشر
+// بحث مباشر أو عند الضغط على زر البحث
 const searchInput = document.getElementById('searchUser');
-searchInput.addEventListener('input', function() {
-    const value = this.value.trim().toLowerCase();
+const searchBtn = document.getElementById('searchUserBtn');
+function filterUsers() {
+    const value = searchInput.value.trim().toLowerCase();
     document.querySelectorAll('#usersTable tr').forEach(row => {
         const username = row.children[0].textContent.toLowerCase();
         const email = row.children[1].textContent.toLowerCase();
         row.style.display = (username.includes(value) || email.includes(value)) ? '' : 'none';
     });
-});
+}
+searchInput.addEventListener('input', filterUsers);
+searchBtn.addEventListener('click', filterUsers);
 
 // مودال التعديل
 function openEditUserModal(id, username, email) {
@@ -383,9 +448,24 @@ function openDeleteUserModal(id, username) {
 document.querySelector('.close-delete-user-modal').onclick = function() {
     document.getElementById('deleteUserModal').classList.remove('active');
 };
+// مودال الإضافة
+// إصلاح زر الإغلاق لمودال الإضافة
+if(document.querySelector('.close-modal')) {
+    document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.onclick = function() {
+            document.querySelector('.add-user-modal').classList.remove('active');
+        };
+    });
+}
 window.onclick = function(e) {
     if (e.target === document.getElementById('deleteUserModal')) {
         document.getElementById('deleteUserModal').classList.remove('active');
+    }
+    if (e.target === document.querySelector('.add-user-modal')) {
+        document.querySelector('.add-user-modal').classList.remove('active');
+    }
+    if (e.target === document.querySelector('.edit-user-modal')) {
+        document.querySelector('.edit-user-modal').style.display = 'none';
     }
 }
 </script>

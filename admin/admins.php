@@ -1,6 +1,45 @@
 <?php
 session_start();
 require_once '../db.php';
+// إضافة مشرف جديد
+if (isset($_POST['add_admin'])) {
+    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
+    if ($username && $email && $password) {
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare('INSERT INTO admins (username, email, password, created_at) VALUES (?, ?, ?, NOW())');
+        $stmt->execute([$username, $email, $hashed]);
+        header('Location: admins.php?success=1');
+        exit();
+    }
+}
+// حذف مشرف
+if (isset($_POST['delete_admin_id'])) {
+    $id = intval($_POST['delete_admin_id']);
+    $pdo->prepare('DELETE FROM admins WHERE id = ?')->execute([$id]);
+    header('Location: admins.php?deleted=1');
+    exit();
+}
+// تعديل مشرف
+if (isset($_POST['edit_admin_id'])) {
+    $id = intval($_POST['edit_admin_id']);
+    $username = trim($_POST['edit_username']);
+    $email = trim($_POST['edit_email']);
+    $password = trim($_POST['edit_password']);
+    if ($username && $email) {
+        if ($password) {
+            $hashed = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare('UPDATE admins SET username = ?, email = ?, password = ? WHERE id = ?');
+            $stmt->execute([$username, $email, $hashed, $id]);
+        } else {
+            $stmt = $pdo->prepare('UPDATE admins SET username = ?, email = ? WHERE id = ?');
+            $stmt->execute([$username, $email, $id]);
+        }
+        header('Location: admins.php?edited=1');
+        exit();
+    }
+}
 $admins = $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -247,6 +286,15 @@ $admins = $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll
             background: #3a86ff;
             color: #fff;
         }
+        .search-input {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: 1px solid #dbeafe;
+            font-size: 1.05rem;
+            width: 100%;
+            max-width: 100%;
+            background: #f8fafc;
+        }
         @media (max-width: 700px) {
             .main-content {
                 padding: 1rem 0.2vw;
@@ -265,13 +313,17 @@ $admins = $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll
 <?php include 'sidebar.php'; ?>
 <main class="main-content">
     <h1 class="dashboard-title animate__animated animate__fadeInDown">إدارة المشرفين</h1>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:18px;">
+        <input type="text" id="searchAdmin" placeholder="بحث عن مشرف..." class="search-input">
+        <button type="button" id="searchAdminBtn" class="action-btn" style="background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;font-weight:bold;padding:10px 24px;min-width:120px;display:flex;align-items:center;gap:7px;"><i class="fa fa-search"></i> بحث</button>
+    </div>
     <table class="data-table admins-table">
         <thead>
             <tr>
                 <th>اسم المشرف</th>
                 <th>البريد الإلكتروني</th>
                 <th>تاريخ الإضافة</th>
-                <th>إجراءات</th>
+                <th>إجراءات </th>
             </tr>
         </thead>
         <tbody id="adminsTable">
@@ -281,14 +333,131 @@ $admins = $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll
                 <td><?= htmlspecialchars($admin['email']) ?></td>
                 <td><?= htmlspecialchars($admin['created_at']) ?></td>
                 <td>
-                    <button class="action-btn edit-btn"><i class="fa fa-edit"></i></button>
-                    <button class="action-btn delete-btn"><i class="fa fa-trash"></i></button>
+                    <button class="action-btn edit-btn" onclick="openEditAdminModal(<?= $admin['id'] ?>, '<?= htmlspecialchars(addslashes($admin['username'])) ?>', '<?= htmlspecialchars(addslashes($admin['email'])) ?>')"><i class="fa fa-edit"></i></button>
+                    <button class="action-btn delete-btn" onclick="openDeleteAdminModal(<?= $admin['id'] ?>, '<?= htmlspecialchars(addslashes($admin['username'])) ?>')"><i class="fa fa-trash"></i></button>
+                    <button class="action-btn add-admin-btn" style="background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;padding:7px 16px;font-size:1rem;margin-right:6px;display:inline-flex;align-items:center;gap:5px;" onclick="document.querySelector('.add-admin-modal').classList.add('active')"><i class="fa fa-plus"></i> إضافة</button>
                 </td>
             </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
+    <!-- مودال إضافة مشرف -->
+    <div class="add-admin-modal modal">
+        <form action="admins.php" method="post">
+            <div class="modal-content">
+                <div class="modal-header">إضافة مشرف جديد</div>
+                <div class="form-group">
+                    <label for="username">اسم المشرف</label>
+                    <input type="text" name="username" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">البريد الإلكتروني</label>
+                    <input type="email" name="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">كلمة المرور</label>
+                    <input type="password" name="password" id="password" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" name="add_admin" class="add-admin-btn">إضافة</button>
+                    <button type="button" class="close-modal">إلغاء</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <!-- مودال تعديل مشرف -->
+    <div class="edit-admin-modal modal">
+        <form action="admins.php" method="post">
+            <div class="modal-content">
+                <div class="modal-header">تعديل مشرف</div>
+                <input type="hidden" name="edit_admin_id" id="edit_admin_id">
+                <div class="form-group">
+                    <label for="edit_username">اسم المشرف</label>
+                    <input type="text" name="edit_username" id="edit_username" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_email">البريد الإلكتروني</label>
+                    <input type="email" name="edit_email" id="edit_email" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_password">كلمة المرور الجديدة (اختياري)</label>
+                    <input type="password" name="edit_password" id="edit_password">
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="add-admin-btn">حفظ التعديلات</button>
+                    <button type="button" class="close-edit-modal">إلغاء</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <!-- مودال حذف مشرف -->
+    <div class="delete-admin-modal modal" id="deleteAdminModal">
+        <div class="modal-content">
+            <div class="modal-header">تأكيد حذف المشرف</div>
+            <div class="form-group">
+                <label>المشرف المحدد للحذف</label>
+                <div id="deleteAdminName" style="color:#e63946;font-weight:bold;"></div>
+            </div>
+            <form method="post" id="deleteAdminForm">
+                <input type="hidden" name="delete_admin_id" id="delete_admin_id">
+                <div class="modal-actions">
+                    <button type="submit" class="delete-btn-confirm">حذف المشرف</button>
+                    <button type="button" class="close-delete-modal">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </main>
-<script src="js/admins.js"></script>
+<script>
+function openEditAdminModal(id, username, email) {
+    document.querySelector('.edit-admin-modal').classList.add('active');
+    document.getElementById('edit_admin_id').value = id;
+    document.getElementById('edit_username').value = username;
+    document.getElementById('edit_email').value = email;
+    document.getElementById('edit_password').value = '';
+}
+document.querySelectorAll('.close-edit-modal').forEach(btn => {
+    btn.onclick = () => document.querySelector('.edit-admin-modal').classList.remove('active');
+});
+function openDeleteAdminModal(id, username) {
+    document.getElementById('delete_admin_id').value = id;
+    document.getElementById('deleteAdminName').textContent = username;
+    document.getElementById('deleteAdminModal').classList.add('active');
+}
+document.querySelectorAll('.close-delete-modal').forEach(btn => {
+    btn.onclick = function() {
+        document.getElementById('deleteAdminModal').classList.remove('active');
+    };
+});
+document.querySelectorAll('.close-modal').forEach(btn => {
+    btn.onclick = function() {
+        document.querySelector('.add-admin-modal').classList.remove('active');
+    };
+});
+window.onclick = function(e) {
+    if (e.target === document.querySelector('.add-admin-modal')) {
+        document.querySelector('.add-admin-modal').classList.remove('active');
+    }
+    if (e.target === document.querySelector('.edit-admin-modal')) {
+        document.querySelector('.edit-admin-modal').classList.remove('active');
+    }
+    if (e.target === document.getElementById('deleteAdminModal')) {
+        document.getElementById('deleteAdminModal').classList.remove('active');
+    }
+}
+// بحث مباشر أو عند الضغط على زر البحث
+const searchInput = document.getElementById('searchAdmin');
+const searchBtn = document.getElementById('searchAdminBtn');
+function filterAdmins() {
+    const value = searchInput.value.trim().toLowerCase();
+    document.querySelectorAll('#adminsTable tr').forEach(row => {
+        const username = row.children[0].textContent.toLowerCase();
+        const email = row.children[1].textContent.toLowerCase();
+        row.style.display = (username.includes(value) || email.includes(value)) ? '' : 'none';
+    });
+}
+searchInput.addEventListener('input', filterAdmins);
+searchBtn.addEventListener('click', filterAdmins);
+</script>
 </body>
 </html>
