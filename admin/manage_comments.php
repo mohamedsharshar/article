@@ -52,61 +52,94 @@ $comments = $pdo->query("SELECT c.*, a.title, IF(is_admin=1,'مشرف','مستخ
                 margin-right: 0 !important;
             }
         }
-        .comments-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px #0001;
-            overflow: hidden;
+        .dashboard-title {
+            font-size: 2rem;
+            color: #2d3a4b;
             margin-bottom: 2rem;
-        }
-        .comments-table th, .comments-table td {
-            padding: 1rem 0.7rem;
-            text-align: center;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .comments-table th {
-            background: #f3f6fa;
-            color: #4e73df;
             font-weight: bold;
         }
-        .comments-table tr:last-child td {
-            border-bottom: none;
-        }
-        .action-btn {
-            background: #4e73df;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 0.4rem 1rem;
-            margin: 0 0.2rem;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .action-btn.edit {
-            background: #36b9cc;
-        }
-        .action-btn.delete {
-            background: #e74a3b;
-        }
-        .action-btn:hover {
-            opacity: 0.9;
-        }
         .add-comment-btn {
-            background: #1cc88a;
+            background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
             color: #fff;
             border: none;
             border-radius: 8px;
-            padding: 0.7rem 1.5rem;
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
+            padding: 10px 22px;
+            font-size: 1.08rem;
+            font-weight: bold;
+            margin-bottom: 18px;
             cursor: pointer;
-            transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(67,97,238,0.07);
+            transition: background 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
         }
         .add-comment-btn:hover {
-            background: #17a673;
+            background: linear-gradient(90deg, #4361ee 0%, #3a86ff 100%);
+            box-shadow: 0 4px 16px rgba(67,97,238,0.13);
+        }
+        .comments-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 24px rgba(67,97,238,0.07);
+            overflow: hidden;
+            margin-top: 32px;
+            font-size: 1.08rem;
+            direction: rtl;
+        }
+        .comments-table thead tr {
+            background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
+            color: #fff;
+        }
+        .comments-table th, .comments-table td {
+            padding: 16px 18px;
+            text-align: right;
+            border-bottom: 1px solid #f0f4fa;
+        }
+        .comments-table th {
+            font-weight: bold;
+            font-size: 1.1rem;
+            letter-spacing: 0.01em;
+        }
+        .comments-table tbody tr {
+            transition: background 0.2s;
+        }
+        .comments-table tbody tr:hover {
+            background: #f1f5f9;
+        }
+        .comments-table td {
+            color: #2d3142;
+        }
+        .action-btn {
+            background: #f8fafc;
+            border: none;
+            border-radius: 6px;
+            color: #3a86ff;
+            padding: 7px 12px;
+            margin-left: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            box-shadow: 0 1px 4px rgba(67,97,238,0.07);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-btn.edit {
+            background: #36b9cc;
+            color: #fff;
+        }
+        .action-btn.delete {
+            background: #e74a3b;
+            color: #fff;
+        }
+        .action-btn:hover {
+            background: #3a86ff;
+            color: #fff;
         }
         .modal {
             display: none;
@@ -117,39 +150,37 @@ $comments = $pdo->query("SELECT c.*, a.title, IF(is_admin=1,'مشرف','مستخ
             align-items: center;
             justify-content: center;
         }
-        .modal.active {
-            display: flex;
+        .modal.active, .modal[style*="display: flex"] {
+            display: flex !important;
         }
         .modal-content {
             background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 16px #0002;
-            padding: 2rem 2.5rem;
-            min-width: 320px;
-            max-width: 95vw;
-            animation: fadeInDown 0.7s;
-        }
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .modal-header {
-            font-size: 1.3rem;
-            color: #2d3a4b;
-            font-weight: bold;
-            margin-bottom: 1.2rem;
-        }
-        .modal-actions {
+            border-radius: 14px;
+            box-shadow: 0 4px 24px rgba(67,97,238,0.13);
+            padding: 32px 8px 24px 28px;
+            min-width: 340px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
             display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            justify-content: flex-end;
+            flex-direction: column;
+            gap: 16px;
+            animation: bounceIn 0.5s;
+            align-items: center;
+            justify-content: center;
         }
-        .modal-actions button {
-            min-width: 90px;
+        .form-group, .form-group label, .form-group input, .form-group textarea {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
         .form-group {
             margin-bottom: 1.2rem;
+            width: 100%;
         }
         .form-group label {
             display: block;
@@ -167,14 +198,168 @@ $comments = $pdo->query("SELECT c.*, a.title, IF(is_admin=1,'مشرف','مستخ
             color: #222;
         }
         .form-group textarea {
-            min-height: 80px;
+            min-height: 100px;
+            max-height: 180px;
+            border: 1.5px solid #dbeafe;
+            border-radius: 10px;
+            background: #f8fafc;
+            font-size: 1.08rem;
+            color: #222;
+            padding: 12px 10px;
+            transition: border 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 4px #e3e6f0;
+            resize: vertical;
+        }
+        .form-group textarea:focus {
+            border-color: #4262ed;
+            box-shadow: 0 2px 8px #4262ed22;
+            outline: none;
+        }
+        .modal-actions {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        .modal-actions button {
+            min-width: 120px;
+            font-size: 1.08rem;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 10px 0;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s, color 0.2s;
+            margin-bottom: 0;
+        }
+        .add-comment-btn[type="submit"], .modal-actions .add-comment-btn {
+            background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
+            color: #fff;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+        .add-comment-btn[type="submit"]:hover, .modal-actions .add-comment-btn:hover {
+            background: linear-gradient(90deg, #4361ee 0%, #3a86ff 100%);
+        }
+        .delete-btn-confirm {
+            background: linear-gradient(90deg, #e63946 0%, #ff6b6b 100%);
+            color: #fff;
+        }
+        .delete-btn-confirm:hover {
+            background: linear-gradient(90deg, #ff6b6b 0%, #e63946 100%);
+        }
+        .close-modal, .close-edit-modal, .close-delete-modal {
+            background: #f8fafc;
+            color: #3a86ff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 0;
+            font-size: 1.08rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: background 0.2s, color 0.2s;
+            min-width: 120px;
+        }
+        .close-modal:hover, .close-edit-modal:hover, .close-delete-modal:hover {
+            background: #3a86ff;
+            color: #fff;
+        }
+        .add-comment-flex-modern {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        .add-comment-flex-modern .modern-input {
+            order: 1;
+            flex: 0 1 80%;
+            max-width: 80%;
+            min-width: 120px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1.5px solid #3a86ff;
+            background: #f8fafc;
+            font-size: 1.08rem;
+            color: #2d3142;
+            box-shadow: 0 2px 8px #3a86ff11;
+            transition: border 0.2s, box-shadow 0.2s;
+            outline: none;
+            font-family: inherit;
+            font-weight: 500;
+        }
+        .add-comment-flex-modern .modern-input:focus {
+            border-color: #4361ee;
+            box-shadow: 0 4px 16px #4361ee22;
+        }
+        .add-comment-flex-modern .modern-select {
+            order: 2;
+            flex: 0 0 180px;
+            min-width: 120px;
+            max-width: 220px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1.5px solid #3a86ff;
+            background: #f8fafc;
+            font-size: 1.08rem;
+            color: #2d3142;
+            box-shadow: 0 2px 8px #3a86ff11;
+            transition: border 0.2s, box-shadow 0.2s;
+            outline: none;
+            font-family: inherit;
+            font-weight: 500;
+        }
+        .add-comment-flex-modern .modern-select:focus {
+            border-color: #4361ee;
+            box-shadow: 0 4px 16px #4361ee22;
+        }
+        .add-comment-flex-modern .modern-search-btn {
+            order: 3;
+            flex: 0 1 20%;
+            max-width: 20%;
+            min-width: 120px;
+            background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 22px;
+            font-size: 1.08rem;
+            font-weight: bold;
+            box-shadow: 0 2px 8px #3a86ff22;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: background 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            justify-content: center;
+        }
+        .add-comment-flex-modern .modern-search-btn:hover {
+            background: linear-gradient(90deg, #4361ee 0%, #3a86ff 100%);
+            box-shadow: 0 4px 16px #4361ee33;
+        }
+        @media (max-width: 900px) {
+            .add-comment-flex-modern .modern-input,
+            .add-comment-flex-modern .modern-search-btn {
+                max-width: 100%;
+            }
         }
         @media (max-width: 700px) {
-            .main-content {
-                padding: 1rem 0.2vw;
+            .add-comment-flex-modern {
+                flex-direction: column;
+                align-items: stretch;
             }
-            .modal-content {
-                padding: 1rem 0.5rem;
+            .add-comment-flex-modern .modern-input,
+            .add-comment-flex-modern .modern-search-btn,
+            .add-comment-flex-modern .modern-select {
+                max-width: 100%;
+                min-width: 0;
+                flex: 1 1 100%;
             }
         }
     </style>
@@ -186,15 +371,34 @@ $comments = $pdo->query("SELECT c.*, a.title, IF(is_admin=1,'مشرف','مستخ
     <!-- نموذج إضافة تعليق أدمن -->
     <div class="add-comment-admin-modal" style="margin-bottom:24px;">
         <form action="manage_comments.php" method="post" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <select name="article_id" required style="padding:7px 12px;border-radius:8px;border:1px solid #dbeafe;min-width:160px;">
-                <option value="">اختر مقالاً</option>
-                <?php foreach($articles_list as $art): ?>
-                    <option value="<?= $art['id'] ?>"><?= htmlspecialchars($art['title']) ?></option>
-                <?php endforeach; ?>
-            </select>
-            <input type="text" name="comment" placeholder="تعليقك هنا..." required style="flex:1;padding:7px 12px;border-radius:8px;border:1px solid #dbeafe;">
-            <button type="submit" name="add_comment" class="action-btn" style="background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;">إضافة تعليق</button>
+            <div class="disp add-comment-flex-modern">
+                <input type="text" name="comment" placeholder="تعليقك هنا..." required class="modern-input">
+                <select name="article_id" required class="modern-select">
+                    <option value="">اختر مقالاً</option>
+                    <?php foreach($articles_list as $art): ?>
+                        <option value="<?= $art['id'] ?>"><?= htmlspecialchars($art['title']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" name="add_comment" class="action-btn modern-search-btn"><i class="fa fa-paper-plane"></i> إضافة تعليق</button>
+            </div>
         </form>
+    </div>
+    <!-- مودال تأكيد حذف التعليق -->
+    <div class="delete-comment-modal modal" id="deleteCommentModal">
+        <div class="modal-content">
+            <div class="modal-header">تأكيد حذف التعليق</div>
+            <div class="form-group">
+                <label>التعليق المحدد للحذف</label>
+                <div id="deleteCommentContent" style="color:#e63946;font-weight:bold;word-break:break-word;"></div>
+            </div>
+            <form method="post" id="deleteCommentForm">
+                <input type="hidden" name="delete_comment_id" id="delete_comment_id">
+                <div class="modal-actions">
+                    <button type="submit" class="delete-btn-confirm">حذف التعليق</button>
+                    <button type="button" class="close-delete-modal">إلغاء</button>
+                </div>
+            </form>
+        </div>
     </div>
     <table class="data-table comments-table">
         <thead>
@@ -214,16 +418,32 @@ $comments = $pdo->query("SELECT c.*, a.title, IF(is_admin=1,'مشرف','مستخ
                 <td><?= $comment['author_type'] ?></td>
                 <td><?= htmlspecialchars($comment['created_at']) ?></td>
                 <td>
-                    <form method="post" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذا التعليق؟');">
-                        <input type="hidden" name="delete_comment_id" value="<?= $comment['id'] ?>">
-                        <button type="submit" class="action-btn delete-btn"><i class="fa fa-trash"></i></button>
-                    </form>
+                    <button type="button" class="action-btn delete-btn" onclick="openDeleteCommentModal(<?= $comment['id'] ?>, '<?= htmlspecialchars(addslashes($comment['content'])) ?>')"><i class="fa fa-trash"></i></button>
                 </td>
             </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 </main>
-<script src="js/comments.js"></script>
+<script>
+        // فتح مودال الحذف مع تمرير بيانات التعليق
+        function openDeleteCommentModal(id, content) {
+            document.getElementById('delete_comment_id').value = id;
+            document.getElementById('deleteCommentContent').textContent = content;
+            document.getElementById('deleteCommentModal').classList.add('active');
+        }
+        // إغلاق المودال
+        document.querySelectorAll('.close-delete-modal').forEach(btn => {
+            btn.onclick = function() {
+                document.getElementById('deleteCommentModal').classList.remove('active');
+            };
+        });
+        // إغلاق عند الضغط خارج المودال
+        window.onclick = function(e) {
+            if (e.target === document.getElementById('deleteCommentModal')) {
+                document.getElementById('deleteCommentModal').classList.remove('active');
+            }
+        }
+        </script>
 </body>
 </html>

@@ -46,7 +46,6 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة المقالات</title>
-    <link rel="stylesheet" href="./css/manage_articles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
@@ -66,61 +65,98 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
                 margin-right: 0 !important;
             }
         }
-        .articles-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px #0001;
-            overflow: hidden;
+        .dashboard-title {
+            font-size: 2rem;
+            color: #2d3a4b;
             margin-bottom: 2rem;
-        }
-        .articles-table th, .articles-table td {
-            padding: 1rem 0.7rem;
-            text-align: center;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .articles-table th {
-            background: #f3f6fa;
-            color: #4e73df;
             font-weight: bold;
         }
-        .articles-table tr:last-child td {
-            border-bottom: none;
-        }
-        .action-btn {
-            background: #4e73df;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 0.4rem 1rem;
-            margin: 0 0.2rem;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .action-btn.edit {
-            background: #36b9cc;
-        }
-        .action-btn.delete {
-            background: #e74a3b;
-        }
-        .action-btn:hover {
-            opacity: 0.9;
-        }
         .add-article-btn {
-            background: #1cc88a;
+            background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
             color: #fff;
             border: none;
             border-radius: 8px;
-            padding: 0.7rem 1.5rem;
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
+            padding: 10px 22px;
+            font-size: 1.08rem;
+            font-weight: bold;
+            margin-bottom: 18px;
             cursor: pointer;
-            transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(67,97,238,0.07);
+            transition: background 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
         }
         .add-article-btn:hover {
-            background: #17a673;
+            background: linear-gradient(90deg, #4361ee 0%, #3a86ff 100%);
+            box-shadow: 0 4px 16px rgba(67,97,238,0.13);
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 24px rgba(67,97,238,0.07);
+            overflow: hidden;
+            margin-top: 32px;
+            font-size: 1.08rem;
+            direction: rtl;
+        }
+        .data-table thead tr {
+            background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
+            color: #fff;
+        }
+        .data-table th, .data-table td {
+            padding: 16px 18px;
+            text-align: right;
+            border-bottom: 1px solid #f0f4fa;
+        }
+        .data-table th {
+            font-weight: bold;
+            font-size: 1.1rem;
+            letter-spacing: 0.01em;
+        }
+        .data-table tbody tr {
+            transition: background 0.2s;
+        }
+        .data-table tbody tr:hover {
+            background: #f1f5f9;
+        }
+        .data-table td {
+            color: #2d3142;
+        }
+        .action-btn {
+            background: #f8fafc;
+            border: none;
+            border-radius: 6px;
+            color: #3a86ff;
+            padding: 7px 12px;
+            margin-left: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            box-shadow: 0 1px 4px rgba(67,97,238,0.07);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-btn.edit {
+            background: #36b9cc;
+            color: #fff;
+        }
+        .action-btn.delete {
+            background: #e74a3b;
+            color: #fff;
+        }
+        .action-btn.view-btn {
+            background: #4e73df;
+            color: #fff;
+        }
+        .action-btn:hover {
+            background: #3a86ff;
+            color: #fff;
         }
         .modal {
             display: none;
@@ -136,34 +172,32 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
         }
         .modal-content {
             background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 16px #0002;
-            padding: 2rem 2.5rem;
-            min-width: 320px;
-            max-width: 95vw;
-            animation: fadeInDown 0.7s;
-        }
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .modal-header {
-            font-size: 1.3rem;
-            color: #2d3a4b;
-            font-weight: bold;
-            margin-bottom: 1.2rem;
-        }
-        .modal-actions {
+            border-radius: 14px;
+            box-shadow: 0 4px 24px rgba(67,97,238,0.13);
+            padding: 32px 8px 24px 28px;
+            min-width: 400px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
             display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            justify-content: flex-end;
+            flex-direction: column;
+            gap: 16px;
+            animation: bounceIn 0.5s;
+            align-items: center;
+            justify-content: center;
         }
-        .modal-actions button {
-            min-width: 90px;
+        .form-group, .form-group label, .form-group input, .form-group textarea {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
         .form-group {
             margin-bottom: 1.2rem;
+            width: 100%;
         }
         .form-group label {
             display: block;
@@ -181,7 +215,78 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
             color: #222;
         }
         .form-group textarea {
-            min-height: 80px;
+            min-height: 100px;
+            max-height: 180px;
+            border: 1.5px solid #dbeafe;
+            border-radius: 10px;
+            background: #f8fafc;
+            font-size: 1.08rem;
+            color: #222;
+            padding: 12px 10px;
+            transition: border 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 4px #e3e6f0;
+            resize: vertical;
+        }
+        .form-group textarea:focus {
+            border-color: #4262ed;
+            box-shadow: 0 2px 8px #4262ed22;
+            outline: none;
+        }
+        .modal-actions {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        .modal-actions button {
+            min-width: 120px;
+            font-size: 1.08rem;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 10px 0;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s, color 0.2s;
+            margin-bottom: 0;
+        }
+        .add-article-btn[type="submit"], .modal-actions .add-article-btn {
+            background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
+            color: #fff;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+        .add-article-btn[type="submit"]:hover, .modal-actions .add-article-btn:hover {
+            background: linear-gradient(90deg, #4361ee 0%, #3a86ff 100%);
+        }
+        .delete-btn-confirm {
+            background: linear-gradient(90deg, #e63946 0%, #ff6b6b 100%);
+            color: #fff;
+        }
+        .delete-btn-confirm:hover {
+            background: linear-gradient(90deg, #ff6b6b 0%, #e63946 100%);
+        }
+        .close-modal, .close-edit-modal, .close-view-modal, .close-delete-modal {
+            background: #f8fafc;
+            color: #3a86ff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 0;
+            font-size: 1.08rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: background 0.2s, color 0.2s;
+            min-width: 120px;
+        }
+        .close-modal:hover, .close-edit-modal:hover, .close-view-modal:hover, .close-delete-modal:hover {
+            background: #3a86ff;
+            color: #fff;
         }
         @media (max-width: 700px) {
             .main-content {
@@ -189,6 +294,10 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
             }
             .modal-content {
                 padding: 1rem 0.5rem;
+            }
+            .data-table th, .data-table td {
+                padding: 10px 6px;
+                font-size: 0.98rem;
             }
         }
     </style>
