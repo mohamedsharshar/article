@@ -46,208 +46,151 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة المقالات</title>
-    <link rel="stylesheet" href="./css/dashboard.css">
-    <link rel="stylesheet" href="./css/sidebar.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./css/manage_articles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-    /* تصميم خاص بصفحة إدارة المقالات */
-    .manage-articles-title {
-        color: #2d3142;
-        margin-bottom: 32px;
-        font-size: 2.2rem;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .add-article-btn {
-        background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 22px;
-        font-size: 1.08rem;
-        font-weight: bold;
-        margin-bottom: 18px;
-        cursor: pointer;
-        box-shadow: 0 2px 8px rgba(67,97,238,0.07);
-        transition: background 0.2s, box-shadow 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .add-article-btn:hover {
-        background: linear-gradient(90deg, #4361ee 0%, #3a86ff 100%);
-        box-shadow: 0 4px 16px rgba(67,97,238,0.13);
-    }
-    .data-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        background: #fff;
-        border-radius: 14px;
-        box-shadow: 0 4px 24px rgba(67,97,238,0.07);
-        overflow: hidden;
-        margin-top: 32px;
-        font-size: 1.08rem;
-        direction: rtl;
-    }
-    .data-table thead tr {
-        background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
-        color: #fff;
-    }
-    .data-table th, .data-table td {
-        padding: 16px 18px;
-        text-align: right;
-        border-bottom: 1px solid #f0f4fa;
-    }
-    .data-table th {
-        font-weight: bold;
-        font-size: 1.1rem;
-        letter-spacing: 0.01em;
-    }
-    .data-table tbody tr {
-        transition: background 0.2s;
-    }
-    .data-table tbody tr:hover {
-        background: #f1f5f9;
-    }
-    .data-table td {
-        color: #2d3142;
-    }
-    .action-btn {
-        background: #f8fafc;
-        border: none;
-        border-radius: 6px;
-        color: #3a86ff;
-        padding: 7px 12px;
-        margin-left: 4px;
-        font-size: 1.1rem;
-        cursor: pointer;
-        transition: background 0.2s, color 0.2s;
-        box-shadow: 0 1px 4px rgba(67,97,238,0.07);
-    }
-    .action-btn:hover {
-        background: #3a86ff;
-        color: #fff;
-    }
-    .add-article-modal,
-    .edit-article-modal,
-    .view-article-modal,
-    .delete-article-modal {
-        position: fixed;
-        top: 0; right: 0; left: 0; bottom: 0;
-        background: rgba(60, 60, 90, 0.13);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        animation: fadeIn 0.3s;
-    }
-    .add-article-modal.active,
-    .edit-article-modal.active,
-    .view-article-modal.active,
-    .delete-article-modal.active {
-        display: flex;
-    }
-    .add-article-modal form,
-    .edit-article-modal form,
-    .view-article-modal .view-content,
-    .delete-article-modal .delete-content {
-        background: #fff;
-        border-radius: 14px;
-        box-shadow: 0 4px 24px rgba(67,97,238,0.13);
-        padding: 32px 28px 24px 28px;
-        min-width: 320px;
-        max-width: 90vw;
-        max-height: 80vh;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        animation: bounceIn 0.5s;
-    }
-    .add-article-modal input[type="text"],
-    .add-article-modal textarea,
-    .edit-article-modal input[type="text"],
-    .edit-article-modal textarea {
-        border: 1px solid #dbeafe;
-        border-radius: 8px;
-        padding: 10px 8px;
-        background: #f1f5f9;
-        font-size: 1rem;
-        transition: border 0.2s;
-        resize: none;
-    }
-    .add-article-modal input:focus,
-    .add-article-modal textarea:focus,
-    .edit-article-modal input:focus,
-    .edit-article-modal textarea:focus {
-        border-color: #3a86ff;
-        outline: none;
-    }
-    .add-article-modal button[type="submit"],
-    .edit-article-modal button[type="submit"],
-    .delete-btn-confirm {
-        background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 0;
-        font-size: 1.08rem;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-    .add-article-modal button[type="submit"]:hover,
-    .edit-article-modal button[type="submit"]:hover,
-    .delete-btn-confirm:hover {
-        background: linear-gradient(90deg, #4361ee 0%, #3a86ff 100%);
-    }
-    .delete-btn-confirm {
-        background: linear-gradient(90deg, #e63946 0%, #ff6b6b 100%);
-    }
-    .delete-btn-confirm:hover {
-        background: linear-gradient(90deg, #ff6b6b 0%, #e63946 100%);
-    }
-    .add-article-modal .close-modal,
-    .edit-article-modal .close-edit-modal,
-    .view-article-modal .close-view-modal,
-    .delete-article-modal .close-delete-modal {
-        background: #f8fafc;
-        color: #3a86ff;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 0;
-        font-size: 1.08rem;
-        font-weight: bold;
-        cursor: pointer;
-        margin-top: 6px;
-        transition: background 0.2s, color 0.2s;
-    }
-    .add-article-modal .close-modal:hover,
-    .edit-article-modal .close-edit-modal:hover,
-    .view-article-modal .close-view-modal:hover,
-    .delete-article-modal .close-delete-modal:hover {
-        background: #3a86ff;
-        color: #fff;
-    }
-    @media (max-width: 700px) {
-        .data-table th, .data-table td {
-            padding: 10px 6px;
-            font-size: 0.98rem;
+        body, html {
+            font-family: 'Cairo', Tahoma, Arial, sans-serif;
+            background: #f7f8fa;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
         }
-        .add-article-modal form,
-        .edit-article-modal form,
-        .view-article-modal .view-content,
-        .delete-article-modal .delete-content {
-            min-width: 90vw;
-            padding: 18px 8px 16px 8px;
+        .main-content {
+            padding: 2rem 2vw 1rem 2vw;
+            margin-right: 220px;
         }
-    }
+        @media (max-width: 900px) {
+            .main-content {
+                margin-right: 0 !important;
+            }
+        }
+        .articles-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #0001;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .articles-table th, .articles-table td {
+            padding: 1rem 0.7rem;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .articles-table th {
+            background: #f3f6fa;
+            color: #4e73df;
+            font-weight: bold;
+        }
+        .articles-table tr:last-child td {
+            border-bottom: none;
+        }
+        .action-btn {
+            background: #4e73df;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.4rem 1rem;
+            margin: 0 0.2rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .action-btn.edit {
+            background: #36b9cc;
+        }
+        .action-btn.delete {
+            background: #e74a3b;
+        }
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+        .add-article-btn {
+            background: #1cc88a;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.7rem 1.5rem;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .add-article-btn:hover {
+            background: #17a673;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            right: 0; left: 0; top: 0; bottom: 0;
+            background: rgba(0,0,0,0.25);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 16px #0002;
+            padding: 2rem 2.5rem;
+            min-width: 320px;
+            max-width: 95vw;
+            animation: fadeInDown 0.7s;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-header {
+            font-size: 1.3rem;
+            color: #2d3a4b;
+            font-weight: bold;
+            margin-bottom: 1.2rem;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: flex-end;
+        }
+        .modal-actions button {
+            min-width: 90px;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            color: #444;
+            font-weight: 500;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 0.5rem 0.7rem;
+            border: 1px solid #e3e6f0;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: #f9fafb;
+            color: #222;
+        }
+        .form-group textarea {
+            min-height: 80px;
+        }
+        @media (max-width: 700px) {
+            .main-content {
+                padding: 1rem 0.2vw;
+            }
+            .modal-content {
+                padding: 1rem 0.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -255,7 +198,7 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
 <main class="main-content">
     <h1 class="dashboard-title animate__animated animate__fadeInDown">إدارة المقالات</h1>
     <button class="add-article-btn"><i class="fa fa-plus"></i> إضافة مقال جديد</button>
-    <table class="data-table">
+    <table class="data-table articles-table">
         <thead>
             <tr>
                 <th>العنوان</th>
@@ -290,41 +233,75 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
         </tbody>
     </table>
     <!-- نموذج إضافة مقال جديد (يظهر عند الضغط على الزر) -->
-    <div class="add-article-modal" style="display:none;">
+    <div class="add-article-modal modal" style="display:none;">
         <form action="manage_articles.php" method="post">
-            <input type="text" name="title" placeholder="عنوان المقال" required>
-            <textarea name="content" rows="4" placeholder="محتوى المقال" required></textarea>
-            <button type="submit" name="add_article">إضافة</button>
-            <button type="button" class="close-modal">إلغاء</button>
+            <div class="modal-content">
+                <div class="modal-header">إضافة مقال جديد</div>
+                <div class="form-group">
+                    <label for="title">عنوان المقال</label>
+                    <input type="text" name="title" id="title" placeholder="أدخل عنوان المقال" required>
+                </div>
+                <div class="form-group">
+                    <label for="content">محتوى المقال</label>
+                    <textarea name="content" id="content" rows="4" placeholder="أدخل محتوى المقال" required></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" name="add_article" class="add-article-btn">إضافة مقال</button>
+                    <button type="button" class="close-modal">إلغاء</button>
+                </div>
+            </div>
         </form>
     </div>
     <!-- مودال تعديل مقال -->
-    <div class="edit-article-modal" style="display:none;">
+    <div class="edit-article-modal modal" style="display:none;">
         <form action="manage_articles.php" method="post">
-            <input type="hidden" name="edit_article_id" id="edit_article_id">
-            <input type="text" name="edit_title" id="edit_title" placeholder="عنوان المقال" required>
-            <textarea name="edit_content" id="edit_content" rows="4" placeholder="محتوى المقال" required></textarea>
-            <button type="submit">حفظ التعديلات</button>
-            <button type="button" class="close-edit-modal">إلغاء</button>
+            <div class="modal-content">
+                <div class="modal-header">تعديل مقال</div>
+                <input type="hidden" name="edit_article_id" id="edit_article_id">
+                <div class="form-group">
+                    <label for="edit_title">عنوان المقال</label>
+                    <input type="text" name="edit_title" id="edit_title" placeholder="أدخل عنوان المقال" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_content">محتوى المقال</label>
+                    <textarea name="edit_content" id="edit_content" rows="4" placeholder="أدخل محتوى المقال" required></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="add-article-btn">حفظ التعديلات</button>
+                    <button type="button" class="close-edit-modal">إلغاء</button>
+                </div>
+            </div>
         </form>
     </div>
     <!-- مودال عرض تفاصيل المقال -->
-    <div class="view-article-modal" id="viewArticleModal">
-        <div class="view-content">
-            <h3 id="viewArticleTitle"></h3>
-            <div id="viewArticleContent" style="white-space:pre-line;"></div>
-            <button type="button" class="close-view-modal">إغلاق</button>
+    <div class="view-article-modal modal" id="viewArticleModal">
+        <div class="modal-content">
+            <div class="modal-header">تفاصيل المقال</div>
+            <div class="form-group">
+                <label>العنوان</label>
+                <div id="viewArticleTitle" style="font-weight:bold;"></div>
+            </div>
+            <div class="form-group">
+                <label>المحتوى</label>
+                <div id="viewArticleContent" style="white-space:pre-line;"></div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="close-view-modal">إغلاق</button>
+            </div>
         </div>
     </div>
     <!-- مودال تأكيد الحذف -->
-    <div class="delete-article-modal" id="deleteArticleModal">
-        <div class="delete-content">
-            <h3>تأكيد حذف المقال</h3>
-            <div id="deleteArticleTitle" style="color:#e63946;font-weight:bold;"></div>
+    <div class="delete-article-modal modal" id="deleteArticleModal">
+        <div class="modal-content">
+            <div class="modal-header">تأكيد حذف المقال</div>
+            <div class="form-group">
+                <label>المقال المحدد للحذف</label>
+                <div id="deleteArticleTitle" style="color:#e63946;font-weight:bold;"></div>
+            </div>
             <form method="post" id="deleteArticleForm">
                 <input type="hidden" name="delete_article_id" id="delete_article_id">
-                <div class="delete-actions">
-                    <button type="submit" class="delete-btn-confirm">حذف</button>
+                <div class="modal-actions">
+                    <button type="submit" class="delete-btn-confirm">حذف المقال</button>
                     <button type="button" class="close-delete-modal">إلغاء</button>
                 </div>
             </form>
