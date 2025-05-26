@@ -42,10 +42,10 @@ $latest_articles = $pdo->query('SELECT * FROM articles ORDER BY created_at DESC 
                     <li><a href="logout.php">تسجيل الخروج</a></li>
                 </ul>
                 <div class="dashboard-actions">
-                    <a href="manage_users.php" class="dashboard-action-btn"><i class="fa fa-users"></i> إدارة المستخدمين</a>
+                    <a href="users.php" class="dashboard-action-btn"><i class="fa fa-users"></i> إدارة المستخدمين</a>
                     <a href="manage_articles.php" class="dashboard-action-btn"><i class="fa fa-newspaper"></i> إدارة المقالات</a>
                     <a href="manage_comments.php" class="dashboard-action-btn"><i class="fa fa-comments"></i> إدارة التعليقات</a>
-                    <a href="manage_admins.php" class="dashboard-action-btn"><i class="fa fa-user-shield"></i> إدارة المشرفين</a>
+                    <a href="admins.php" class="dashboard-action-btn"><i class="fa fa-user-shield"></i> إدارة المشرفين</a>
                 </div>
             </nav>
         </header>
