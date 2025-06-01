@@ -37,7 +37,6 @@ $latest_articles = $pdo->query('SELECT * FROM articles ORDER BY created_at DESC 
         .dashboard {
             min-height: 100vh;
             background: #f7f8fa;            
-            margin-inline-end: 0px;
             position: relative;
             transition: margin-inline-end 0.3s;
         }
@@ -156,13 +155,45 @@ $latest_articles = $pdo->query('SELECT * FROM articles ORDER BY created_at DESC 
         }
         .charts-section {
             background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px #0001;
-            padding: 2rem 1.5rem;
-            margin-top: 2rem;
-            max-width: 700px;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px #4262ed14;
+            padding: 2.5rem 2rem 2.5rem 2rem;
+            margin-top: 2.5rem;
+            max-width: 800px;
             margin-right: auto;
             margin-left: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2.5rem;
+        }
+        .charts-section h2 {
+            text-align: center;
+            color: #4262ed;
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 18px;
+            margin-top: 0;
+            letter-spacing: 0.01em;
+        }
+        .charts-section canvas {
+            background: #f8fafc;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #4262ed0a;
+            margin-bottom: 0;
+            max-width: 100%;
+        }
+        .charts-section hr {
+            width: 80%;
+            border: none;
+            border-top: 1.5px solid #e3e6f0;
+            margin: 32px 0 24px 0;
+        }
+        @media (max-width: 700px) {
+            .charts-section {
+                padding: 1rem 0.5rem;
+                max-width: 100vw;
+            }
         }
         @media (max-width: 900px) {
             .stats-cards {
@@ -260,19 +291,20 @@ fetch('api_articles_stats.php')
         datasets: [{
           label: 'عدد المقالات',
           data: stats.data,
-          backgroundColor: '#4262ed',
-          borderRadius: 8
+          backgroundColor: 'rgba(66,98,237,0.85)',
+          borderRadius: 10,
+          maxBarThickness: 38
         }]
       },
       options: {
         responsive: true,
         plugins: {
           legend: { display: false },
-          tooltip: { rtl: true, callbacks: { label: ctx => 'عدد المقالات: ' + ctx.parsed.y } }
+          tooltip: { rtl: true, backgroundColor: '#4262ed', titleFont: {size:16}, bodyFont: {size:15}, callbacks: { label: ctx => 'عدد المقالات: ' + ctx.parsed.y } }
         },
         scales: {
-          x: { title: { display: true, text: 'الشهر' } },
-          y: { title: { display: true, text: 'عدد المقالات' }, beginAtZero: true, stepSize: 1 }
+          x: { title: { display: true, text: 'الشهر', color:'#4262ed', font:{size:15,weight:'bold'} }, ticks:{font:{size:14}} },
+          y: { title: { display: true, text: 'عدد المقالات', color:'#4262ed', font:{size:15,weight:'bold'} }, beginAtZero: true, stepSize: 1, ticks:{font:{size:14}} }
         }
       }
     });
@@ -289,19 +321,20 @@ fetch('api_comments_stats.php')
         datasets: [{
           label: 'عدد التعليقات',
           data: stats.data,
-          backgroundColor: '#36b9cc',
-          borderRadius: 8
+          backgroundColor: 'rgba(54,185,204,0.85)',
+          borderRadius: 10,
+          maxBarThickness: 38
         }]
       },
       options: {
         responsive: true,
         plugins: {
           legend: { display: false },
-          tooltip: { rtl: true, callbacks: { label: ctx => 'عدد التعليقات: ' + ctx.parsed.y } }
+          tooltip: { rtl: true, backgroundColor: '#36b9cc', titleFont: {size:16}, bodyFont: {size:15}, callbacks: { label: ctx => 'عدد التعليقات: ' + ctx.parsed.y } }
         },
         scales: {
-          x: { title: { display: true, text: 'الشهر' } },
-          y: { title: { display: true, text: 'عدد التعليقات' }, beginAtZero: true, stepSize: 1 }
+          x: { title: { display: true, text: 'الشهر', color:'#36b9cc', font:{size:15,weight:'bold'} }, ticks:{font:{size:14}} },
+          y: { title: { display: true, text: 'عدد التعليقات', color:'#36b9cc', font:{size:15,weight:'bold'} }, beginAtZero: true, stepSize: 1, ticks:{font:{size:14}} }
         }
       }
     });
