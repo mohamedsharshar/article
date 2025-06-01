@@ -1,0 +1,118 @@
+/* تصميم عصري ومتجاوب لواجهة المقالات الرئيسية */
+body, html {
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  background: #f7f8fa;
+  margin: 0;
+  padding: 0;
+  direction: rtl;
+}
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+.site-title {
+  font-size: 2.3rem;
+  color: #2d3a4b;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.01em;
+}
+.site-desc {
+  color: #4262ed;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+nav {
+  margin-bottom: 1.5rem;
+}
+nav a {
+  color: #3a86ff;
+  text-decoration: none;
+  font-weight: bold;
+  margin: 0 0.7rem;
+  font-size: 1.08rem;
+  transition: color 0.2s;
+}
+nav a:hover, nav a:focus {
+  color: #4361ee;
+  text-decoration: underline;
+}
+.articles-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+@media (max-width: 700px) {
+  .articles-list { grid-template-columns: 1fr; gap: 1.2rem; }
+}
+.article-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(67,97,238,0.07);
+  padding: 1.5rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  position: relative;
+  min-height: 180px;
+  transition: box-shadow 0.2s, transform 0.18s;
+  outline: none;
+}
+.article-card:focus-within, .article-card:hover {
+  box-shadow: 0 8px 32px 0 #4262ed22, 0 2px 8px #3a86ff22;
+  transform: translateY(-2px) scale(1.03);
+}
+.article-title {
+  font-size: 1.25rem;
+  color: #2d3a4b;
+  font-weight: bold;
+  margin-bottom: 0.2rem;
+  line-height: 1.4;
+}
+.article-content {
+  color: #444;
+  font-size: 1.08rem;
+  line-height: 1.7;
+  margin-bottom: 0.5rem;
+}
+.article-date {
+  color: #888;
+  font-size: 0.98rem;
+  margin-top: auto;
+  text-align: left;
+}
+.no-articles {
+  text-align: center;
+  color: #888;
+  font-size: 1.2rem;
+  margin-top: 2.5rem;
+}
+.scroll-top-btn {
+  position: fixed;
+  bottom: 32px;
+  left: 32px;
+  background: linear-gradient(90deg, #4262ed 0%, #3a86ff 100%);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 18px 0 #4262ed22;
+  cursor: pointer;
+  z-index: 100;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.scroll-top-btn:focus, .scroll-top-btn:hover {
+  background: linear-gradient(90deg, #3a86ff 0%, #4262ed 100%);
+  box-shadow: 0 8px 32px 0 #4262ed33;
+}
+/* تحسينات وصول */
+.article-card:focus {
+  outline: 2px solid #4262ed;
+  outline-offset: 2px;
+}
