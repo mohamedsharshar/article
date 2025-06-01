@@ -72,25 +72,30 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
             font-weight: bold;
         }
         .add-article-btn {
-            background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
+            background: linear-gradient(90deg, #4262ed 0%, #3a86ff 100%);
             color: #fff;
             border: none;
-            border-radius: 8px;
-            padding: 10px 22px;
-            font-size: 1.08rem;
+            border-radius: 10px;
+            padding: 10px 24px;
+            font-size: 1.15rem;
             font-weight: bold;
-            margin-bottom: 18px;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(67,97,238,0.07);
-            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 18px 0 #4262ed22, 0 1.5px 6px #3a86ff11;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.13s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             justify-content: center;
+            min-width: 170px;
+            letter-spacing: 0.01em;
+        }
+        .add-article-btn i {
+            font-size: 1.25em;
         }
         .add-article-btn:hover {
-            background: linear-gradient(90deg, #4361ee 0%, #3a86ff 100%);
-            box-shadow: 0 4px 16px rgba(67,97,238,0.13);
+            background: linear-gradient(90deg, #3a86ff 0%, #4262ed 100%);
+            box-shadow: 0 8px 32px 0 #4262ed33, 0 2px 8px #3a86ff22;
+            transform: translateY(-2px) scale(1.04);
         }
         .data-table {
             width: 100%;
@@ -288,6 +293,15 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
             background: #3a86ff;
             color: #fff;
         }
+        .search-input {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: 1px solid #dbeafe;
+            font-size: 1.05rem;
+            width: 100%;
+            max-width: 100%;
+            background: #f8fafc;
+        }
         @media (max-width: 700px) {
             .main-content {
                 padding: 1rem 0.2vw;
@@ -306,7 +320,11 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
 <?php include 'sidebar.php'; ?>
 <main class="main-content">
     <h1 class="dashboard-title animate__animated animate__fadeInDown">إدارة المقالات</h1>
-    <button class="add-article-btn"><i class="fa fa-plus"></i> إضافة مقال جديد</button>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:18px;">
+        <input type="text" id="searchArticle" placeholder="بحث عن مقال..." class="search-input">
+        <button type="button" id="searchArticleBtn" class="action-btn" style="background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;font-weight:bold;padding:10px 24px;min-width:120px;display:flex;align-items:center;gap:7px;"><i class="fa fa-search"></i> بحث</button>
+        <button class="add-article-btn" onclick="document.querySelector('.add-article-modal').style.display='flex'"><i class="fa fa-plus"></i> إضافة مقال </button>
+    </div>
     <table class="data-table articles-table">
         <thead>
             <tr>
@@ -453,6 +471,19 @@ window.onclick = function(e) {
         document.getElementById('deleteArticleModal').classList.remove('active');
     }
 }
+// بحث مباشر أو عند الضغط على زر البحث
+const searchInput = document.getElementById('searchArticle');
+const searchBtn = document.getElementById('searchArticleBtn');
+function filterArticles() {
+    const value = searchInput.value.trim().toLowerCase();
+    document.querySelectorAll('#articlesTable tr').forEach(row => {
+        const title = row.children[0].textContent.toLowerCase();
+        const content = row.children[1].textContent.toLowerCase();
+        row.style.display = (title.includes(value) || content.includes(value)) ? '' : 'none';
+    });
+}
+searchInput.addEventListener('input', filterArticles);
+searchBtn.addEventListener('click', filterArticles);
 </script>
 </body>
 </html>
