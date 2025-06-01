@@ -111,13 +111,12 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
         transition: background 0.18s;
         background: none;
         border: none;
+        position: relative;
       }
-      .user-nav-info:hover, .user-nav-info:focus {
-        background: #e9f0fb;
-        color: #4361ee;
+      .user-nav-info:focus {
+        outline: none;
       }
-      /* إخفاء النقاط */
-      .user-dropdown {
+      .navbar-user .user-dropdown {
         display: none;
         position: absolute;
         left: 0; top: 110%;
@@ -129,7 +128,11 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
         padding: 0.5rem 0;
         list-style: none;
       }
-      .navbar-user.open .user-dropdown {
+      .navbar-user.open .user-dropdown,
+      .navbar-user:focus-within .user-dropdown,
+      .user-nav-info:focus + .user-dropdown,
+      .user-nav-info:hover + .user-dropdown,
+      .user-dropdown:hover {
         display: block;
       }
       .user-dropdown li { width: 100%; }
@@ -167,7 +170,7 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
         <ul class="navbar-list">
           <?php if (isset($_SESSION['username'])): ?>
             <li class="navbar-user" id="navbarUser">
-              <a href="profile.php" class="user-nav-info" id="userNavInfo">
+              <a href="profile.php" class="user-nav-info" id="userNavInfo" tabindex="0">
                 <i class="fa fa-user-circle"></i> <?= htmlspecialchars($_SESSION['username']) ?>
               </a>
               <ul class="user-dropdown" id="userDropdown">
@@ -214,19 +217,19 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
         if(window.scrollY > 300) scrollBtn.style.display = 'flex';
         else scrollBtn.style.display = 'none';
       });
-      // user-dropdown: فتح القائمة عند الضغط على اسم المستخدم وإغلاقها عند الضغط خارجها
+      // user-dropdown: فتح القائمة عند المرور أو التركيز على الزر
       const navbarUser = document.getElementById('navbarUser');
       const userNavInfo = document.getElementById('userNavInfo');
       if(navbarUser && userNavInfo) {
+        // لا تحول مباشرة للبروفايل عند الضغط، فقط افتح القائمة
         userNavInfo.addEventListener('click', function(e) {
-          // الانتقال للبروفايل مباشرة
-          window.location.href = 'profile.php';
+          e.preventDefault();
+          navbarUser.classList.toggle('open');
         });
-        navbarUser.addEventListener('mouseenter', function() {
-          navbarUser.classList.add('open');
-        });
-        navbarUser.addEventListener('mouseleave', function() {
-          navbarUser.classList.remove('open');
+        document.addEventListener('click', function(e) {
+          if (!navbarUser.contains(e.target)) {
+            navbarUser.classList.remove('open');
+          }
         });
       }
     </script>
