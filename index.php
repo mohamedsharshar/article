@@ -7,231 +7,916 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مقالات | الصفحة الرئيسية</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <link rel="stylesheet" href="css/index.css?v=2">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-      body, html { font-family: 'Cairo', Tahoma, Arial, sans-serif; background: #f7f8fa; margin: 0; padding: 0; }
-      .container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
-      header { display: flex; flex-direction: column; align-items: center; margin-bottom: 2.5rem; }
-      .site-title { font-size: 2.3rem; color: #2d3a4b; font-weight: bold; margin-bottom: 0.5rem; letter-spacing: 0.01em; }
-      .site-desc { color: #4262ed; font-size: 1.1rem; margin-bottom: 0.5rem; }
-      nav { margin-bottom: 1.5rem; }
-      nav a { color: #3a86ff; text-decoration: none; font-weight: bold; margin: 0 0.7rem; font-size: 1.08rem; transition: color 0.2s; }
-      nav a:hover, nav a:focus { color: #4361ee; text-decoration: underline; }
-      .articles-list { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-      @media (max-width: 700px) { .articles-list { grid-template-columns: 1fr; gap: 1.2rem; } }
-      .article-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(67,97,238,0.07); padding: 1.5rem 1.2rem; display: flex; flex-direction: column; gap: 0.7rem; position: relative; min-height: 180px; transition: box-shadow 0.2s, transform 0.18s; outline: none; }
-      .article-card:focus-within, .article-card:hover { box-shadow: 0 8px 32px 0 #4262ed22, 0 2px 8px #3a86ff22; transform: translateY(-2px) scale(1.03); }
-      .article-title { font-size: 1.25rem; color: #2d3a4b; font-weight: bold; margin-bottom: 0.2rem; line-height: 1.4; }
-      .article-content { color: #444; font-size: 1.08rem; line-height: 1.7; margin-bottom: 0.5rem; }
-      .article-date { color: #888; font-size: 0.98rem; margin-top: auto; text-align: left; }
-      .no-articles { text-align: center; color: #888; font-size: 1.2rem; margin-top: 2.5rem; }
-      /* زر العودة للأعلى */
-      .scroll-top-btn { position: fixed; bottom: 32px; left: 32px; background: linear-gradient(90deg, #4262ed 0%, #3a86ff 100%); color: #fff; border: none; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 18px 0 #4262ed22; cursor: pointer; z-index: 100; transition: background 0.2s, box-shadow 0.2s; }
-      .scroll-top-btn:focus, .scroll-top-btn:hover { background: linear-gradient(90deg, #3a86ff 0%, #4262ed 100%); box-shadow: 0 8px 32px 0 #4262ed33; }
-      .main-navbar {
-        width: 100vw;
-        position: fixed;
-        top: 0; right: 0; left: 0;
-        background: #fff;
-        box-shadow: 0 2px 16px #4262ed0a;
-        z-index: 1000;
-        border-bottom: 1.5px solid #e3e6f0;
-        min-height: 56px;
-        display: flex;
-        align-items: center;
-      }
-      .navbar-content {
-        max-width: 1100px;
-        margin: 0 auto;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 2vw;
-      }
-      .navbar-brand {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .brand-link {
-        color: #4262ed;
-        font-size: 1.35rem;
-        font-weight: bold;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        letter-spacing: 0.01em;
-        transition: color 0.18s;
-      }
-      .brand-link:hover { color: #3a86ff; }
-      .navbar-list {
-        list-style: none;
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-        margin: 0;
-        padding: 0;
-      }
-      .navbar-list > li { position: relative; }
-      .navbar-list a {
-        color: #3a86ff;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 1.08rem;
-        padding: 8px 18px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        transition: background 0.18s, color 0.18s;
-      }
-      .navbar-list a[aria-current="page"], .navbar-list a:hover, .navbar-list a:focus {
-        background: #e9f0fb;
-        color: #4361ee;
-      }
-      .navbar-user {
-        position: relative;
-      }
-      .user-nav-info {
-        color: #2d3a4b;
-        font-weight: bold;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 18px;
-        border-radius: 8px;
-        transition: background 0.18s;
-        background: none;
-        border: none;
-        position: relative;
-      }
-      .user-nav-info:focus {
-        outline: none;
-      }
-      .navbar-user .user-dropdown {
-        display: none;
-        position: absolute;
-        left: 0; top: 110%;
-        background: #fff;
-        box-shadow: 0 4px 18px #4262ed22;
-        border-radius: 10px;
-        min-width: 160px;
-        z-index: 10;
-        padding: 0.5rem 0;
-        list-style: none;
-      }
-      .navbar-user.open .user-dropdown,
-      .navbar-user:focus-within .user-dropdown,
-      .user-nav-info:focus + .user-dropdown,
-      .user-nav-info:hover + .user-dropdown,
-      .user-dropdown:hover {
-        display: block;
-      }
-      .user-dropdown li { width: 100%; }
-      .user-dropdown a {
-        color: #2d3a4b;
-        font-weight: 500;
-        font-size: 1.05rem;
-        padding: 10px 18px;
-        border-radius: 0;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        background: none;
-        transition: background 0.18s;
-      }
-      .user-dropdown a:hover, .user-dropdown a:focus {
-        background: #f1f5f9;
-        color: #3a86ff;
-      }
-      @media (max-width: 700px) {
-        .navbar-content { flex-direction: column; align-items: stretch; gap: 0.5rem; padding: 0 1vw; }
-        .navbar-list { flex-direction: column; gap: 0.2rem; align-items: flex-end; }
-        .user-dropdown { left: auto; right: 0; min-width: 140px; }
-        .navbar-brand { justify-content: flex-end; }
-      }
-      .container { margin-top: 0px !important; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مقالات | منصة مقالات عصرية</title>
+  <link rel="stylesheet" href="./css/index.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --color-primary: #3B82F6;
+  --color-primary-dark: #2563EB;
+  --color-slate-50: #F8FAFC;
+  --color-slate-100: #F1F5F9;
+  --color-slate-200: #E2E8F0;
+  --color-slate-300: #CBD5E1;
+  --color-slate-400: #94A3B8;
+  --color-slate-500: #64748B;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1E293B;
+  --color-slate-900: #0F172A;
+  --color-white: #FFFFFF;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Merriweather', Georgia, serif;
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: #3B82F6 ;
+  background-color: var(--color-slate-50); /* سيتم استبدالها بقيمة ديناميكية حسب الثيم */
+  line-height: 1.5;
+}
+
+[data-theme="dark"] body {
+  background-color: #0F172A !important;
+  color: #fff !important;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Header */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--color-white);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  z-index: 50;
+}
+
+[data-theme="dark"] .header {
+  background-color: #1E293B !important;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4rem;
+}
+
+.logo {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-slate-900);
+  text-decoration: none;
+}
+
+.nav-links {
+  display: none;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+@media (min-width: 768px) {
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    background: none !important;
+    box-shadow: none !important;
+  }
+}
+
+.nav-links a {
+  color: var(--color-slate-600);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--color-primary);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.btn-outline {
+  border: 1px solid var(--color-slate-200);
+  color: var(--color-slate-700);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-slate-100);
+}
+
+/* Hero Section */
+.hero {
+  padding: 8rem 0 4rem;
+  text-align: center;
+}
+
+.hero h1 {
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.125rem;
+  max-width: 36rem;
+  margin: 0 auto;
+}
+
+/* Search Section */
+.search-section {
+  padding: 2rem 0;
+}
+
+.search-form {
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+.search-input-wrapper {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 3rem;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 9999px;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Categories Section */
+.categories-section {
+  padding: 1rem 0 2rem;
+}
+
+.category-filters {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.category-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 9999px;
+  background-color: var(--color-slate-100);
+  color: var(--color-slate-700);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.category-btn:hover {
+  background-color: var(--color-slate-200);
+}
+
+.category-btn.active {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+/* Featured Article */
+.featured-article {
+  padding: 2rem 0;
+}
+
+.featured-article h2 {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.featured-card {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background-color: var(--color-white);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.featured-image {
+  position: relative;
+  height: 24rem;
+}
+
+.featured-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.featured-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: var(--color-white);
+}
+
+.category-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: var(--color-primary);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.featured-content h3 {
+  font-family: var(--font-serif);
+  font-size: 1.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.article-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.author img {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  object-fit: cover;
+}
+
+.meta-info {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+/* Articles Grid */
+.articles-grid {
+  padding: 2rem 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+}
+
+.article-card {
+  background-color: var(--color-white);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.article-card:hover {
+  transform: translateY(-2px);
+}
+
+.article-image {
+  position: relative;
+  height: 12rem;
+}
+
+.article-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.article-content {
+  padding: 1.5rem;
+}
+
+.article-content h3 {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Footer */
+.footer {
+  background-color: var(--color-white);
+  border-top: 1px solid var(--color-slate-200);
+  padding: 4rem 0 2rem;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.footer h3 {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.footer h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.footer-about p {
+  color: var(--color-slate-600);
+  margin-bottom: 1.5rem;
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.footer ul {
+  list-style: none;
+}
+
+.footer ul li {
+  margin-bottom: 0.5rem;
+}
+
+.footer a {
+  color: var(--color-slate-600);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer a:hover {
+  color: var(--color-primary);
+}
+
+.subscribe-form .input-group {
+  display: flex;
+  margin-top: 1rem;
+}
+
+.subscribe-form input {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.375rem 0 0 0.375rem;
+  outline: none;
+}
+
+.subscribe-form button {
+  padding: 0.5rem 1rem;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: 0 0.375rem 0.375rem 0;
+  cursor: pointer;
+}
+
+.footer-bottom {
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-slate-200);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.footer-links {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+}
+
+/* Dark Mode */
+[data-theme="dark"] {
+  --color-primary: #60A5FA;
+  --color-primary-dark: #3B82F6;
+  --color-slate-50: #0F172A;
+  --color-slate-100: #1E293B;
+  --color-slate-200: #334155;
+  --color-slate-300: #475569;
+  --color-slate-400: #64748B;
+  --color-slate-500: #94A3B8;
+  --color-slate-600: #CBD5E1;
+  --color-slate-700: #E2E8F0;
+  --color-slate-800: #F1F5F9;
+  --color-slate-900: #F8FAFC;
+  --color-white: #fff;
+}
+[data-theme="dark"] body {
+  background-color: #0F172A !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .header,
+[data-theme="dark"] .footer {
+  background-color: #1E293B !important;
+  border-color: #334155 !important;
+}
+[data-theme="dark"] .logo {
+  color: #fff !important;
+}
+[data-theme="dark"] .article-card,
+[data-theme="dark"] .featured-card {
+  background-color: #1E293B !important;
+}
+[data-theme="dark"] .btn-outline {
+  border-color: #334155 !important;
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .btn-outline:hover {
+  background-color: #334155 !important;
+}
+[data-theme="dark"] .search-input {
+  background-color: #1E293B !important;
+  border-color: #334155 !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .category-btn {
+  background-color: #1E293B !important;
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .category-btn:hover {
+  background-color: #334155 !important;
+}
+[data-theme="dark"] .footer a {
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .footer a:hover {
+  color: #60A5FA !important;
+}
+</style>
 </head>
 <body>
-    <nav class="main-navbar-fixed" aria-label="شريط التنقل الرئيسي">
-      <div class="navbar-content">
-        <div class="navbar-brand">
-          <a href="index.php" class="brand-link"><i class="fa fa-feather"></i> <span>مقالات</span></a>
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.php" class="logo">مقالات</a>
+        <div class="nav-links">
+          <a href="index.php" class="active">الرئيسية</a>
+          <a href="#categories">التصنيفات</a>
+          <a href="#about">عن الموقع</a>
+          <a href="#contact">تواصل</a>
         </div>
-        <ul class="navbar-list">
-          <?php if (isset($_SESSION['username'])): ?>
-            <li class="navbar-user" id="navbarUser">
-              <a href="profile.php" class="user-nav-info" id="userNavInfo" tabindex="0">
-                <i class="fa fa-user-circle"></i> <?= htmlspecialchars($_SESSION['username']) ?>
-              </a>
-              <ul class="user-dropdown" id="userDropdown">
-                <li><a href="profile.php"><i class="fa fa-user"></i> بروفايلي</a></li>
-                <li><a href="logout.php"><i class="fa fa-sign-out-alt"></i> تسجيل الخروج</a></li>
-              </ul>
-            </li>
-          <?php else: ?>
-            <li><a href="login.php"><i class="fa fa-sign-in-alt"></i> تسجيل الدخول</a></li>
-            <li><a href="register.php"><i class="fa fa-user-plus"></i> إنشاء حساب</a></li>
-          <?php endif; ?>
+        <div class="nav-actions">
+          
+          <button class="theme-toggle" aria-label="تبديل الوضع">
+            <i class="fa fa-moon"></i>
+          </button>
+          <span id="user-actions"></span>
+          <button class="menu-toggle" aria-label="القائمة" id="menuToggle">
+            <i class="fa fa-bars"></i>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>مقالات</h1>
+        <p>اكتشف مقالات ملهمة وحديثة في التقنية، التصميم، والابتكار الرقمي.</p>
+      </div>
+    </section>
+
+    <section class="search-section">
+      <div class="container">
+        <form class="search-form">
+          <div class="search-input-wrapper">
+            <i class="fa fa-search"></i>
+            <input type="text" placeholder="ابحث عن مقال..." class="search-input">
+            <button type="submit" class="search-submit">
+              <i class="fa fa-search"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="categories-section" id="categories">
+      <div class="container">
+        <div class="category-filters">
+          <button class="category-btn active">الكل</button>
+          <button class="category-btn">تقنية</button>
+          <button class="category-btn">تصميم</button>
+          <button class="category-btn">ذكاء اصطناعي</button>
+          <button class="category-btn">تطوير</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="featured-article">
+      <div class="container">
+        <h2>مقال مميز</h2>
+        <article class="featured-card">
+          <div class="featured-image">
+            <img src="https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg" alt="مستقبل تطوير الويب">
+            <div class="featured-content">
+              <span class="category-tag">تقنية</span>
+              <h3>مستقبل تطوير الويب</h3>
+              <p>استكشاف الاتجاهات والتقنيات الناشئة التي تشكل مستقبل تطوير الويب.</p>
+              <div class="article-meta">
+                <div class="author">
+                  <img src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg" alt="أحمد علي">
+                  <span>أحمد علي</span>
+                </div>
+                <div class="meta-info">
+                  <span><i class="fa fa-calendar"></i>15 مايو 2025</span>
+                  <span><i class="fa fa-clock"></i>6 دقائق قراءة</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="articles-grid">
+      <div class="container">
+        <h2>أحدث المقالات</h2>
+        <div class="grid" id="articles-container">
+          <!-- سيتم تعبئة المقالات عبر جافاسكريبت لاحقاً -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <h3>مقالات</h3>
+          <p>منصة عصرية لمقالات ملهمة ورؤى في التقنية، التصميم، وأكثر.</p>
+          <div class="social-links">
+            <a href="#" aria-label="فيسبوك"><i class="fa fa-facebook"></i></a>
+            <a href="#" aria-label="تويتر"><i class="fa fa-twitter"></i></a>
+            <a href="#" aria-label="انستجرام"><i class="fa fa-instagram"></i></a>
+            <a href="#" aria-label="يوتيوب"><i class="fa fa-youtube"></i></a>
+          </div>
+        </div>
+        <div class="footer-nav">
+          <h4>روابط</h4>
+          <ul>
+            <li><a href="index.php">الرئيسية</a></li>
+            <li><a href="#categories">التصنيفات</a></li>
+            <li><a href="#about">عن الموقع</a></li>
+            <li><a href="#contact">تواصل</a></li>
+          </ul>
+        </div>
+        <div class="footer-categories">
+          <h4>تصنيفات</h4>
+          <ul>
+            <li><a href="#">تقنية</a></li>
+            <li><a href="#">تصميم</a></li>
+            <li><a href="#">ذكاء اصطناعي</a></li>
+            <li><a href="#">تطوير</a></li>
+            <li><a href="#">تجربة المستخدم</a></li>
+          </ul>
+        </div>
+        <div class="footer-subscribe">
+          <h4>اشترك</h4>
+          <p>اشترك في النشرة البريدية لأحدث المقالات والتحديثات.</p>
+          <form class="subscribe-form">
+            <div class="input-group">
+              <input type="email" placeholder="بريدك الإلكتروني">
+              <button type="submit" aria-label="اشترك">
+                <i class="fa fa-envelope"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 مقالات. جميع الحقوق محفوظة.</p>
+        <ul class="footer-links">
+          <li><a href="#">سياسة الخصوصية</a></li>
+          <li><a href="#">الشروط</a></li>
+          <li><a href="#">سياسة الكوكيز</a></li>
         </ul>
       </div>
-    </nav>
-    <main class="container" aria-label="قائمة المقالات">
-      <header style="margin-top: 60px;">
-        <h1 class="site-title animate__animated animate__fadeInDown" tabindex="0">مقالات</h1>
-        <div class="site-desc animate__animated animate__fadeInUp" tabindex="0">منصة مقالات عربية متنوعة وحديثة</div>
-      </header>
-      <section class="articles-list animate__animated animate__fadeInUp" aria-live="polite">
-        <?php if (count($articles) === 0): ?>
-          <div class="no-articles animate__animated animate__fadeIn">لا توجد مقالات بعد.</div>
-        <?php else: ?>
-          <?php foreach($articles as $article): ?>
-            <article class="article-card animate__animated animate__fadeInUp" tabindex="0" aria-label="مقال: <?= htmlspecialchars($article['title']) ?>">
-              <h2 class="article-title"><?= htmlspecialchars($article['title']) ?></h2>
-              <div class="article-content">
-                <?= nl2br(htmlspecialchars(mb_substr($article['content'],0,180))) ?><?= mb_strlen($article['content']) > 180 ? '...' : '' ?>
-              </div>
-              <time class="article-date" datetime="<?= htmlspecialchars($article['created_at']) ?>">
-                <i class="fa fa-calendar-alt" aria-hidden="true"></i> <?= date('Y/m/d', strtotime($article['created_at'])) ?>
-              </time>
-            </article>
-          <?php endforeach; ?>
-        <?php endif; ?>
-      </section>
-      <button class="scroll-top-btn" aria-label="العودة للأعلى" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:none;"><i class="fa fa-arrow-up"></i></button>
-    </main>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
-    <script>
-      // زر العودة للأعلى
-      const scrollBtn = document.querySelector('.scroll-top-btn');
-      window.addEventListener('scroll', () => {
-        if(window.scrollY > 300) scrollBtn.style.display = 'flex';
-        else scrollBtn.style.display = 'none';
-      });
-      // user-dropdown: فتح القائمة عند المرور أو التركيز على الزر
-      const navbarUser = document.getElementById('navbarUser');
+    </div>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
+  <script>
+    // بيانات المستخدم من PHP
+    const username = <?php echo isset($_SESSION['username']) ? '"' . addslashes($_SESSION['username']) . '"' : 'null'; ?>;
+    const userActions = document.getElementById('user-actions');
+    if (username) {
+      userActions.innerHTML = `
+        <div class="navbar-user" style="position:relative;display:inline-block;">
+          <button class="btn btn-outline user-nav-info" id="userNavInfo" tabindex="0">
+            <i class="fa fa-user-circle"></i> ${username}
+          </button>
+          <ul class="user-dropdown" id="userDropdown">
+            <li><a href="profile.php"><i class="fa fa-user"></i> بروفايلي</a></li>
+            <li><a href="logout.php"><i class="fa fa-sign-out-alt"></i> تسجيل الخروج</a></li>
+          </ul>
+        </div>
+      `;
+      // تفعيل القائمة المنسدلة للمستخدم
+      const navbarUser = userActions.querySelector('.navbar-user');
       const userNavInfo = document.getElementById('userNavInfo');
-      if(navbarUser && userNavInfo) {
-        // لا تحول مباشرة للبروفايل عند الضغط، فقط افتح القائمة
-        userNavInfo.addEventListener('click', function(e) {
+      const userDropdown = document.getElementById('userDropdown');
+      userNavInfo.addEventListener('click', function(e) {
+        e.preventDefault();
+        navbarUser.classList.toggle('open');
+      });
+      document.addEventListener('click', function(e) {
+        if (!navbarUser.contains(e.target)) {
+          navbarUser.classList.remove('open');
+        }
+      });
+      userNavInfo.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           navbarUser.classList.toggle('open');
+        }
+      });
+    } else {
+      userActions.innerHTML = `
+        <a href="login.php" class="btn btn-outline"><i class="fa fa-sign-in-alt"></i> تسجيل الدخول</a>
+        <a href="register.php" class="btn btn-primary"><i class="fa fa-user-plus"></i> إنشاء حساب</a>
+      `;
+    }
+
+    // منيو بار للموبايل
+    const menuToggle = document.getElementById('menuToggle');
+    const navLinks = document.querySelector('.nav-links');
+    if (menuToggle && navLinks) {
+      menuToggle.addEventListener('click', function() {
+        navLinks.classList.toggle('open');
+        menuToggle.querySelector('i').className = navLinks.classList.contains('open') ? 'fa fa-times' : 'fa fa-bars';
+      });
+      document.addEventListener('click', function(e) {
+        if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+          navLinks.classList.remove('open');
+          menuToggle.querySelector('i').className = 'fa fa-bars';
+        }
+      });
+      navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          navLinks.classList.remove('open');
+          menuToggle.querySelector('i').className = 'fa fa-bars';
         });
-        document.addEventListener('click', function(e) {
-          if (!navbarUser.contains(e.target)) {
-            navbarUser.classList.remove('open');
-          }
-        });
+      });
+    }
+
+    // الوضع الليلي (ثابت على الموقع حتى يغيره المستخدم يدوياً)
+    const themeToggle = document.querySelector('.theme-toggle');
+    function setDarkMode(on) {
+      if(on) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('darkMode', '1');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('darkMode', '0');
       }
-    </script>
+    }
+    // تفعيل الوضع الليلي دائماً عند التحميل (إلا إذا اختار المستخدم وضع آخر)
+    if(themeToggle) {
+      if(localStorage.getItem('darkMode') === null) {
+        setDarkMode(true);
+        themeToggle.innerHTML = '<i class="fa fa-sun"></i>';
+      } else if(localStorage.getItem('darkMode') === '1') {
+        setDarkMode(true);
+        themeToggle.innerHTML = '<i class="fa fa-sun"></i>';
+      } else {
+        setDarkMode(false);
+        themeToggle.innerHTML = '<i class="fa fa-moon"></i>';
+      }
+      themeToggle.onclick = function() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        setDarkMode(!isDark);
+        themeToggle.innerHTML = isDark ? '<i class="fa fa-moon"></i>' : '<i class="fa fa-sun"></i>';
+      };
+    }
+
+    // بيانات المقالات من PHP إلى جافاسكريبت
+    const articles = <?php echo json_encode($articles, JSON_UNESCAPED_UNICODE); ?>;
+    // استخراج التصنيفات الفريدة
+    const categories = Array.from(new Set(articles.map(a => a.category).filter(Boolean)));
+
+    // تفعيل الفلاتر الديناميكية
+    const categoryFilters = document.querySelector('.category-filters');
+    categoryFilters.innerHTML = '';
+    const allBtn = document.createElement('button');
+    allBtn.className = 'category-btn active';
+    allBtn.textContent = 'الكل';
+    allBtn.onclick = () => renderArticles();
+    categoryFilters.appendChild(allBtn);
+    categories.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'category-btn';
+      btn.textContent = cat;
+      btn.onclick = () => renderArticles(cat);
+      categoryFilters.appendChild(btn);
+    });
+
+    // البحث
+    const searchInput = document.querySelector('.search-input');
+    const searchForm = document.querySelector('.search-form');
+    let currentCategory = null;
+    let currentQuery = '';
+    searchForm.onsubmit = e => {
+      e.preventDefault();
+      currentQuery = searchInput.value.trim();
+      renderArticles(currentCategory, currentQuery);
+    };
+
+    // تفعيل الفلترة عند الضغط على زر تصنيف
+    function renderArticles(category = null, query = '') {
+      currentCategory = category;
+      // تحديث أزرار التصنيفات
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if ((category === null && btn.textContent === 'الكل') || btn.textContent === category) btn.classList.add('active');
+      });
+      // تصفية المقالات
+      let filtered = articles;
+      if (category && category !== 'الكل') filtered = filtered.filter(a => a.category === category);
+      if (query) {
+        const q = query.toLowerCase();
+        filtered = filtered.filter(a => (a.title && a.title.toLowerCase().includes(q)) || (a.content && a.content.toLowerCase().includes(q)));
+      }
+      // إزالة المقال المميز من الشبكة
+      const featuredId = articles[0] ? articles[0].id : null;
+      filtered = filtered.filter(a => a.id !== featuredId);
+      // عرض المقالات
+      const grid = document.getElementById('articles-container');
+      grid.innerHTML = '';
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="no-articles">لا توجد مقالات مطابقة.</div>';
+        return;
+      }
+      filtered.forEach(article => {
+        const card = document.createElement('article');
+        card.className = 'article-card';
+        card.tabIndex = 0;
+        card.setAttribute('aria-label', 'مقال: ' + article.title);
+        card.innerHTML = `
+          <div class="article-image">
+            <img src="https://source.unsplash.com/400x200/?arabic,writing,${encodeURIComponent(article.category || 'article')}" alt="صورة المقال" loading="lazy">
+          </div>
+          <div class="article-content">
+            <h3>${article.title}</h3>
+            <p>${(article.content || '').substring(0, 100)}${(article.content && article.content.length > 100 ? '...' : '')}</p>
+            <div class="meta-info">
+              <span><i class="fa fa-calendar-alt"></i> ${article.created_at.split(' ')[0]}</span>
+              ${article.category ? `<span class="category-tag">${article.category}</span>` : ''}
+            </div>
+          </div>
+        `;
+        card.onclick = () => showArticleDetails(article);
+        grid.appendChild(card);
+      });
+    }
+
+    // تفعيل المقال المميز ديناميكياً
+    function renderFeatured() {
+      const featured = articles[0];
+      if (!featured) return;
+      const featuredCard = document.querySelector('.featured-card');
+      featuredCard.innerHTML = `
+        <div class="featured-image">
+          <img src="https://source.unsplash.com/900x400/?arabic,writing,${encodeURIComponent(featured.category || 'article')}" alt="صورة المقال المميز" loading="lazy">
+          <div class="featured-content">
+            ${featured.category ? `<span class="category-tag">${featured.category}</span>` : ''}
+            <h3>${featured.title}</h3>
+            <p>${(featured.content || '').substring(0, 120)}${(featured.content && featured.content.length > 120 ? '...' : '')}</p>
+            <div class="article-meta">
+              <div class="author">
+                <i class="fa fa-user"></i>
+                <span>${featured.author || 'مجهول'}</span>
+              </div>
+              <div class="meta-info">
+                <span><i class="fa fa-calendar"></i>${featured.created_at.split(' ')[0]}</span>
+                <span><i class="fa fa-clock"></i>قراءة سريعة</span>
+              </div>
+            </div>
+            <a href="#" class="btn btn-primary" style="margin-top:1rem;">اقرأ المزيد</a>
+          </div>
+        </div>
+      `;
+    }
+
+    // نافذة تفاصيل المقال (بسيطة)
+    function showArticleDetails(article) {
+      const modal = document.createElement('div');
+      modal.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000a;z-index:9999;display:flex;align-items:center;justify-content:center;';
+      modal.innerHTML = `
+        <div style="background:#fff;max-width:600px;width:90vw;padding:2rem;border-radius:1rem;position:relative;direction:rtl;max-height:90vh;overflow:auto;">
+          <button style="position:absolute;top:1rem;left:1rem;font-size:1.5rem;background:none;border:none;cursor:pointer;" aria-label="إغلاق" onclick="this.parentNode.parentNode.remove()"><i class='fa fa-times'></i></button>
+          <h2>${article.title}</h2>
+          <div style="color:#888;font-size:0.95rem;margin-bottom:1rem;">
+            <i class="fa fa-calendar-alt"></i> ${article.created_at.split(' ')[0]}
+            ${article.category ? `<span class="category-tag" style="margin-right:1rem;">${article.category}</span>` : ''}
+          </div>
+          <div style="margin-bottom:1.5rem;">
+            <img src="https://source.unsplash.com/600x300/?arabic,writing,${encodeURIComponent(article.category || 'article')}" alt="صورة المقال" style="width:100%;border-radius:0.5rem;">
+          </div>
+          <div style="font-size:1.1rem;line-height:2;">${article.content.replace(/\n/g,'<br>')}</div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      modal.onclick = e => { if (e.target === modal) modal.remove(); };
+    }
+
+    // الوضع الليلي (ثابت على الموقع حتى يغيره المستخدم يدوياً)
+    function setDarkMode(on) {
+      if(on) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('darkMode', '1');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('darkMode', '0');
+      }
+    }
+    // تفعيل الوضع الليلي دائماً عند التحميل (إلا إذا اختار المستخدم وضع آخر)
+    if(localStorage.getItem('darkMode') === null) {
+      setDarkMode(true);
+      document.querySelector('.theme-toggle').innerHTML = '<i class="fa fa-sun"></i>';
+    } else if(localStorage.getItem('darkMode') === '1') {
+      setDarkMode(true);
+      document.querySelector('.theme-toggle').innerHTML = '<i class="fa fa-sun"></i>';
+    } else {
+      setDarkMode(false);
+      document.querySelector('.theme-toggle').innerHTML = '<i class="fa fa-moon"></i>';
+    }
+    // زر تبديل الوضع
+    themeToggle.onclick = function() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      setDarkMode(!isDark);
+      themeToggle.innerHTML = isDark ? '<i class="fa fa-moon"></i>' : '<i class="fa fa-sun"></i>';
+    };
+
+    // تفعيل البحث والفلترة عند التحميل
+    renderFeatured();
+    renderArticles();
+  </script>
 </body>
 </html>
