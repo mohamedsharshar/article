@@ -145,8 +145,8 @@ body {
 }
 
 .btn-outline {
-  border: 1px solid var(--color-slate-200);
-  color: var(--color-slate-700);
+  border: 1px solid var(--color-primary-dark);
+  color: #2563EB;
 }
 
 .btn-outline:hover {
@@ -485,8 +485,8 @@ body {
   background-color: #1E293B !important;
 }
 [data-theme="dark"] .btn-outline {
-  border-color: #334155 !important;
-  color: #CBD5E1 !important;
+  border-color: #0F172A !important;
+  color: #0F172A !important;
 }
 [data-theme="dark"] .btn-outline:hover {
   background-color: #334155 !important;
