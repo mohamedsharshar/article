@@ -201,6 +201,32 @@ body {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* تحسين زر البحث */
+.search-submit {
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px #3b82f622;
+}
+.search-submit:hover, .search-submit:focus {
+  background: var(--color-primary-dark);
+  box-shadow: 0 4px 16px #2563eb33;
+  outline: none;
+}
+
 /* Categories Section */
 .categories-section {
   padding: 1rem 0 2rem;
@@ -548,7 +574,6 @@ body {
       <div class="container">
         <form class="search-form">
           <div class="search-input-wrapper">
-            <i class="fa fa-search"></i>
             <input type="text" placeholder="ابحث عن مقال..." class="search-input">
             <button type="submit" class="search-submit">
               <i class="fa fa-search"></i>
@@ -566,6 +591,15 @@ body {
           <button class="category-btn">تصميم</button>
           <button class="category-btn">ذكاء اصطناعي</button>
           <button class="category-btn">تطوير</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="articles-grid">
+      <div class="container">
+        <h2>أحدث المقالات</h2>
+        <div class="grid" id="articles-container">
+          <!-- سيتم تعبئة المقالات عبر جافاسكريبت لاحقاً -->
         </div>
       </div>
     </section>
@@ -593,15 +627,6 @@ body {
             </div>
           </div>
         </article>
-      </div>
-    </section>
-
-    <section class="articles-grid">
-      <div class="container">
-        <h2>أحدث المقالات</h2>
-        <div class="grid" id="articles-container">
-          <!-- سيتم تعبئة المقالات عبر جافاسكريبت لاحقاً -->
-        </div>
       </div>
     </section>
   </main>
@@ -674,7 +699,7 @@ body {
           </button>
           <ul class="user-dropdown" id="userDropdown">
             <li><a href="profile.php"><i class="fa fa-user"></i> بروفايلي</a></li>
-            <li><a href="logout.php"><i class="fa fa-sign-out-alt"></i> تسجيل الخروج</a></li>
+            <li><a href="#" id="logoutLink"><i class="fa fa-sign-out-alt"></i> تسجيل الخروج</a></li>
           </ul>
         </div>
       `;
@@ -697,6 +722,14 @@ body {
           navbarUser.classList.toggle('open');
         }
       });
+      // تفعيل تسجيل الخروج
+      const logoutLink = document.getElementById('logoutLink');
+      if (logoutLink) {
+        logoutLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.location.href = 'logout.php';
+        });
+      }
     } else {
       userActions.innerHTML = `
         <a href="login.php" class="btn btn-outline"><i class="fa fa-sign-in-alt"></i> تسجيل الدخول</a>
@@ -780,13 +813,26 @@ body {
     // البحث
     const searchInput = document.querySelector('.search-input');
     const searchForm = document.querySelector('.search-form');
+    const searchBtn = document.querySelector('.search-submit');
     let currentCategory = null;
     let currentQuery = '';
+
     searchForm.onsubmit = e => {
       e.preventDefault();
       currentQuery = searchInput.value.trim();
       renderArticles(currentCategory, currentQuery);
     };
+    searchBtn.onclick = function(e) {
+      e.preventDefault();
+      currentQuery = searchInput.value.trim();
+      renderArticles(currentCategory, currentQuery);
+    };
+    searchInput.addEventListener('input', function() {
+      if (searchInput.value.trim() === '') {
+        currentQuery = '';
+        renderArticles(currentCategory, '');
+      }
+    });
 
     // تفعيل الفلترة عند الضغط على زر تصنيف
     function renderArticles(category = null, query = '') {
