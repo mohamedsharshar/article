@@ -261,12 +261,14 @@ body, html {
   gap: 7px;
   background: none;
   transition: background 0.18s;
+  text-decoration: none !important;
 }
 
 .user-dropdown a:hover,
 .user-dropdown a:focus {
   background: #f1f5f9;
   color: var(--color-primary);
+  text-decoration: none;
 }
 
 [data-theme="dark"] .user-dropdown a {

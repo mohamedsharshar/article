@@ -110,7 +110,9 @@ body {
   font-weight: 500;
   transition: color 0.2s;
 }
-
+.user-dropdown a{
+  text-decoration: none !important;
+}
 .nav-links a:hover,
 .nav-links a.active {
   color: var(--color-primary);
@@ -535,6 +537,12 @@ body {
 }
 [data-theme="dark"] .footer a:hover {
   color: #60A5FA !important;
+}
+[data-theme="dark"] a {
+  color: #fff !important;
+}
+[data-theme="dark"] .theme-toggle {
+  color: #fff !important;
 }
 </style>
 </head>
