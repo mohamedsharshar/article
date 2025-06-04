@@ -427,7 +427,7 @@ if (!$article) {
         themeToggle.innerHTML = '<i class="fa fa-moon"></i>';
       }
     }
-    (function() {
+    document.addEventListener('DOMContentLoaded', function() {
       let darkPref = localStorage.getItem('darkMode');
       if(darkPref === null) {
         setDarkMode(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -443,7 +443,7 @@ if (!$article) {
           updateThemeIcon();
         };
       }
-    })();
+    });
   </script>
 </head>
 <body>
