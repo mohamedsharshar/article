@@ -21,96 +21,197 @@ if (!$article) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
   <style>
     :root {
-      --color-slate-500: #64748B;
-      --color-slate-600: #475569;
-      --color-slate-700: #334155;
-      --color-slate-800: #1E293B;
-      --color-slate-900: #0F172A;
+      --color-bg-light: #fff;
+      --color-bg-dark: #0F172A;
+      --color-surface-light: #f8fafc;
+      --color-surface-dark: #334155;
+      --color-text-light: #222;
+      --color-text-dark: #fff;
+      --color-primary: #475569;
+      --color-secondary: #64748B;
+      --color-accent: #2563eb;
+      --color-shadow-light: #33415522;
+      --color-shadow-dark: #000a;
+    }
+    html[data-theme="dark"] body,
+    body[data-theme="dark"] {
+      background: var(--color-bg-dark) !important;
+      color: var(--color-text-dark) !important;
     }
     body {
-      background: var(--color-slate-900);
+      background: var(--color-bg-light);
       min-height: 100vh;
       margin: 0;
       font-family: 'Cairo', Tahoma, Arial, sans-serif;
+      color: var(--color-text-light);
+      transition: background 0.2s, color 0.2s;
     }
     .article-page-container {
       max-width: 800px;
       margin: 4rem auto 0rem auto;
       border-radius: 1.2rem;
-      background: var(--color-slate-800);
-      box-shadow: 0 4px 24px var(--color-slate-700)44;
+      background: var(--color-bg-light);
+      box-shadow: 0 4px 24px var(--color-shadow-light);
       padding: 2.5rem 2rem 2.5rem 2rem;
       position: relative;
-      color: #fff;
+      color: var(--color-text-light);
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
     }
-    .article-page-image {
-      width: 100%;
-      max-height: 350px;
-      object-fit: cover;
-      border-radius: 1rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 2px 8px var(--color-slate-900)22;
-      background: var(--color-slate-700);
-      display: block;
+    html[data-theme="dark"] .article-page-container,
+    body[data-theme="dark"] .article-page-container {
+      background: var(--color-surface-dark) !important;
+      color: var(--color-text-dark) !important;
+      box-shadow: 0 4px 24px var(--color-shadow-dark);
     }
     .article-page-title {
       font-family: 'Merriweather', serif;
       font-size: 2.2rem;
       font-weight: bold;
       margin-bottom: 1rem;
-      color: #fff;
-      text-shadow: 0 2px 8px var(--color-slate-900)22;
+      color: var(--color-text-light);
+      text-shadow: 0 2px 8px var(--color-shadow-light);
+      transition: color 0.2s;
+    }
+    html[data-theme="dark"] .article-page-title,
+    body[data-theme="dark"] .article-page-title {
+      color: var(--color-text-dark) !important;
+      text-shadow: 0 2px 8px var(--color-shadow-dark);
     }
     .article-page-meta {
-      color: #fff;
+      color: var(--color-secondary);
       font-size: 1rem;
       margin-bottom: 1.5rem;
       display: flex;
       gap: 1.5rem;
       flex-wrap: wrap;
       align-items: center;
+      transition: color 0.2s;
+    }
+    html[data-theme="dark"] .article-page-meta,
+    body[data-theme="dark"] .article-page-meta {
+      color: var(--color-text-dark) !important;
     }
     .article-page-meta .category-tag {
       margin-right: 0.5rem;
-      background: var(--color-slate-700);
+      background: var(--color-primary);
       color: #fff;
       padding: 0.35em 1.2em;
       border-radius: 999px;
       font-size: 1em;
-      box-shadow: 0 2px 8px var(--color-slate-900)33;
+      box-shadow: 0 2px 8px var(--color-shadow-light);
       z-index: 2;
       font-weight: bold;
       letter-spacing: 0.01em;
+      transition: background 0.2s, color 0.2s;
+    }
+    html[data-theme="dark"] .article-page-meta .category-tag,
+    body[data-theme="dark"] .article-page-meta .category-tag {
+      background: var(--color-surface-dark) !important;
+      color: var(--color-text-dark) !important;
+      box-shadow: 0 2px 8px var(--color-shadow-dark);
     }
     .article-page-content {
       font-size: 1.15rem;
       line-height: 2.1;
-      color: #fff;
+      color: var(--color-text-light);
       margin-bottom: 2rem;
-      background: var(--color-slate-700);
+      background: var(--color-surface-light);
       padding: 1.5rem 1.2rem;
       border-radius: 1rem;
-      box-shadow: 0 1px 4px var(--color-slate-900)11;
+      box-shadow: 0 1px 4px var(--color-shadow-light);
       word-break: break-word;
       white-space: pre-line;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+    html[data-theme="dark"] .article-page-content,
+    body[data-theme="dark"] .article-page-content {
+      background: var(--color-primary) !important;
+      color: var(--color-text-dark) !important;
+      box-shadow: 0 1px 4px var(--color-shadow-dark);
     }
     .article-page-back {
       display: inline-block;
       margin-bottom: 1.5rem;
-      color: #fff;
+      color: var(--color-primary);
       font-weight: bold;
       text-decoration: none;
       font-size: 1.1rem;
       transition: color 0.2s, background 0.2s;
-      background: var(--color-slate-700);
+      background: var(--color-surface-light);
       padding: 0.5em 1.2em;
       border-radius: 8px;
-      box-shadow: 0 1px 4px var(--color-slate-900)11;
+      box-shadow: 0 1px 4px var(--color-shadow-light);
     }
     .article-page-back:hover {
       color: #fff;
-      background: var(--color-slate-600);
+      background: var(--color-primary);
       text-decoration: none;
+    }
+    html[data-theme="dark"] .article-page-back,
+    body[data-theme="dark"] .article-page-back {
+      background: var(--color-surface-dark) !important;
+      color: var(--color-text-dark) !important;
+      box-shadow: 0 1px 4px var(--color-shadow-dark);
+    }
+    html[data-theme="dark"] .article-page-back:hover,
+    body[data-theme="dark"] .article-page-back:hover {
+      background: var(--color-primary) !important;
+      color: #fff !important;
+    }
+    .article-page-image {
+      width: 100%;
+      max-height: 350px;
+      object-fit: cover;
+      border-radius: 1rem;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 2px 12px var(--color-shadow-light);
+      transition: box-shadow 0.2s;
+    }
+    html[data-theme="dark"] .article-page-image,
+    body[data-theme="dark"] .article-page-image {
+      box-shadow: 0 2px 12px var(--color-shadow-dark);
+    }
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: var(--color-primary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.2s;
+      margin-right: 0.5rem;
+    }
+    html[data-theme="dark"] .theme-toggle,
+    body[data-theme="dark"] .theme-toggle {
+      color: var(--color-text-dark);
+    }
+    .header {
+      background: transparent;
+      box-shadow: none;
+      padding: 1.2rem 0 0.5rem 0;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.2rem;
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--color-primary);
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      transition: color 0.2s;
+    }
+    .logo:hover {
+      color: var(--color-accent);
     }
     @media (max-width: 900px) {
       .article-page-container {
@@ -138,13 +239,223 @@ if (!$article) {
         padding: 0.7rem 0.2rem;
       }
     }
+    .article-comments-section {
+      margin-top: 2.5rem;
+      background: var(--color-surface-light);
+      border-radius: 1rem;
+      box-shadow: 0 1px 8px var(--color-shadow-light);
+      padding: 2rem 1.2rem 1.5rem 1.2rem;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    html[data-theme="dark"] .article-comments-section,
+    body[data-theme="dark"] .article-comments-section {
+      background: var(--color-surface-dark);
+      box-shadow: 0 1px 8px var(--color-shadow-dark);
+    }
+    .comments-title {
+      font-size: 1.3rem;
+      color: var(--color-primary);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    .comments-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 2.2rem 0;
+    }
+    .comment-item {
+      background: #f1f5f9;
+      border-radius: 0.7rem;
+      margin-bottom: 1.2rem;
+      padding: 1rem 1.2rem 0.7rem 1.2rem;
+      box-shadow: 0 1px 4px #33415511;
+      transition: background 0.2s;
+      border-right: 4px solid #2563eb22;
+      position: relative;
+    }
+    .comment-item.admin-comment {
+      background: #e0e7ff;
+      border-right: 4px solid #2563eb;
+    }
+    html[data-theme="dark"] .comment-item {
+      background: #222e3a;
+      color: #fff;
+      box-shadow: 0 1px 4px #0005;
+      border-right: 4px solid #2563eb33;
+    }
+    html[data-theme="dark"] .comment-item.admin-comment {
+      background: #334155;
+      border-right: 4px solid #2563eb;
+    }
+    .comment-content {
+      font-size: 1.08rem;
+      margin-bottom: 0.5rem;
+      word-break: break-word;
+      line-height: 1.8;
+    }
+    .comment-meta {
+      font-size: 0.98rem;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+    }
+    html[data-theme="dark"] .comment-meta {
+      color: #cbd5e1;
+    }
+    .no-comments {
+      color: #64748b;
+      text-align: center;
+      margin: 1.5rem 0 2.5rem 0;
+      font-size: 1.08rem;
+    }
+    .add-comment-title {
+      font-size: 1.1rem;
+      color: var(--color-primary);
+      margin-bottom: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    .add-comment-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      margin-bottom: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .add-comment-form textarea {
+      border-radius: 8px;
+      border: 1.5px solid #dbeafe;
+      background: #f8fafc;
+      font-size: 1.08rem;
+      color: #222;
+      padding: 12px 10px;
+      min-height: 80px;
+      max-height: 180px;
+      resize: vertical;
+      box-shadow: 0 1px 4px #e3e6f0;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+    .add-comment-form textarea:focus {
+      border-color: #4262ed;
+      outline: none;
+      box-shadow: 0 2px 8px #4262ed22;
+    }
+    html[data-theme="dark"] .add-comment-form textarea {
+      background: #222e3a;
+      color: #fff;
+      border: 1.5px solid #334155;
+      box-shadow: 0 1px 4px #0005;
+    }
+    .add-comment-btn {
+      background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 22px;
+      font-size: 1.08rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #3a86ff22;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      justify-content: center;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .add-comment-btn:hover {
+      background: linear-gradient(90deg, #4361ee 0%, #3a86ff 100%);
+      box-shadow: 0 4px 16px #4361ee22;
+    }
+    /* Unified dark mode toggle logic
+    function setDarkMode(on) {
+      if(on) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('darkMode', '1');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('darkMode', '0');
+      }
+    }
+    function updateThemeIcon() {
+      var themeToggle = document.getElementById('themeToggleBtn');
+      if (!themeToggle) return;
+      if(document.documentElement.getAttribute('data-theme') === 'dark') {
+        themeToggle.innerHTML = '<i class="fa fa-sun"></i>';
+      } else {
+        themeToggle.innerHTML = '<i class="fa fa-moon"></i>';
+      }
+    }
+    (function() {
+      let darkPref = localStorage.getItem('darkMode');
+      if(darkPref === null) {
+        setDarkMode(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      } else {
+        setDarkMode(darkPref === '1');
+      }
+      updateThemeIcon();
+      var themeToggle = document.getElementById('themeToggleBtn');
+      if(themeToggle) {
+        themeToggle.onclick = function() {
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+          setDarkMode(!isDark);
+          updateThemeIcon();
+        };
+      }
+    })(); */
   </style>
+  <script>
+    // Unified dark mode toggle logic
+    function setDarkMode(on) {
+      if(on) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('darkMode', '1');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('darkMode', '0');
+      }
+    }
+    function updateThemeIcon() {
+      var themeToggle = document.getElementById('themeToggleBtn');
+      if (!themeToggle) return;
+      if(document.documentElement.getAttribute('data-theme') === 'dark') {
+        themeToggle.innerHTML = '<i class="fa fa-sun"></i>';
+      } else {
+        themeToggle.innerHTML = '<i class="fa fa-moon"></i>';
+      }
+    }
+    (function() {
+      let darkPref = localStorage.getItem('darkMode');
+      if(darkPref === null) {
+        setDarkMode(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      } else {
+        setDarkMode(darkPref === '1');
+      }
+      updateThemeIcon();
+      var themeToggle = document.getElementById('themeToggleBtn');
+      if(themeToggle) {
+        themeToggle.onclick = function() {
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+          setDarkMode(!isDark);
+          updateThemeIcon();
+        };
+      }
+    })();
+  </script>
 </head>
 <body>
   <header class="header">
     <div class="container">
       <nav class="nav">
         <a href="index.php" class="logo"><i class="fa fa-feather"></i>مقالات</a>
+        <div class="nav-actions">
+          <button class="theme-toggle" aria-label="تبديل الوضع" id="themeToggleBtn">
+            <i class="fa fa-moon"></i>
+          </button>
+        </div>
       </nav>
     </div>
   </header>
@@ -167,6 +478,47 @@ if (!$article) {
       </div>
       <div class="article-page-content">
         <?= nl2br(htmlspecialchars($article['content'])) ?>
+      </div>
+      <!-- comments section -->
+      <div class="article-comments-section">
+        <h2 class="comments-title"><i class="fa fa-comments"></i> التعليقات</h2>
+        <?php
+        // معالجة إضافة تعليق مستخدم
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_comment'])) {
+          $user_comment = trim($_POST['user_comment']);
+          if ($user_comment) {
+            $stmt = $pdo->prepare('INSERT INTO comments (article_id, content, is_admin, created_at) VALUES (?, ?, 0, NOW())');
+            $stmt->execute([$article['id'], $user_comment]);
+            echo '<meta http-equiv="refresh" content="0">';
+            exit;
+          }
+        }
+        // جلب جميع التعليقات لهذا المقال (مستخدمين وأدمن)
+        $comments = $pdo->prepare("SELECT content, created_at, is_admin FROM comments WHERE article_id = ? ORDER BY created_at DESC");
+        $comments->execute([$article['id']]);
+        $comments = $comments->fetchAll(PDO::FETCH_ASSOC);
+        if ($comments && count($comments)) {
+          echo '<ul class="comments-list">';
+          foreach ($comments as $c) {
+            $isAdmin = $c['is_admin'] == 1;
+            echo '<li class="comment-item'.($isAdmin ? ' admin-comment' : '').'">'
+              .'<div class="comment-content">'.nl2br(htmlspecialchars($c['content'])).'</div>'
+              .'<div class="comment-meta">'
+              .($isAdmin ? '<i class="fa fa-user-shield"></i> مشرف' : '<i class="fa fa-user"></i> مستخدم')
+              .' &nbsp; <i class="fa fa-calendar-alt"></i> '.htmlspecialchars(substr($c['created_at'],0,16)).'</div>'
+              .'</li>';
+          }
+          echo '</ul>';
+        } else {
+          echo '<div class="no-comments">لا توجد تعليقات بعد.</div>';
+        }
+        ?>
+        <hr style="margin:2.5rem 0 1.5rem 0;opacity:.13;">
+        <h3 class="add-comment-title"><i class="fa fa-plus"></i> أضف تعليقك</h3>
+        <form class="add-comment-form" method="post" action="">
+          <textarea name="user_comment" required placeholder="اكتب تعليقك هنا..." maxlength="500"></textarea>
+          <button type="submit" class="add-comment-btn"><i class="fa fa-paper-plane"></i> إرسال</button>
+        </form>
       </div>
     </div>
   </main>
