@@ -185,6 +185,7 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
         .action-btn.view-btn {
             background: #4e73df;
             color: #fff;
+            text-decoration: none;
         }
         .action-btn:hover {
             background: #3a86ff;
@@ -377,12 +378,15 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
                 <td><?= htmlspecialchars($article['created_at']) ?></td>
                 <td>
                     <!-- زر عرض التفاصيل -->
-                    <button class="action-btn view-btn" onclick="openViewModal('<?= htmlspecialchars(addslashes($article['title'])) ?>', '<?= htmlspecialchars(addslashes($article['content'])) ?>')">
+                    <a class="action-btn view-btn" href="article_view.php?id=<?= $article['id'] ?>" target="_blank">
                         <i class="fa fa-eye"></i>
-                    </button>
+                    </a>
                     <!-- زر تعديل -->
-                    <button class="action-btn edit-btn"
-                        onclick="openEditModal(<?= $article['id'] ?>, '<?= htmlspecialchars(addslashes($article['title'])) ?>', '<?= htmlspecialchars(addslashes($article['content'])) ?>')">
+                    <button class="action-btn edit-btn" 
+                        data-id="<?= $article['id'] ?>"
+                        data-title='<?= htmlspecialchars($article['title'], ENT_QUOTES) ?>'
+                        data-content='<?= htmlspecialchars($article['content'], ENT_QUOTES) ?>'
+                        onclick="handleEditBtnClickSafe(this)">
                         <i class="fa fa-edit"></i>
                     </button>
                     <!-- زر حذف -->
@@ -520,13 +524,19 @@ const searchBtn = document.getElementById('searchArticleBtn');
 function filterArticles() {
     const value = searchInput.value.trim().toLowerCase();
     document.querySelectorAll('#articlesTable tr').forEach(row => {
-        const title = row.children[0].textContent.toLowerCase();
-        const content = row.children[1].textContent.toLowerCase();
+        const title = row.children[1].textContent.toLowerCase(); // العنوان
+        const content = row.children[2].textContent.toLowerCase(); // المحتوى المختصر
         row.style.display = (title.includes(value) || content.includes(value)) ? '' : 'none';
     });
 }
 searchInput.addEventListener('input', filterArticles);
 searchBtn.addEventListener('click', filterArticles);
+function handleEditBtnClickSafe(btn) {
+    const id = btn.getAttribute('data-id');
+    const title = btn.getAttribute('data-title');
+    const content = btn.getAttribute('data-content');
+    openEditModal(id, title, content);
+}
 </script>
 </body>
 </html>

@@ -358,6 +358,7 @@ body {
   background-color: var(--color-white);
   border-radius: 0.75rem;
   overflow: hidden;
+  cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
 }
@@ -800,7 +801,12 @@ body {
     const allBtn = document.createElement('button');
     allBtn.className = 'category-btn active';
     allBtn.textContent = 'الكل';
-    allBtn.onclick = () => renderArticles();
+    allBtn.onclick = () => {
+      currentCategory = null;
+      currentQuery = '';
+      searchInput.value = '';
+      renderArticles();
+    };
     categoryFilters.appendChild(allBtn);
     categories.forEach(cat => {
       const btn = document.createElement('button');
