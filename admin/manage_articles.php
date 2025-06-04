@@ -6,9 +6,20 @@ require_once '../db.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_article'])) {
     $title = trim($_POST['title']);
     $content = trim($_POST['content']);
+    $imageName = null;
+    if (isset($_FILES['image']) && $_FILES['image']['tmp_name']) {
+        $uploadsDir = '../uploads/articles/';
+        if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0777, true);
+        $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+        $allowed = ['jpg','jpeg','png','gif','webp'];
+        if (in_array($ext, $allowed)) {
+            $imageName = uniqid('art_', true) . '.' . $ext;
+            move_uploaded_file($_FILES['image']['tmp_name'], $uploadsDir . $imageName);
+        }
+    }
     if ($title && $content) {
-        $stmt = $pdo->prepare('INSERT INTO articles (title, content, created_at) VALUES (?, ?, NOW())');
-        $stmt->execute([$title, $content]);
+        $stmt = $pdo->prepare('INSERT INTO articles (title, content, image, created_at) VALUES (?, ?, ?, NOW())');
+        $stmt->execute([$title, $content, $imageName]);
         header('Location: manage_articles.php?success=1');
         exit();
     } else {
@@ -30,9 +41,25 @@ if (isset($_POST['edit_article_id'])) {
     $id = intval($_POST['edit_article_id']);
     $title = trim($_POST['edit_title']);
     $content = trim($_POST['edit_content']);
+    $imageName = null;
+    if (isset($_FILES['edit_image']) && $_FILES['edit_image']['tmp_name']) {
+        $uploadsDir = '../uploads/articles/';
+        if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0777, true);
+        $ext = strtolower(pathinfo($_FILES['edit_image']['name'], PATHINFO_EXTENSION));
+        $allowed = ['jpg','jpeg','png','gif','webp'];
+        if (in_array($ext, $allowed)) {
+            $imageName = uniqid('art_', true) . '.' . $ext;
+            move_uploaded_file($_FILES['edit_image']['tmp_name'], $uploadsDir . $imageName);
+        }
+    }
     if ($title && $content) {
-        $stmt = $pdo->prepare('UPDATE articles SET title = ?, content = ? WHERE id = ?');
-        $stmt->execute([$title, $content, $id]);
+        if ($imageName) {
+            $stmt = $pdo->prepare('UPDATE articles SET title = ?, content = ?, image = ? WHERE id = ?');
+            $stmt->execute([$title, $content, $imageName, $id]);
+        } else {
+            $stmt = $pdo->prepare('UPDATE articles SET title = ?, content = ? WHERE id = ?');
+            $stmt->execute([$title, $content, $id]);
+        }
         header('Location: manage_articles.php?edited=1');
         exit();
     }
@@ -328,6 +355,7 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
     <table class="data-table articles-table">
         <thead>
             <tr>
+                <th>الصورة</th>
                 <th>العنوان</th>
                 <th>المحتوى المختصر</th>
                 <th>تاريخ النشر</th>
@@ -337,6 +365,13 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
         <tbody id="articlesTable">
             <?php foreach($articles as $article): ?>
             <tr>
+                <td>
+                    <?php if (!empty($article['image'])): ?>
+                        <img src="../uploads/articles/<?= htmlspecialchars($article['image']) ?>" alt="صورة المقال" style="width:60px;height:40px;object-fit:cover;border-radius:6px;box-shadow:0 1px 4px #0002;">
+                    <?php else: ?>
+                        <span style="color:#bbb;font-size:1.2em;">—</span>
+                    <?php endif; ?>
+                </td>
                 <td><?= htmlspecialchars($article['title']) ?></td>
                 <td><?= htmlspecialchars(mb_substr($article['content'],0,50)).'...' ?></td>
                 <td><?= htmlspecialchars($article['created_at']) ?></td>
@@ -361,7 +396,7 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
     </table>
     <!-- نموذج إضافة مقال جديد (يظهر عند الضغط على الزر) -->
     <div class="add-article-modal modal" style="display:none;">
-        <form action="manage_articles.php" method="post">
+        <form action="manage_articles.php" method="post" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">إضافة مقال جديد</div>
                 <div class="form-group">
@@ -372,6 +407,10 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
                     <label for="content">محتوى المقال</label>
                     <textarea name="content" id="content" rows="4" placeholder="أدخل محتوى المقال" required></textarea>
                 </div>
+                <div class="form-group">
+                    <label for="image">صورة المقال</label>
+                    <input type="file" name="image" id="image" accept="image/*">
+                </div>
                 <div class="modal-actions">
                     <button type="submit" name="add_article" class="add-article-btn">إضافة مقال</button>
                     <button type="button" class="close-modal">إلغاء</button>
@@ -381,7 +420,7 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
     </div>
     <!-- مودال تعديل مقال -->
     <div class="edit-article-modal modal" style="display:none;">
-        <form action="manage_articles.php" method="post">
+        <form action="manage_articles.php" method="post" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">تعديل مقال</div>
                 <input type="hidden" name="edit_article_id" id="edit_article_id">
@@ -392,6 +431,10 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
                 <div class="form-group">
                     <label for="edit_content">محتوى المقال</label>
                     <textarea name="edit_content" id="edit_content" rows="4" placeholder="أدخل محتوى المقال" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit_image">تغيير صورة المقال (اختياري)</label>
+                    <input type="file" name="edit_image" id="edit_image" accept="image/*">
                 </div>
                 <div class="modal-actions">
                     <button type="submit" class="add-article-btn">حفظ التعديلات</button>

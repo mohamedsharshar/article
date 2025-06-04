@@ -237,7 +237,8 @@ $latest_articles = $pdo->query('SELECT * FROM articles ORDER BY created_at DESC 
         </header>
         <main class="main-content">
             <h1 class="dashboard-title animate__animated animate__fadeInDown">لوحة التحكم</h1>
-            <div class="stats-cards">
+            <!-- تم نقل نموذج إضافة مقال إلى إدارة المقالات -->
+    <div class="stats-cards">
         <div class="stat-card animate__animated animate__fadeInUp">
             <i class="fa fa-users"></i>
             <div>
@@ -345,52 +346,6 @@ fetch('api_comments_stats.php')
 </html>
 <?php
 // معالجة إضافة مقال
-if (isset($_POST['add_article'])) {
-    $title = trim($_POST['title']);
-    $content = trim($_POST['content']);
-    if ($title && $content) {
-        $stmt = $pdo->prepare('INSERT INTO articles (title, content, created_at) VALUES (?, ?, NOW())');
-        $stmt->execute([$title, $content]);
-        header('Location: dashboard.php');
-        exit();
-    }
-}
-// معالجة حذف مقال
-if (isset($_POST['delete_id'])) {
-    $id = intval($_POST['delete_id']);
-    $pdo->prepare('DELETE FROM articles WHERE id = ?')->execute([$id]);
-    $pdo->prepare('DELETE FROM comments WHERE article_id = ?')->execute([$id]);
-    header('Location: dashboard.php');
-    exit();
-}
-// إضافة تعليق أدمن فقط
-if (isset($_POST['add_comment']) && isset($_POST['article_id'])) {
-    $comment = trim($_POST['comment']);
-    $article_id = intval($_POST['article_id']);
-    if ($comment) {
-        $stmt = $pdo->prepare('INSERT INTO comments (article_id, content, is_admin, created_at) VALUES (?, ?, 1, NOW())');
-        $stmt->execute([$article_id, $comment]);
-        header('Location: dashboard.php?comments=' . $article_id);
-        exit();
-    }
-}
-// تعديل تعليق أدمن فقط
-if (isset($_POST['edit_comment_id']) && isset($_POST['edit_comment_content']) && isset($_GET['comments'])) {
-    $comment_id = intval($_POST['edit_comment_id']);
-    $content = trim($_POST['edit_comment_content']);
-    if ($content) {
-        // تحديث التعليق فقط إذا كان أدمن أو يوزر (حسب is_admin)
-        $stmt = $pdo->prepare('UPDATE comments SET content = ? WHERE id = ?');
-        $stmt->execute([$content, $comment_id]);
-    }
-    header('Location: dashboard.php?comments=' . intval($_GET['comments']));
-    exit();
-}
-// حذف تعليق أدمن أو يوزر
-if (isset($_POST['delete_comment_id']) && isset($_GET['comments'])) {
-    $comment_id = intval($_POST['delete_comment_id']);
-    $pdo->prepare('DELETE FROM comments WHERE id = ?')->execute([$comment_id]);
-    header('Location: dashboard.php?comments=' . intval($_GET['comments']));
-    exit();
-}
+// تم نقل معالجة إضافة مقال إلى manage_articles.php
+// ...existing code...
 ?>

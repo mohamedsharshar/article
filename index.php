@@ -541,7 +541,7 @@ body {
   <header class="header">
     <div class="container">
       <nav class="nav">
-        <a href="index.php" class="logo">مقالات</a>
+        <a href="index.php" class="logo"><i class="fa fa-feather"></i>مقالات</a>
         <div class="nav-links">
           <a href="index.php" class="active">الرئيسية</a>
           <a href="#categories">التصنيفات</a>
@@ -565,7 +565,7 @@ body {
   <main>
     <section class="hero">
       <div class="container">
-        <h1>مقالات</h1>
+        <h1> <i class="fa fa-feather"></i>مقالات</h1>
         <p>اكتشف مقالات ملهمة وحديثة في التقنية، التصميم، والابتكار الرقمي.</p>
       </div>
     </section>
@@ -860,13 +860,14 @@ body {
         return;
       }
       filtered.forEach(article => {
+        const imgSrc = article.image ? `uploads/articles/${article.image}` : `https://source.unsplash.com/400x200/?arabic,writing,${encodeURIComponent(article.category || 'article')}`;
         const card = document.createElement('article');
         card.className = 'article-card';
         card.tabIndex = 0;
         card.setAttribute('aria-label', 'مقال: ' + article.title);
         card.innerHTML = `
           <div class="article-image">
-            <img src="https://source.unsplash.com/400x200/?arabic,writing,${encodeURIComponent(article.category || 'article')}" alt="صورة المقال" loading="lazy">
+            <img src="${imgSrc}" alt="صورة المقال" loading="lazy">
           </div>
           <div class="article-content">
             <h3>${article.title}</h3>
@@ -877,7 +878,7 @@ body {
             </div>
           </div>
         `;
-        card.onclick = () => showArticleDetails(article);
+        card.onclick = () => window.location.href = `article.php?id=${article.id}`;
         grid.appendChild(card);
       });
     }
@@ -887,9 +888,10 @@ body {
       const featured = articles[0];
       if (!featured) return;
       const featuredCard = document.querySelector('.featured-card');
+      const imgSrc = featured.image ? `uploads/articles/${featured.image}` : `https://source.unsplash.com/900x400/?arabic,writing,${encodeURIComponent(featured.category || 'article')}`;
       featuredCard.innerHTML = `
         <div class="featured-image">
-          <img src="https://source.unsplash.com/900x400/?arabic,writing,${encodeURIComponent(featured.category || 'article')}" alt="صورة المقال المميز" loading="lazy">
+          <img src="${imgSrc}" alt="صورة المقال المميز" loading="lazy">
           <div class="featured-content">
             ${featured.category ? `<span class="category-tag">${featured.category}</span>` : ''}
             <h3>${featured.title}</h3>
@@ -904,7 +906,7 @@ body {
                 <span><i class="fa fa-clock"></i>قراءة سريعة</span>
               </div>
             </div>
-            <a href="#" class="btn btn-primary" style="margin-top:1rem;">اقرأ المزيد</a>
+            <a href="article.php?id=${featured.id}" class="btn btn-primary" style="margin-top:1rem;">اقرأ المزيد</a>
           </div>
         </div>
       `;
@@ -914,6 +916,7 @@ body {
     function showArticleDetails(article) {
       const modal = document.createElement('div');
       modal.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000a;z-index:9999;display:flex;align-items:center;justify-content:center;';
+      const imgSrc = article.image ? `uploads/articles/${article.image}` : `https://source.unsplash.com/600x300/?arabic,writing,${encodeURIComponent(article.category || 'article')}`;
       modal.innerHTML = `
         <div style="background:#fff;max-width:600px;width:90vw;padding:2rem;border-radius:1rem;position:relative;direction:rtl;max-height:90vh;overflow:auto;">
           <button style="position:absolute;top:1rem;left:1rem;font-size:1.5rem;background:none;border:none;cursor:pointer;" aria-label="إغلاق" onclick="this.parentNode.parentNode.remove()"><i class='fa fa-times'></i></button>
@@ -923,7 +926,7 @@ body {
             ${article.category ? `<span class="category-tag" style="margin-right:1rem;">${article.category}</span>` : ''}
           </div>
           <div style="margin-bottom:1.5rem;">
-            <img src="https://source.unsplash.com/600x300/?arabic,writing,${encodeURIComponent(article.category || 'article')}" alt="صورة المقال" style="width:100%;border-radius:0.5rem;">
+            <img src="${imgSrc}" alt="صورة المقال" style="width:100%;border-radius:0.5rem;">
           </div>
           <div style="font-size:1.1rem;line-height:2;">${article.content.replace(/\n/g,'<br>')}</div>
         </div>
