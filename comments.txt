@@ -1,0 +1,8 @@
+// length of images in data base table is too large 
+// updated at in user and admin table and is active or not 
+// enable users to add articles 
+//pagination and rules in articles
+//make users and admin login with emails 
+//if admin or not in admin table and if user or not in user table 
+// ربط كل المقالات والكومنتات ببعض 
+// ظبط الداتا بيز كويس 

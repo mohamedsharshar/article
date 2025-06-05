@@ -2,10 +2,10 @@
 session_start();
 require_once '../db.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
     $password = $_POST['password'];
-    $stmt = $pdo->prepare('SELECT * FROM admins WHERE username = ?');
-    $stmt->execute([$username]);
+    $stmt = $pdo->prepare('SELECT * FROM admins WHERE email = ?');
+    $stmt->execute([$email]);
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($admin && password_verify($password, $admin['password'])) {
         $_SESSION['admin_logged_in'] = true;
@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         header('Location: dashboard.php');
         exit();
     } else {
-        $error = 'اسم المستخدم أو كلمة المرور غير صحيحة';
+        $error = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
     }
 }
 ?>
@@ -25,15 +25,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>تسجيل دخول الأدمن</title>
     <link rel="stylesheet" href="../css/login.css">
     <style>
-        body { direction: rtl; text-align: right; }
+      input#email, input#password {
+        width: 95%;
+        display: block;
+        margin: 0 0 18px 0;
+        padding: 10px 8px;
+        border: 1px solid #dbeafe;
+        border-radius: 8px;
+        background: #f1f5f9;
+        font-size: 1rem;
+        transition: border 0.2s;
+        text-align: right;
+      }
+      input#email:focus, input#password:focus {
+        border-color: #3a86ff;
+        outline: none;
+      }
+      label {
+        text-align: right;
+        display: block;
+        margin-bottom: 6px;
+        color: #4f5d75;
+        font-weight: 600;
+      }
     </style>
 </head>
 <body>
     <div class="login">
         <h2>تسجيل دخول الأدمن</h2>
         <form action="login.php" method="post">
-            <label for="username">اسم المستخدم:</label>
-            <input type="text" id="username" name="username" required>
+            <label for="email">البريد الإلكتروني:</label>
+            <input type="email" id="email" name="email" required>
             <label for="password">كلمة المرور:</label>
             <input type="password" id="password" name="password" required>
             <button type="submit">دخول</button>
