@@ -16,9 +16,10 @@ if (isset($_POST['edit_user_id'])) {
     $id = intval($_POST['edit_user_id']);
     $username = trim($_POST['edit_username']);
     $email = trim($_POST['edit_email']);
+    $is_active = isset($_POST['edit_is_active']) ? 1 : 0;
     if ($username && $email) {
-        $stmt = $pdo->prepare('UPDATE users SET username = ?, email = ? WHERE id = ?');
-        $stmt->execute([$username, $email, $id]);
+        $stmt = $pdo->prepare('UPDATE users SET username = ?, email = ?, is_active = ? WHERE id = ?');
+        $stmt->execute([$username, $email, $is_active, $id]);
         header('Location: users.php?edited=1');
         exit();
     }
@@ -29,13 +30,34 @@ if (isset($_POST['add_user'])) {
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
     if ($username && $email && $password) {
         $hashed = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare('INSERT INTO users (username, email, password, created_at) VALUES (?, ?, ?, NOW())');
-        $stmt->execute([$username, $email, $hashed]);
+        $stmt = $pdo->prepare('INSERT INTO users (username, email, password, created_at, is_active) VALUES (?, ?, ?, NOW(), ?)');
+        $stmt->execute([$username, $email, $hashed, $is_active]);
         header('Location: users.php?success=1');
         exit();
     }
+}
+
+// تفعيل/إيقاف المستخدم
+if (isset($_POST['toggle_active_id'])) {
+    $id = intval($_POST['toggle_active_id']);
+    // جلب حالة المستخدم قبل التغيير
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
+    $stmt->execute([$id]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $new_active = $user['is_active'] ? 0 : 1;
+    $stmt = $pdo->prepare('UPDATE users SET is_active = ? WHERE id = ?');
+    $stmt->execute([$new_active, $id]);
+    // إذا كان المستخدم الحالي هو نفسه الذي تم تعطيله، اعمل له تسجيل خروج
+    if ($new_active == 0 && isset($_SESSION['username']) && $_SESSION['username'] === $user['username']) {
+        session_unset();
+        session_destroy();
+        // لا تقم بإعادة التوجيه
+    }
+    header('Location: users.php');
+    exit();
 }
 
 $users = $pdo->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
@@ -331,6 +353,7 @@ $users = $pdo->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll(P
                 <th>اسم المستخدم</th>
                 <th>البريد الإلكتروني</th>
                 <th>تاريخ التسجيل</th>
+                <th>الحالة</th>
                 <th>إجراءات</th>
             </tr>
         </thead>
@@ -340,8 +363,21 @@ $users = $pdo->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll(P
                 <td><?= htmlspecialchars($user['username']) ?></td>
                 <td><?= htmlspecialchars($user['email']) ?></td>
                 <td><?= htmlspecialchars($user['created_at']) ?></td>
+                <td>
+                    <?php if ($user['is_active']): ?>
+                        <span style="color:green;font-weight:bold;">نشط</span>
+                    <?php else: ?>
+                        <span style="color:red;font-weight:bold;">موقوف</span>
+                    <?php endif; ?>
+                </td>
                 <td style="display:flex;gap:4px;align-items:center;">
-                    <button class="action-btn edit-btn" onclick="openEditUserModal(<?= $user['id'] ?>, '<?= htmlspecialchars(addslashes($user['username'])) ?>', '<?= htmlspecialchars(addslashes($user['email'])) ?>')"><i class="fa fa-edit"></i></button>
+                    <form method="post" style="display:inline;">
+                        <input type="hidden" name="toggle_active_id" value="<?= $user['id'] ?>">
+                        <button type="submit" class="action-btn" style="background:<?= $user['is_active'] ? '#e74a3b' : '#36b9cc' ?>;color:#fff;" title="<?= $user['is_active'] ? 'إيقاف' : 'تفعيل' ?> المستخدم">
+                            <i class="fa <?= $user['is_active'] ? 'fa-user-slash' : 'fa-user-check' ?>"></i>
+                        </button>
+                    </form>
+                    <button class="action-btn edit-btn" onclick="openEditUserModal(<?= $user['id'] ?>, '<?= htmlspecialchars(addslashes($user['username'])) ?>', '<?= htmlspecialchars(addslashes($user['email'])) ?>', <?= $user['is_active'] ?>)"><i class="fa fa-edit"></i></button>
                     <button class="action-btn delete-btn" onclick="openDeleteUserModal(<?= $user['id'] ?>, '<?= htmlspecialchars(addslashes($user['username'])) ?>')"><i class="fa fa-trash"></i></button>
                     <button class="action-btn add-btn" style="background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;padding:7px 16px;font-size:1rem;margin-right:6px;display:inline-flex;align-items:center;gap:5px;" title="إضافة مستخدم جديد" onclick="document.querySelector('.add-user-modal').classList.add('active')">
                         <i class="fa fa-plus"></i> إضافة
@@ -368,6 +404,9 @@ $users = $pdo->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll(P
                     <label for="password">كلمة المرور</label>
                     <input type="password" name="password" id="password" required>
                 </div>
+                <div class="form-group">
+                    <label><input type="checkbox" name="is_active" checked> نشط</label>
+                </div>
                 <div class="modal-actions">
                     <button type="submit" name="add_user" class="add-user-btn">إضافة</button>
                     <button type="button" class="close-modal">إلغاء</button>
@@ -388,6 +427,9 @@ $users = $pdo->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll(P
                 <div class="form-group">
                     <label for="edit_email">البريد الإلكتروني</label>
                     <input type="email" name="edit_email" id="edit_email" placeholder="البريد الإلكتروني" required>
+                </div>
+                <div class="form-group">
+                    <label><input type="checkbox" name="edit_is_active" id="edit_is_active"> نشط</label>
                 </div>
                 <div class="modal-actions">
                     <button type="submit" class="action-btn edit">حفظ التعديلات</button>
@@ -429,11 +471,12 @@ searchInput.addEventListener('input', filterUsers);
 searchBtn.addEventListener('click', filterUsers);
 
 // مودال التعديل
-function openEditUserModal(id, username, email) {
+function openEditUserModal(id, username, email, is_active) {
     document.querySelector('.edit-user-modal').style.display = 'flex';
     document.getElementById('edit_user_id').value = id;
     document.getElementById('edit_username').value = username;
     document.getElementById('edit_email').value = email;
+    document.getElementById('edit_is_active').checked = is_active == 1;
 }
 document.querySelectorAll('.close-edit-user-modal').forEach(btn => {
     btn.onclick = () => document.querySelector('.edit-user-modal').style.display = 'none';

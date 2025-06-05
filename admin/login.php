@@ -1,19 +1,36 @@
 <?php
 session_start();
 require_once '../db.php';
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
+
+function admin_login($pdo, $email, $password) {
     $stmt = $pdo->prepare('SELECT * FROM admins WHERE email = ?');
     $stmt->execute([$email]);
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($admin && password_verify($password, $admin['password'])) {
+    if ($admin) {
+        if (!$admin['is_active']) {
+            return [false, 'تم تعطيل حسابك من قبل الإدارة.'];
+        }
+        if (password_verify($password, $admin['password'])) {
+            return [true, $admin];
+        } else {
+            return [false, 'البريد الإلكتروني أو كلمة المرور غير صحيحة'];
+        }
+    } else {
+        return [false, 'البريد الإلكتروني أو كلمة المرور غير صحيحة'];
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    list($login_successful, $admin_or_error) = admin_login($pdo, $email, $password);
+    if ($login_successful) {
         $_SESSION['admin_logged_in'] = true;
-        $_SESSION['admin_username'] = $admin['username'];
+        $_SESSION['admin_username'] = $admin_or_error['username'];
         header('Location: dashboard.php');
         exit();
     } else {
-        $error = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+        $error = $admin_or_error;
     }
 }
 ?>

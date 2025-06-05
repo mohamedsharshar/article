@@ -8,10 +8,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
     $stmt->execute([$email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['username'] = $user['username'];
-        header('Location: index.php');
-        exit();
+    if ($user) {
+        if (!$user['is_active']) {
+            $error = 'تم تعطيل حسابك من قبل الإدارة.';
+        } elseif (password_verify($password, $user['password'])) {
+            $_SESSION['username'] = $user['username'];
+            header('Location: index.php');
+            exit();
+        } else {
+            $error = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+        }
     } else {
         $error = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
     }

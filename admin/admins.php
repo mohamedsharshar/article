@@ -407,6 +407,10 @@ $admins = $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll
             </form>
         </div>
     </div>
+    <?php if (isset(
+    $error) && !empty($error)): ?>
+    <p style="color:red; text-align:center;"> <?= htmlspecialchars($error) ?> </p>
+<?php endif; ?>
 </main>
 <script>
 function openEditAdminModal(id, username, email) {
