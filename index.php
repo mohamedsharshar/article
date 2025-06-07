@@ -1,8 +1,10 @@
 <?php
 session_start();
 require_once 'db.php';
-// جلب جميع المقالات من قاعدة البيانات
-$articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+// جلب جميع التصنيفات من قاعدة البيانات
+$categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+// جلب جميع المقالات مع التصنيف
+$articles = $pdo->query("SELECT articles.*, categories.name AS category_name FROM articles LEFT JOIN categories ON articles.category_id = categories.id ORDER BY articles.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -595,11 +597,10 @@ body {
     <section class="categories-section" id="categories">
       <div class="container">
         <div class="category-filters">
-          <button class="category-btn active">الكل</button>
-          <button class="category-btn">تقنية</button>
-          <button class="category-btn">تصميم</button>
-          <button class="category-btn">ذكاء اصطناعي</button>
-          <button class="category-btn">تطوير</button>
+          <button class="category-btn active" data-id="all">الكل</button>
+          <?php foreach($categories as $cat): ?>
+            <button class="category-btn" data-id="<?= $cat['id'] ?>"> <?= htmlspecialchars($cat['name']) ?> </button>
+          <?php endforeach; ?>
         </div>
       </div>
     </section>
@@ -805,62 +806,51 @@ body {
 
     // تفعيل الفلاتر الديناميكية
     const categoryFilters = document.querySelector('.category-filters');
-    categoryFilters.innerHTML = '';
-    const allBtn = document.createElement('button');
-    allBtn.className = 'category-btn active';
-    allBtn.textContent = 'الكل';
-    allBtn.onclick = () => {
-      currentCategory = null;
-      currentQuery = '';
-      searchInput.value = '';
-      renderArticles();
-    };
-    categoryFilters.appendChild(allBtn);
-    categories.forEach(cat => {
-      const btn = document.createElement('button');
-      btn.className = 'category-btn';
-      btn.textContent = cat;
-      btn.onclick = () => renderArticles(cat);
-      categoryFilters.appendChild(btn);
+    let currentCategoryId = null;
+    categoryFilters.querySelectorAll('button').forEach(btn => {
+      btn.onclick = function() {
+        categoryFilters.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCategoryId = btn.dataset.id === 'all' ? null : btn.dataset.id;
+        renderArticles();
+      };
     });
 
     // البحث
     const searchInput = document.querySelector('.search-input');
     const searchForm = document.querySelector('.search-form');
     const searchBtn = document.querySelector('.search-submit');
-    let currentCategory = null;
     let currentQuery = '';
 
     searchForm.onsubmit = e => {
       e.preventDefault();
       currentQuery = searchInput.value.trim();
-      renderArticles(currentCategory, currentQuery);
+      renderArticles();
     };
     searchBtn.onclick = function(e) {
       e.preventDefault();
       currentQuery = searchInput.value.trim();
-      renderArticles(currentCategory, currentQuery);
+      renderArticles();
     };
     searchInput.addEventListener('input', function() {
       if (searchInput.value.trim() === '') {
         currentQuery = '';
-        renderArticles(currentCategory, '');
+        renderArticles();
       }
     });
 
     // تفعيل الفلترة عند الضغط على زر تصنيف
-    function renderArticles(category = null, query = '') {
-      currentCategory = category;
+    function renderArticles() {
       // تحديث أزرار التصنيفات
-      document.querySelectorAll('.category-btn').forEach(btn => {
+      categoryFilters.querySelectorAll('button').forEach(btn => {
         btn.classList.remove('active');
-        if ((category === null && btn.textContent === 'الكل') || btn.textContent === category) btn.classList.add('active');
+        if ((currentCategoryId === null && btn.dataset.id === 'all') || btn.dataset.id == currentCategoryId) btn.classList.add('active');
       });
       // تصفية المقالات
       let filtered = articles;
-      if (category && category !== 'الكل') filtered = filtered.filter(a => a.category === category);
-      if (query) {
-        const q = query.toLowerCase();
+      if (currentCategoryId) filtered = filtered.filter(a => a.category_id == currentCategoryId);
+      if (currentQuery) {
+        const q = currentQuery.toLowerCase();
         filtered = filtered.filter(a => (a.title && a.title.toLowerCase().includes(q)) || (a.content && a.content.toLowerCase().includes(q)));
       }
       // إزالة المقال المميز من الشبكة
@@ -874,7 +864,7 @@ body {
         return;
       }
       filtered.forEach(article => {
-        const imgSrc = article.image ? `uploads/articles/${article.image}` : `https://source.unsplash.com/400x200/?arabic,writing,${encodeURIComponent(article.category || 'article')}`;
+        const imgSrc = article.image ? `uploads/articles/${article.image}` : `https://source.unsplash.com/400x200/?arabic,writing,${encodeURIComponent(article.category_name || 'article')}`;
         const card = document.createElement('article');
         card.className = 'article-card';
         card.tabIndex = 0;
@@ -888,7 +878,7 @@ body {
             <p>${(article.content || '').substring(0, 100)}${(article.content && article.content.length > 100 ? '...' : '')}</p>
             <div class="meta-info">
               <span><i class="fa fa-calendar-alt"></i> ${article.created_at.split(' ')[0]}</span>
-              ${article.category ? `<span class="category-tag">${article.category}</span>` : ''}
+              ${article.category_name ? `<span class="category-tag">${article.category_name}</span>` : ''}
             </div>
           </div>
         `;

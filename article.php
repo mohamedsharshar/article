@@ -515,10 +515,43 @@ if (!$article) {
         ?>
         <hr style="margin:2.5rem 0 1.5rem 0;opacity:.13;">
         <h3 class="add-comment-title"><i class="fa fa-plus"></i> أضف تعليقك</h3>
-        <form class="add-comment-form" method="post" action="">
+        <form class="add-comment-form" method="post" action="" id="addCommentForm">
           <textarea name="user_comment" required placeholder="اكتب تعليقك هنا..." maxlength="500"></textarea>
           <button type="submit" class="add-comment-btn"><i class="fa fa-paper-plane"></i> إرسال</button>
         </form>
+        <script>
+        document.getElementById('addCommentForm').addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const form = this;
+          const textarea = form.querySelector('textarea[name="user_comment"]');
+          const comment = textarea.value.trim();
+          if (!comment) return;
+          const btn = form.querySelector('button[type="submit"]');
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> جارٍ الإرسال...';
+          try {
+            const res = await fetch('', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: 'user_comment=' + encodeURIComponent(comment)
+            });
+            const html = await res.text();
+            // استخراج جزء التعليقات فقط من الصفحة الجديدة
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newCommentsSection = doc.querySelector('.article-comments-section');
+            if (newCommentsSection) {
+              document.querySelector('.article-comments-section').innerHTML = newCommentsSection.innerHTML;
+            }
+            textarea.value = '';
+          } catch (err) {
+            alert('حدث خطأ أثناء إرسال التعليق');
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa fa-paper-plane"></i> إرسال';
+          }
+        });
+        </script>
       </div>
     </div>
   </main>
