@@ -1,33 +1,69 @@
 <?php
 session_start();
 require_once '../db.php';
-// إضافة مشرف جديد
+// صلاحيات الأدمن والسوبر أدمن
+function is_superadmin($admin) {
+    return !empty($admin['superadmin']) && $admin['superadmin'] == 1;
+}
+// جلب بيانات الأدمن الحالي من السيشن
+function get_current_admin($pdo) {
+    if (!isset($_SESSION['admin_username'])) return null;
+    $stmt = $pdo->prepare('SELECT * FROM admins WHERE username = ?');
+    $stmt->execute([$_SESSION['admin_username']]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+$current_admin = get_current_admin($pdo);
+// إضافة مشرف جديد (فقط سوبر أدمن)
 if (isset($_POST['add_admin'])) {
-    $username = trim($_POST['username']);
-    $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
-    if ($username && $email && $password) {
-        $hashed = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare('INSERT INTO admins (username, email, password, created_at) VALUES (?, ?, ?, NOW())');
-        $stmt->execute([$username, $email, $hashed]);
-        header('Location: admins.php?success=1');
+    if (!is_superadmin($current_admin)) {
+        $error = 'غير مصرح لك بإضافة مشرفين. هذه العملية متاحة فقط للسوبر أدمن.';
+    } else {
+        $username = trim($_POST['username']);
+        $email = trim($_POST['email']);
+        $password = trim($_POST['password']);
+        $superadmin = ($email === 'superadmin@example.com') ? 1 : 0;
+        if ($username && $email && $password) {
+            $hashed = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare('INSERT INTO admins (username, email, password, created_at, superadmin) VALUES (?, ?, ?, NOW(), ?)');
+            $stmt->execute([$username, $email, $hashed, $superadmin]);
+            $success = 'تمت إضافة المشرف بنجاح.';
+            header('Location: admins.php?success_msg=' . urlencode($success));
+            exit();
+        }
+    }
+}
+// حذف مشرف (فقط سوبر أدمن)
+if (isset($_POST['delete_admin_id'])) {
+    $id = intval($_POST['delete_admin_id']);
+    $stmt = $pdo->prepare('SELECT * FROM admins WHERE id = ?');
+    $stmt->execute([$id]);
+    $target = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!is_superadmin($current_admin)) {
+        $error = 'غير مصرح لك بحذف المشرفين. هذه العملية متاحة فقط للسوبر أدمن.';
+    } elseif (is_superadmin($target) && !is_superadmin($current_admin)) {
+        $error = 'لا يمكن حذف سوبر أدمن إلا من سوبر أدمن.';
+    } else {
+        $pdo->prepare('DELETE FROM admins WHERE id = ?')->execute([$id]);
+        header('Location: admins.php?deleted=1');
         exit();
     }
 }
-// حذف مشرف
-if (isset($_POST['delete_admin_id'])) {
-    $id = intval($_POST['delete_admin_id']);
-    $pdo->prepare('DELETE FROM admins WHERE id = ?')->execute([$id]);
-    header('Location: admins.php?deleted=1');
-    exit();
-}
-// تعديل مشرف
+// تعديل مشرف (فقط سوبر أدمن)
 if (isset($_POST['edit_admin_id'])) {
     $id = intval($_POST['edit_admin_id']);
     $username = trim($_POST['edit_username']);
     $email = trim($_POST['edit_email']);
     $password = trim($_POST['edit_password']);
-    if ($username && $email) {
+    $stmt = $pdo->prepare('SELECT * FROM admins WHERE id = ?');
+    $stmt->execute([$id]);
+    $target = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!is_superadmin($current_admin)) {
+        $error = 'غير مصرح لك بتعديل المشرفين. هذه العملية متاحة فقط للسوبر أدمن.';
+    } elseif (is_superadmin($target) && !is_superadmin($current_admin)) {
+        $error = 'لا يمكن تعديل سوبر أدمن إلا من سوبر أدمن.';
+    } elseif ($username && $email) {
+        // لا تنفذ أي تعديل إذا لم يكن المستخدم الحالي سوبر أدمن
+    } else {
         if ($password) {
             $hashed = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare('UPDATE admins SET username = ?, email = ?, password = ? WHERE id = ?');
@@ -37,6 +73,28 @@ if (isset($_POST['edit_admin_id'])) {
             $stmt->execute([$username, $email, $id]);
         }
         header('Location: admins.php?edited=1');
+        exit();
+    }
+}
+// تفعيل/إيقاف الأدمن (فقط سوبر أدمن)
+if (isset($_POST['toggle_active_id'])) {
+    $id = intval($_POST['toggle_active_id']);
+    $stmt = $pdo->prepare('SELECT * FROM admins WHERE id = ?');
+    $stmt->execute([$id]);
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!is_superadmin($current_admin)) {
+        $error = 'غير مصرح لك بتفعيل أو إيقاف المشرفين. هذه العملية متاحة فقط للسوبر أدمن.';
+    } elseif (is_superadmin($admin) && !is_superadmin($current_admin)) {
+        $error = 'لا يمكن إيقاف سوبر أدمن إلا من سوبر أدمن.';
+    } else {
+        $new_active = $admin['is_active'] ? 0 : 1;
+        $stmt = $pdo->prepare('UPDATE admins SET is_active = ? WHERE id = ?');
+        $stmt->execute([$new_active, $id]);
+        if ($new_active == 0 && isset($_SESSION['username']) && $_SESSION['username'] === $admin['username']) {
+            session_unset();
+            session_destroy();
+        }
+        header('Location: admins.php');
         exit();
     }
 }
@@ -323,6 +381,8 @@ $admins = $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll
                 <th>اسم المشرف</th>
                 <th>البريد الإلكتروني</th>
                 <th>تاريخ الإضافة</th>
+                <th>حالة المشرف</th>
+                <th>صلاحية</th>
                 <th>إجراءات </th>
             </tr>
         </thead>
@@ -333,6 +393,26 @@ $admins = $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll
                 <td><?= htmlspecialchars($admin['email']) ?></td>
                 <td><?= htmlspecialchars($admin['created_at']) ?></td>
                 <td>
+                    <?php if ($admin['is_active']): ?>
+                        <span style="color:green;font-weight:bold;">نشط</span>
+                    <?php else: ?>
+                        <span style="color:red;font-weight:bold;">موقوف</span>
+                    <?php endif; ?>
+                </td>
+                <td>
+                    <?php if (!empty($admin['superadmin']) && $admin['superadmin']): ?>
+                        <span style="color:#3a86ff;font-weight:bold;"> سوبر أدمن</span>
+                    <?php else: ?>
+                        <span style="color:#888;">عادي</span>
+                    <?php endif; ?>
+                </td>
+                <td>
+                    <form method="post" style="display:inline;">
+                        <input type="hidden" name="toggle_active_id" value="<?= $admin['id'] ?>">
+                        <button type="submit" class="action-btn" style="background:<?= $admin['is_active'] ? '#e74a3b' : '#36b9cc' ?>;color:#fff;" title="<?= $admin['is_active'] ? 'إيقاف' : 'تفعيل' ?> المشرف">
+                            <i class="fa <?= $admin['is_active'] ? 'fa-user-slash' : 'fa-user-check' ?>"></i>
+                        </button>
+                    </form>
                     <button class="action-btn edit-btn" onclick="openEditAdminModal(<?= $admin['id'] ?>, '<?= htmlspecialchars(addslashes($admin['username'])) ?>', '<?= htmlspecialchars(addslashes($admin['email'])) ?>')"><i class="fa fa-edit"></i></button>
                     <button class="action-btn delete-btn" onclick="openDeleteAdminModal(<?= $admin['id'] ?>, '<?= htmlspecialchars(addslashes($admin['username'])) ?>')"><i class="fa fa-trash"></i></button>
                     <button class="action-btn add-admin-btn" style="background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;padding:7px 16px;font-size:1rem;margin-right:6px;display:inline-flex;align-items:center;gap:5px;" onclick="document.querySelector('.add-admin-modal').classList.add('active')"><i class="fa fa-plus"></i> إضافة</button>
@@ -410,6 +490,9 @@ $admins = $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll
     <?php if (isset(
     $error) && !empty($error)): ?>
     <p style="color:red; text-align:center;"> <?= htmlspecialchars($error) ?> </p>
+<?php endif; ?>
+    <?php if (isset($_GET['success_msg'])): ?>
+    <p style="color:green; text-align:center; font-weight:bold;"> <?= $_GET['success_msg'] ?> </p>
 <?php endif; ?>
 </main>
 <script>

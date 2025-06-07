@@ -18,10 +18,18 @@ if (isset($_POST['edit_user_id'])) {
     $email = trim($_POST['edit_email']);
     $is_active = isset($_POST['edit_is_active']) ? 1 : 0;
     if ($username && $email) {
-        $stmt = $pdo->prepare('UPDATE users SET username = ?, email = ?, is_active = ? WHERE id = ?');
-        $stmt->execute([$username, $email, $is_active, $id]);
-        header('Location: users.php?edited=1');
-        exit();
+        try {
+            $stmt = $pdo->prepare('UPDATE users SET username = ?, email = ?, is_active = ? WHERE id = ?');
+            $stmt->execute([$username, $email, $is_active, $id]);
+            header('Location: users.php?edited=1');
+            exit();
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+                $error = 'اسم المستخدم أو البريد الإلكتروني مستخدم من قبل.';
+            } else {
+                $error = 'حدث خطأ أثناء تعديل المستخدم.';
+            }
+        }
     }
 }
 
@@ -32,11 +40,19 @@ if (isset($_POST['add_user'])) {
     $password = trim($_POST['password']);
     $is_active = isset($_POST['is_active']) ? 1 : 0;
     if ($username && $email && $password) {
-        $hashed = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare('INSERT INTO users (username, email, password, created_at, is_active) VALUES (?, ?, ?, NOW(), ?)');
-        $stmt->execute([$username, $email, $hashed, $is_active]);
-        header('Location: users.php?success=1');
-        exit();
+        try {
+            $hashed = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare('INSERT INTO users (username, email, password, created_at, is_active) VALUES (?, ?, ?, NOW(), ?)');
+            $stmt->execute([$username, $email, $hashed, $is_active]);
+            header('Location: users.php?success=1');
+            exit();
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+                $error = 'اسم المستخدم أو البريد الإلكتروني مستخدم من قبل.';
+            } else {
+                $error = 'حدث خطأ أثناء إضافة المستخدم.';
+            }
+        }
     }
 }
 
@@ -453,6 +469,9 @@ $users = $pdo->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll(P
             </form>
         </div>
     </div>
+    <?php if (isset($error) && !empty($error)): ?>
+        <p style="color:red; text-align:center; font-weight:bold;"> <?= htmlspecialchars($error) ?> </p>
+    <?php endif; ?>
 </main>
 <script src="./js/users.js"></script>
 <script>
