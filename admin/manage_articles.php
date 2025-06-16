@@ -8,12 +8,18 @@ $categories = $pdo->query('SELECT * FROM categories')->fetchAll(PDO::FETCH_ASSOC
 // جلب بيانات الأدمن الحالي
 $current_admin_id = isset($_SESSION['admin_id']) ? intval($_SESSION['admin_id']) : null;
 
+// جلب كل الأدمنز والمستخدمين للاختيار في النموذج
+$all_admins = $pdo->query('SELECT id, username FROM admins')->fetchAll(PDO::FETCH_ASSOC);
+$all_users = $pdo->query('SELECT id, username FROM users')->fetchAll(PDO::FETCH_ASSOC);
+
 // معالجة إضافة مقال جديد من نفس الصفحة
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_article'])) {
     $title = trim($_POST['title']);
     $content = trim($_POST['content']);
     $category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : null;
     $imageName = null;
+    $publisher_type = $_POST['publisher_type'] ?? 'admin';
+    $publisher_id = intval($_POST['publisher_id'] ?? 0);
     if (isset($_FILES['image']) && $_FILES['image']['tmp_name']) {
         $uploadsDir = '../uploads/articles/';
         if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0777, true);
@@ -24,9 +30,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_article'])) {
             move_uploaded_file($_FILES['image']['tmp_name'], $uploadsDir . $imageName);
         }
     }
+    // تحديد admin_id أو user_id
+    $admin_id = null;
+    $user_id = null;
+    if ($publisher_type === 'admin' && $publisher_id) {
+        $admin_id = $publisher_id;
+    } elseif ($publisher_type === 'user' && $publisher_id) {
+        $user_id = $publisher_id;
+    } else {
+        $admin_id = $current_admin_id; // افتراضي: الأدمن الحالي
+    }
     if ($title && $content) {
-        $stmt = $pdo->prepare('INSERT INTO articles (title, content, image, category_id, admin_id, created_at) VALUES (?, ?, ?, ?, ?, NOW())');
-        $stmt->execute([$title, $content, $imageName, $category_id, $current_admin_id]);
+        $stmt = $pdo->prepare('INSERT INTO articles (title, content, image, category_id, admin_id, user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())');
+        $stmt->execute([$title, $content, $imageName, $category_id, $admin_id, $user_id]);
         header('Location: manage_articles.php?success=1');
         exit();
     } else {
@@ -50,6 +66,15 @@ if (isset($_POST['edit_article_id'])) {
     $content = trim($_POST['edit_content']);
     $edit_category_id = isset($_POST['edit_category_id']) ? intval($_POST['edit_category_id']) : null;
     $imageName = null;
+    $edit_publisher_type = $_POST['edit_publisher_type'] ?? '';
+    $edit_publisher_id = intval($_POST['edit_publisher_id'] ?? 0);
+    $admin_id = null;
+    $user_id = null;
+    if ($edit_publisher_type === 'admin' && $edit_publisher_id) {
+        $admin_id = $edit_publisher_id;
+    } elseif ($edit_publisher_type === 'user' && $edit_publisher_id) {
+        $user_id = $edit_publisher_id;
+    }
     if (isset($_FILES['edit_image']) && $_FILES['edit_image']['tmp_name']) {
         $uploadsDir = '../uploads/articles/';
         if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0777, true);
@@ -62,18 +87,24 @@ if (isset($_POST['edit_article_id'])) {
     }
     if ($title && $content) {
         if ($imageName) {
-            $stmt = $pdo->prepare('UPDATE articles SET title = ?, content = ?, image = ?, category_id = ? WHERE id = ?');
-            $stmt->execute([$title, $content, $imageName, $edit_category_id, $id]);
+            $stmt = $pdo->prepare('UPDATE articles SET title = ?, content = ?, image = ?, category_id = ?, admin_id = ?, user_id = ? WHERE id = ?');
+            $stmt->execute([$title, $content, $imageName, $edit_category_id, $admin_id, $user_id, $id]);
         } else {
-            $stmt = $pdo->prepare('UPDATE articles SET title = ?, content = ?, category_id = ? WHERE id = ?');
-            $stmt->execute([$title, $content, $edit_category_id, $id]);
+            $stmt = $pdo->prepare('UPDATE articles SET title = ?, content = ?, category_id = ?, admin_id = ?, user_id = ? WHERE id = ?');
+            $stmt->execute([$title, $content, $edit_category_id, $admin_id, $user_id, $id]);
         }
         header('Location: manage_articles.php?edited=1');
         exit();
     }
 }
 
-$articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+// جلب المقالات مع اسم الناشر الحقيقي
+$articles = $pdo->query("SELECT articles.*, categories.name AS category_name, COALESCE(admins.username, users.username) AS author_name
+FROM articles
+LEFT JOIN categories ON articles.category_id = categories.id
+LEFT JOIN admins ON articles.admin_id = admins.id
+LEFT JOIN users ON articles.user_id = users.id
+ORDER BY articles.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="ar">
@@ -366,6 +397,7 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
             <tr>
                 <th>الصورة</th>
                 <th>العنوان</th>
+                <th>الناشر</th>
                 <th>المحتوى المختصر</th>
                 <th>تاريخ النشر</th>
                 <th>إجراءات</th>
@@ -382,6 +414,7 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
                     <?php endif; ?>
                 </td>
                 <td><?= htmlspecialchars($article['title']) ?></td>
+                <td><?= htmlspecialchars($article['author_name'] ?: 'مجهول') ?></td>
                 <td><?= htmlspecialchars(mb_substr($article['content'],0,50)).'...' ?></td>
                 <td><?= htmlspecialchars($article['created_at']) ?></td>
                 <td>
@@ -395,6 +428,8 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
                         data-title='<?= htmlspecialchars($article['title'], ENT_QUOTES) ?>'
                         data-content='<?= htmlspecialchars($article['content'], ENT_QUOTES) ?>'
                         data-category_id="<?= $article['category_id'] ?>"
+                        data-publisher_type="<?= $article['admin_id'] ? 'admin' : 'user' ?>"
+                        data-publisher_id="<?= $article['admin_id'] ?: $article['user_id'] ?>"
                         onclick="handleEditBtnClickSafe(this)">
                         <i class="fa fa-edit"></i>
                     </button>
@@ -430,6 +465,23 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="publisher_type">الناشر</label>
+                    <select name="publisher_type" id="publisher_type" onchange="togglePublisherSelect(this.value)" required>
+                        <option value="admin" selected>أدمن</option>
+                        <option value="user">مستخدم</option>
+                    </select>
+                    <select name="publisher_id" id="publisher_id_admin" style="margin-top:7px;display:block;">
+                        <?php foreach($all_admins as $adm): ?>
+                            <option value="<?= $adm['id'] ?>" <?= ($adm['id'] == $current_admin_id ? 'selected' : '') ?>><?= htmlspecialchars($adm['username']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <select name="publisher_id" id="publisher_id_user" style="margin-top:7px;display:none;">
+                        <?php foreach($all_users as $usr): ?>
+                            <option value="<?= $usr['id'] ?>"><?= htmlspecialchars($usr['username']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="image">صورة المقال</label>
                     <input type="file" name="image" id="image" accept="image/*">
                 </div>
@@ -460,6 +512,23 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
                         <option value="">اختر التصنيف</option>
                         <?php foreach($categories as $cat): ?>
                             <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit_publisher_type">الناشر</label>
+                    <select name="edit_publisher_type" id="edit_publisher_type" onchange="toggleEditPublisherSelect(this.value)" required>
+                        <option value="admin">أدمن</option>
+                        <option value="user">مستخدم</option>
+                    </select>
+                    <select name="edit_publisher_id" id="edit_publisher_id_admin" style="margin-top:7px;display:block;">
+                        <?php foreach($all_admins as $adm): ?>
+                            <option value="<?= $adm['id'] ?>"><?= htmlspecialchars($adm['username']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <select name="edit_publisher_id" id="edit_publisher_id_user" style="margin-top:7px;display:none;">
+                        <?php foreach($all_users as $usr): ?>
+                            <option value="<?= $usr['id'] ?>"><?= htmlspecialchars($usr['username']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -511,12 +580,19 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
 </main>
 <script src="./js/articles.js"></script>
 <script>
-function openEditModal(id, title, content, category_id) {
+function openEditModal(id, title, content, category_id, publisher_type, publisher_id) {
     document.querySelector('.edit-article-modal').style.display = 'flex';
     document.getElementById('edit_article_id').value = id;
     document.getElementById('edit_title').value = title;
     document.getElementById('edit_content').value = content;
     document.getElementById('edit_category_id').value = category_id;
+    document.getElementById('edit_publisher_type').value = publisher_type;
+    toggleEditPublisherSelect(publisher_type);
+    if (publisher_type === 'admin') {
+        document.getElementById('edit_publisher_id_admin').value = publisher_id;
+    } else {
+        document.getElementById('edit_publisher_id_user').value = publisher_id;
+    }
 }
 document.querySelectorAll('.edit-btn').forEach(btn => {
     btn.onclick = function() {
@@ -524,7 +600,9 @@ document.querySelectorAll('.edit-btn').forEach(btn => {
         const title = this.getAttribute('data-title');
         const content = this.getAttribute('data-content');
         const category_id = this.getAttribute('data-category_id');
-        openEditModal(id, title, content, category_id);
+        const publisher_type = this.getAttribute('data-publisher_type');
+        const publisher_id = this.getAttribute('data-publisher_id');
+        openEditModal(id, title, content, category_id, publisher_type, publisher_id);
     };
 });
 document.querySelectorAll('.close-edit-modal').forEach(btn => {

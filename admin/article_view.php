@@ -6,9 +6,15 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     exit;
 }
 $id = intval($_GET['id']);
-$article = $pdo->prepare("SELECT * FROM articles WHERE id = ?");
-$article->execute([$id]);
-$article = $article->fetch(PDO::FETCH_ASSOC);
+// جلب المقال مع اسم الناشر الحقيقي
+$stmt = $pdo->prepare("SELECT articles.*, categories.name AS category_name, COALESCE(admins.username, users.username) AS author_name
+FROM articles
+LEFT JOIN categories ON articles.category_id = categories.id
+LEFT JOIN admins ON articles.admin_id = admins.id
+LEFT JOIN users ON articles.user_id = users.id
+WHERE articles.id = ?");
+$stmt->execute([$id]);
+$article = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$article) {
     echo '<h2 style="text-align:center;margin-top:4rem;">المقال غير موجود</h2>';
     exit;
@@ -145,7 +151,7 @@ if (!$article) {
         <h1 class="admin-article-title"> <?= htmlspecialchars($article['title']) ?> </h1>
         <div class="admin-article-meta">
             <span><i class="fa fa-calendar-alt"></i> <?= htmlspecialchars(substr($article['created_at'],0,10)) ?></span>
-            <span><i class="fa fa-user"></i> <?= htmlspecialchars($article['author'] ?? 'مجهول') ?></span>
+            <span><i class="fa fa-user"></i> <?= htmlspecialchars($article['author_name'] ?: 'مجهول') ?></span>
         </div>
         <div class="admin-article-content">
             <?= nl2br(htmlspecialchars($article['content'])) ?>
