@@ -190,10 +190,25 @@ if (isset($_GET['edit'])) {
             </div>
         <?php endif; ?>
         <div class="categories-title"><i class="fa fa-tags"></i> إدارة التصنيفات</div>
-        <form method="get" style="margin-bottom:18px;display:flex;gap:10px;width:100%;margin-right:auto;margin-left:auto;">
-            <input type="text" name="search" value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" placeholder="ابحث عن تصنيف..." style="flex:8 1 0%;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0;font-size:1.08rem;">
+        <form method="get" id="searchForm" style="margin-bottom:18px;display:flex;gap:10px;width:100%;margin-right:auto;margin-left:auto;">
+            <input type="text" name="search" id="searchInput" value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" placeholder="ابحث عن تصنيف..." style="flex:8 1 0%;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0;font-size:1.08rem;">
             <button type="submit" style="flex:2 1 0%;background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:1.08rem;font-weight:bold;cursor:pointer;">بحث</button>
         </form>
+        <script>
+        const searchInput = document.getElementById('searchInput');
+        const searchForm = document.getElementById('searchForm');
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (searchInput.value.trim() === '') {
+                    window.location.href = 'categories.php';
+                } else {
+                    searchForm.submit();
+                }
+            }, 350);
+        });
+        </script>
         <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;">
             <div style="flex:1;min-width:260px;">
                 <form method="post" class="category-form">
