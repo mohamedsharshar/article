@@ -11,6 +11,19 @@ if (!$article) {
   exit;
 }
 // يمكنك جلب بيانات الكاتب إذا أردت لاحقاً
+// جلب اسم الناشر للمقال (لو فيه user_id أو admin_id)
+$authorName = '';
+if (!empty($article['user_id'])) {
+    $stmt = $pdo->prepare('SELECT username FROM users WHERE id = ?');
+    $stmt->execute([$article['user_id']]);
+    $u = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($u) $authorName = $u['username'];
+} elseif (!empty($article['admin_id'])) {
+    $stmt = $pdo->prepare('SELECT username FROM admins WHERE id = ?');
+    $stmt->execute([$article['admin_id']]);
+    $a = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($a) $authorName = $a['username'];
+}
 ?><!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -474,7 +487,7 @@ if (!$article) {
       <h1 class="article-page-title"> <?= htmlspecialchars($article['title']) ?> </h1>
       <div class="article-page-meta">
         <span><i class="fa fa-calendar-alt"></i> <?= htmlspecialchars(substr($article['created_at'],0,10)) ?></span>
-        <span><i class="fa fa-user"></i> <?= htmlspecialchars($article['author'] ?? 'مجهول') ?></span>
+        <span><i class="fa fa-user"></i> <?= htmlspecialchars($authorName) ?></span>
       </div>
       <div class="article-page-content">
         <?= nl2br(htmlspecialchars($article['content'])) ?>
@@ -494,17 +507,29 @@ if (!$article) {
           }
         }
         // جلب جميع التعليقات لهذا المقال (مستخدمين وأدمن)
-        $comments = $pdo->prepare("SELECT content, created_at, is_admin FROM comments WHERE article_id = ? ORDER BY created_at DESC");
+        $comments = $pdo->prepare("SELECT content, created_at, is_admin, user_id, admin_id FROM comments WHERE article_id = ? ORDER BY created_at DESC");
         $comments->execute([$article['id']]);
         $comments = $comments->fetchAll(PDO::FETCH_ASSOC);
         if ($comments && count($comments)) {
           echo '<ul class="comments-list">';
           foreach ($comments as $c) {
             $isAdmin = $c['is_admin'] == 1;
+            $commentAuthor = $isAdmin ? 'مشرف' : 'مستخدم';
+            if ($isAdmin && !empty($c['admin_id'])) {
+              $stmt = $pdo->prepare('SELECT username FROM admins WHERE id = ?');
+              $stmt->execute([$c['admin_id']]);
+              $a = $stmt->fetch(PDO::FETCH_ASSOC);
+              if ($a) $commentAuthor = $a['username'] . ' (مشرف)';
+            } elseif (!$isAdmin && !empty($c['user_id'])) {
+              $stmt = $pdo->prepare('SELECT username FROM users WHERE id = ?');
+              $stmt->execute([$c['user_id']]);
+              $u = $stmt->fetch(PDO::FETCH_ASSOC);
+              if ($u) $commentAuthor = $u['username'];
+            }
             echo '<li class="comment-item'.($isAdmin ? ' admin-comment' : '').'">'
               .'<div class="comment-content">'.nl2br(htmlspecialchars($c['content'])).'</div>'
               .'<div class="comment-meta">'
-              .($isAdmin ? '<i class="fa fa-user-shield"></i> مشرف' : '<i class="fa fa-user"></i> مستخدم')
+              .'<i class="fa fa-user'.($isAdmin ? '-shield' : '').'"></i> '.htmlspecialchars($commentAuthor)
               .' &nbsp; <i class="fa fa-calendar-alt"></i> '.htmlspecialchars(substr($c['created_at'],0,16)).'</div>'
               .'</li>';
           }

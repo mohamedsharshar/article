@@ -3,8 +3,14 @@ session_start();
 require_once 'db.php';
 // جلب جميع التصنيفات من قاعدة البيانات
 $categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
-// جلب جميع المقالات مع التصنيف
-$articles = $pdo->query("SELECT articles.*, categories.name AS category_name FROM articles LEFT JOIN categories ON articles.category_id = categories.id ORDER BY articles.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+// جلب جميع المقالات مع التصنيف واسم الناشر (من admins أو users)
+$articles = $pdo->query("SELECT articles.*, categories.name AS category_name, 
+  COALESCE(admins.username, users.username) AS author_name
+FROM articles
+LEFT JOIN categories ON articles.category_id = categories.id
+LEFT JOIN admins ON articles.admin_id = admins.id
+LEFT JOIN users ON articles.user_id = users.id
+ORDER BY articles.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">

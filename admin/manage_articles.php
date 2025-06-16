@@ -5,6 +5,9 @@ require_once '../db.php';
 // جلب التصنيفات
 $categories = $pdo->query('SELECT * FROM categories')->fetchAll(PDO::FETCH_ASSOC);
 
+// جلب بيانات الأدمن الحالي
+$current_admin_id = isset($_SESSION['admin_id']) ? intval($_SESSION['admin_id']) : null;
+
 // معالجة إضافة مقال جديد من نفس الصفحة
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_article'])) {
     $title = trim($_POST['title']);
@@ -22,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_article'])) {
         }
     }
     if ($title && $content) {
-        $stmt = $pdo->prepare('INSERT INTO articles (title, content, image, category_id, created_at) VALUES (?, ?, ?, ?, NOW())');
-        $stmt->execute([$title, $content, $imageName, $category_id]);
+        $stmt = $pdo->prepare('INSERT INTO articles (title, content, image, category_id, admin_id, created_at) VALUES (?, ?, ?, ?, ?, NOW())');
+        $stmt->execute([$title, $content, $imageName, $category_id, $current_admin_id]);
         header('Location: manage_articles.php?success=1');
         exit();
     } else {
