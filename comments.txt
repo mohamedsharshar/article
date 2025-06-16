@@ -6,3 +6,4 @@
 //if admin or not in admin table and if user or not in user table 
 // ربط كل المقالات والكومنتات ببعض 
 // ظبط الداتا بيز كويس 
+// recirsice func 
