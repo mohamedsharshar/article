@@ -2,10 +2,14 @@
 session_start();
 require_once '../db.php';
 
+// جلب التصنيفات
+$categories = $pdo->query('SELECT * FROM categories')->fetchAll(PDO::FETCH_ASSOC);
+
 // معالجة إضافة مقال جديد من نفس الصفحة
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_article'])) {
     $title = trim($_POST['title']);
     $content = trim($_POST['content']);
+    $category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : null;
     $imageName = null;
     if (isset($_FILES['image']) && $_FILES['image']['tmp_name']) {
         $uploadsDir = '../uploads/articles/';
@@ -18,8 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_article'])) {
         }
     }
     if ($title && $content) {
-        $stmt = $pdo->prepare('INSERT INTO articles (title, content, image, created_at) VALUES (?, ?, ?, NOW())');
-        $stmt->execute([$title, $content, $imageName]);
+        $stmt = $pdo->prepare('INSERT INTO articles (title, content, image, category_id, created_at) VALUES (?, ?, ?, ?, NOW())');
+        $stmt->execute([$title, $content, $imageName, $category_id]);
         header('Location: manage_articles.php?success=1');
         exit();
     } else {
@@ -41,6 +45,7 @@ if (isset($_POST['edit_article_id'])) {
     $id = intval($_POST['edit_article_id']);
     $title = trim($_POST['edit_title']);
     $content = trim($_POST['edit_content']);
+    $edit_category_id = isset($_POST['edit_category_id']) ? intval($_POST['edit_category_id']) : null;
     $imageName = null;
     if (isset($_FILES['edit_image']) && $_FILES['edit_image']['tmp_name']) {
         $uploadsDir = '../uploads/articles/';
@@ -54,11 +59,11 @@ if (isset($_POST['edit_article_id'])) {
     }
     if ($title && $content) {
         if ($imageName) {
-            $stmt = $pdo->prepare('UPDATE articles SET title = ?, content = ?, image = ? WHERE id = ?');
-            $stmt->execute([$title, $content, $imageName, $id]);
+            $stmt = $pdo->prepare('UPDATE articles SET title = ?, content = ?, image = ?, category_id = ? WHERE id = ?');
+            $stmt->execute([$title, $content, $imageName, $edit_category_id, $id]);
         } else {
-            $stmt = $pdo->prepare('UPDATE articles SET title = ?, content = ? WHERE id = ?');
-            $stmt->execute([$title, $content, $id]);
+            $stmt = $pdo->prepare('UPDATE articles SET title = ?, content = ?, category_id = ? WHERE id = ?');
+            $stmt->execute([$title, $content, $edit_category_id, $id]);
         }
         header('Location: manage_articles.php?edited=1');
         exit();
@@ -386,6 +391,7 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
                         data-id="<?= $article['id'] ?>"
                         data-title='<?= htmlspecialchars($article['title'], ENT_QUOTES) ?>'
                         data-content='<?= htmlspecialchars($article['content'], ENT_QUOTES) ?>'
+                        data-category_id="<?= $article['category_id'] ?>"
                         onclick="handleEditBtnClickSafe(this)">
                         <i class="fa fa-edit"></i>
                     </button>
@@ -412,6 +418,15 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
                     <textarea name="content" id="content" rows="4" placeholder="أدخل محتوى المقال" required></textarea>
                 </div>
                 <div class="form-group">
+                    <label for="category_id">التصنيف</label>
+                    <select name="category_id" id="category_id" required>
+                        <option value="">اختر التصنيف</option>
+                        <?php foreach($categories as $cat): ?>
+                            <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="image">صورة المقال</label>
                     <input type="file" name="image" id="image" accept="image/*">
                 </div>
@@ -435,6 +450,15 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
                 <div class="form-group">
                     <label for="edit_content">محتوى المقال</label>
                     <textarea name="edit_content" id="edit_content" rows="4" placeholder="أدخل محتوى المقال" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit_category_id">التصنيف</label>
+                    <select name="edit_category_id" id="edit_category_id" required>
+                        <option value="">اختر التصنيف</option>
+                        <?php foreach($categories as $cat): ?>
+                            <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="edit_image">تغيير صورة المقال (اختياري)</label>
@@ -484,12 +508,22 @@ $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetc
 </main>
 <script src="./js/articles.js"></script>
 <script>
-function openEditModal(id, title, content) {
+function openEditModal(id, title, content, category_id) {
     document.querySelector('.edit-article-modal').style.display = 'flex';
     document.getElementById('edit_article_id').value = id;
     document.getElementById('edit_title').value = title;
     document.getElementById('edit_content').value = content;
+    document.getElementById('edit_category_id').value = category_id;
 }
+document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.onclick = function() {
+        const id = this.getAttribute('data-id');
+        const title = this.getAttribute('data-title');
+        const content = this.getAttribute('data-content');
+        const category_id = this.getAttribute('data-category_id');
+        openEditModal(id, title, content, category_id);
+    };
+});
 document.querySelectorAll('.close-edit-modal').forEach(btn => {
     btn.onclick = () => document.querySelector('.edit-article-modal').style.display = 'none';
 });

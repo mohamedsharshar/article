@@ -49,9 +49,16 @@ if (isset($_GET['delete'])) {
     exit;
 }
 
-// جلب كل التصنيفات
-$stmt = $pdo->query('SELECT * FROM categories');
-$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// جلب كل التصنيفات مع دعم البحث
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+if ($search !== '') {
+    $stmt = $pdo->prepare('SELECT * FROM categories WHERE name LIKE ? OR slug LIKE ?');
+    $stmt->execute(['%' . $search . '%', '%' . $search . '%']);
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $stmt = $pdo->query('SELECT * FROM categories');
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 // لو فيه تعديل
 $editCategory = null;
@@ -183,19 +190,29 @@ if (isset($_GET['edit'])) {
             </div>
         <?php endif; ?>
         <div class="categories-title"><i class="fa fa-tags"></i> إدارة التصنيفات</div>
-        <form method="post" class="category-form">
-            <?php if ($editCategory): ?>
-                <input type="hidden" name="id" value="<?= $editCategory['id'] ?>">
-                <input type="text" name="name" value="<?= $editCategory['name'] ?>" required placeholder="اسم التصنيف">
-                <input type="text" name="slug" value="<?= $editCategory['slug'] ?>" required placeholder="Slug">
-                <button type="submit" name="edit">تعديل</button>
-                <a href="categories.php">إلغاء</a>
-            <?php else: ?>
-                <input type="text" name="name" required placeholder="اسم التصنيف">
-                <input type="text" name="slug" required placeholder="Slug">
-                <button type="submit" name="add">إضافة</button>
-            <?php endif; ?>
-        </form>
+        <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;">
+            <div style="flex:1;min-width:260px;">
+                <form method="post" class="category-form">
+                    <?php if ($editCategory): ?>
+                        <input type="hidden" name="id" value="<?= $editCategory['id'] ?>">
+                        <input type="text" name="name" value="<?= $editCategory['name'] ?>" required placeholder="اسم التصنيف">
+                        <input type="text" name="slug" value="<?= $editCategory['slug'] ?>" required placeholder="Slug">
+                        <button type="submit" name="edit">تعديل</button>
+                        <a href="categories.php">إلغاء</a>
+                    <?php else: ?>
+                        <input type="text" name="name" required placeholder="اسم التصنيف">
+                        <input type="text" name="slug" required placeholder="Slug">
+                        <button type="submit" name="add">إضافة</button>
+                    <?php endif; ?>
+                </form>
+            </div>
+            <div style="flex:1;min-width:260px;">
+                <form method="get" style="margin-bottom:18px;display:flex;gap:10px;max-width:400px;">
+                    <input type="text" name="search" value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" placeholder="ابحث عن تصنيف..." style="flex:1;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0;font-size:1.08rem;">
+                    <button type="submit" style="background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:1.08rem;font-weight:bold;cursor:pointer;">بحث</button>
+                </form>
+            </div>
+        </div>
         <table class="data-table">
             <thead>
                 <tr>
