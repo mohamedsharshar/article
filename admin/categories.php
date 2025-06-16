@@ -190,6 +190,10 @@ if (isset($_GET['edit'])) {
             </div>
         <?php endif; ?>
         <div class="categories-title"><i class="fa fa-tags"></i> إدارة التصنيفات</div>
+        <form method="get" style="margin-bottom:18px;display:flex;gap:10px;width:100%;margin-right:auto;margin-left:auto;">
+            <input type="text" name="search" value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" placeholder="ابحث عن تصنيف..." style="flex:8 1 0%;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0;font-size:1.08rem;">
+            <button type="submit" style="flex:2 1 0%;background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:1.08rem;font-weight:bold;cursor:pointer;">بحث</button>
+        </form>
         <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;">
             <div style="flex:1;min-width:260px;">
                 <form method="post" class="category-form">
@@ -197,19 +201,17 @@ if (isset($_GET['edit'])) {
                         <input type="hidden" name="id" value="<?= $editCategory['id'] ?>">
                         <input type="text" name="name" value="<?= $editCategory['name'] ?>" required placeholder="اسم التصنيف">
                         <input type="text" name="slug" value="<?= $editCategory['slug'] ?>" required placeholder="Slug">
-                        <button type="submit" name="edit">تعديل</button>
-                        <a href="categories.php">إلغاء</a>
+                        <div style="display:flex;justify-content:space-between;gap:10px;">
+                            <button type="submit" name="edit" style="flex:1;margin-right:0;">تعديل</button>
+                            <a href="categories.php" style="flex:1;text-align:center;">إلغاء</a>
+                        </div>
                     <?php else: ?>
                         <input type="text" name="name" required placeholder="اسم التصنيف">
                         <input type="text" name="slug" required placeholder="Slug">
-                        <button type="submit" name="add">إضافة</button>
+                        <div style="display:flex;justify-content:space-between;gap:10px;">
+                            <button type="submit" name="add" style="flex:1;margin-right:0;">إضافة</button>
+                        </div>
                     <?php endif; ?>
-                </form>
-            </div>
-            <div style="flex:1;min-width:260px;">
-                <form method="get" style="margin-bottom:18px;display:flex;gap:10px;max-width:400px;">
-                    <input type="text" name="search" value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" placeholder="ابحث عن تصنيف..." style="flex:1;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0;font-size:1.08rem;">
-                    <button type="submit" style="background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:1.08rem;font-weight:bold;cursor:pointer;">بحث</button>
                 </form>
             </div>
         </div>
