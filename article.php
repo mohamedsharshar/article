@@ -507,9 +507,9 @@ $isUserLoggedIn = isset($_SESSION['user_id']);
         // معالجة إضافة تعليق مستخدم
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_comment'])) {
           $user_comment = trim($_POST['user_comment']);
-          if ($user_comment) {
-            $stmt = $pdo->prepare('INSERT INTO comments (article_id, content, is_admin, created_at) VALUES (?, ?, 0, NOW())');
-            $stmt->execute([$article['id'], $user_comment]);
+          if ($user_comment && isset($_SESSION['user_id'])) {
+            $stmt = $pdo->prepare('INSERT INTO comments (article_id, content, is_admin, user_id, created_at) VALUES (?, ?, 0, ?, NOW())');
+            $stmt->execute([$article['id'], $user_comment, $_SESSION['user_id']]);
             echo '<meta http-equiv="refresh" content="0">';
             exit;
           }
