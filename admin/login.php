@@ -27,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($login_successful) {
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_username'] = $admin_or_error['username'];
+        $_SESSION['admin_id'] = $admin_or_error['id'];
         header('Location: dashboard.php');
         exit();
     } else {

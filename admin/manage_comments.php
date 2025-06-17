@@ -424,9 +424,9 @@ ORDER BY c.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
                 <td><?= htmlspecialchars($comment['title']) ?></td>
                 <td>
                     <?php
-                        if ($comment['is_admin'] == 1 && $comment['admin_name']) {
+                        if ($comment['is_admin'] == 1 && !empty($comment['admin_name'])) {
                             echo htmlspecialchars($comment['admin_name']) . ' (أدمن)';
-                        } elseif ($comment['is_admin'] == 0 && $comment['user_name']) {
+                        } elseif ($comment['is_admin'] == 0 && !empty($comment['user_name'])) {
                             echo htmlspecialchars($comment['user_name']) . ' (مستخدم)';
                         } else {
                             echo '-';
