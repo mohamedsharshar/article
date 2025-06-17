@@ -18,8 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_article'])) {
     $content = trim($_POST['content']);
     $category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : null;
     $imageName = null;
-    $publisher_type = $_POST['publisher_type'] ?? 'admin';
-    $publisher_id = intval($_POST['publisher_id'] ?? 0);
     if (isset($_FILES['image']) && $_FILES['image']['tmp_name']) {
         $uploadsDir = '../uploads/articles/';
         if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0777, true);
@@ -30,16 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_article'])) {
             move_uploaded_file($_FILES['image']['tmp_name'], $uploadsDir . $imageName);
         }
     }
-    // تحديد admin_id أو user_id
-    $admin_id = null;
+    // تحديد admin_id فقط بناءً على الحساب الحالي
+    $admin_id = $current_admin_id;
     $user_id = null;
-    if ($publisher_type === 'admin' && $publisher_id) {
-        $admin_id = $publisher_id;
-    } elseif ($publisher_type === 'user' && $publisher_id) {
-        $user_id = $publisher_id;
-    } else {
-        $admin_id = $current_admin_id; // افتراضي: الأدمن الحالي
-    }
     if ($title && $content) {
         $stmt = $pdo->prepare('INSERT INTO articles (title, content, image, category_id, admin_id, user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())');
         $stmt->execute([$title, $content, $imageName, $category_id, $admin_id, $user_id]);
@@ -66,15 +57,8 @@ if (isset($_POST['edit_article_id'])) {
     $content = trim($_POST['edit_content']);
     $edit_category_id = isset($_POST['edit_category_id']) ? intval($_POST['edit_category_id']) : null;
     $imageName = null;
-    $edit_publisher_type = $_POST['edit_publisher_type'] ?? '';
-    $edit_publisher_id = intval($_POST['edit_publisher_id'] ?? 0);
-    $admin_id = null;
+    $admin_id = $current_admin_id;
     $user_id = null;
-    if ($edit_publisher_type === 'admin' && $edit_publisher_id) {
-        $admin_id = $edit_publisher_id;
-    } elseif ($edit_publisher_type === 'user' && $edit_publisher_id) {
-        $user_id = $edit_publisher_id;
-    }
     if (isset($_FILES['edit_image']) && $_FILES['edit_image']['tmp_name']) {
         $uploadsDir = '../uploads/articles/';
         if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0777, true);
@@ -465,23 +449,6 @@ ORDER BY articles.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="publisher_type">الناشر</label>
-                    <select name="publisher_type" id="publisher_type" onchange="togglePublisherSelect(this.value)" required>
-                        <option value="admin" selected>أدمن</option>
-                        <option value="user">مستخدم</option>
-                    </select>
-                    <select name="publisher_id" id="publisher_id_admin" style="margin-top:7px;display:block;">
-                        <?php foreach($all_admins as $adm): ?>
-                            <option value="<?= $adm['id'] ?>" <?= ($adm['id'] == $current_admin_id ? 'selected' : '') ?>><?= htmlspecialchars($adm['adminname']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <select name="publisher_id" id="publisher_id_user" style="margin-top:7px;display:none;">
-                        <?php foreach($all_users as $usr): ?>
-                            <option value="<?= $usr['id'] ?>"><?= htmlspecialchars($usr['username']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="form-group">
                     <label for="image">صورة المقال</label>
                     <input type="file" name="image" id="image" accept="image/*">
                 </div>
@@ -512,23 +479,6 @@ ORDER BY articles.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
                         <option value="">اختر التصنيف</option>
                         <?php foreach($categories as $cat): ?>
                             <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="edit_publisher_type">الناشر</label>
-                    <select name="edit_publisher_type" id="edit_publisher_type" onchange="toggleEditPublisherSelect(this.value)" required>
-                        <option value="admin">أدمن</option>
-                        <option value="user">مستخدم</option>
-                    </select>
-                    <select name="edit_publisher_id" id="edit_publisher_id_admin" style="margin-top:7px;display:block;">
-                        <?php foreach($all_admins as $adm): ?>
-                            <option value="<?= $adm['id'] ?>"><?= htmlspecialchars($adm['adminname']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <select name="edit_publisher_id" id="edit_publisher_id_user" style="margin-top:7px;display:none;">
-                        <?php foreach($all_users as $usr): ?>
-                            <option value="<?= $usr['id'] ?>"><?= htmlspecialchars($usr['username']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>

@@ -20,10 +20,10 @@ if (!empty($article['user_id'])) {
     $u = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($u) $authorName = $u['username'];
 } elseif (!empty($article['admin_id'])) {
-    $stmt = $pdo->prepare('SELECT username FROM admins WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT adminname FROM admins WHERE id = ?');
     $stmt->execute([$article['admin_id']]);
     $a = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($a) $authorName = $a['username'];
+    if ($a) $authorName = $a['adminname'];
 }
 
 // السماح فقط للمستخدم المسجل بإضافة تعليق

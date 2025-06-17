@@ -911,7 +911,7 @@ body {
             <div class="article-meta">
               <div class="author">
                 <i class="fa fa-user"></i>
-                <span>${featured.author || 'مجهول'}</span>
+                <span>${featured.author_name || 'مجهول'}</span>
               </div>
               <div class="meta-info">
                 <span><i class="fa fa-calendar"></i>${featured.created_at.split(' ')[0]}</span>
