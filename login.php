@@ -149,11 +149,37 @@ body {
 [data-theme="dark"] .login a {
   color: #60A5FA !important;
 }
+.back-home-btn {
+  display: inline-block;
+  margin-bottom: 1.2rem;
+  color: var(--color-primary);
+  background: var(--color-slate-100);
+  padding: 7px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.back-home-btn:hover {
+  background: var(--color-primary);
+  color: #fff !important;
+}
+[data-theme="dark"] .back-home-btn {
+  background: #334155 !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .back-home-btn:hover {
+  background: #3B82F6 !important;
+  color: #fff !important;
+}
     </style>
 </head>
 <body style="direction: rtl; text-align: right;">
     <div class="login">
         <button class="theme-toggle" aria-label="تبديل الوضع" type="button"><i class="fa fa-moon"></i></button>
+        <a href="index.php" class="back-home-btn" style="display:inline-block;margin-bottom:1.2rem;color:var(--color-primary);background:var(--color-slate-100);padding:7px 18px;border-radius:8px;text-decoration:none;font-weight:bold;transition:background 0.2s;">
+          <i class="fa fa-home"></i> العودة للرئيسية
+        </a>
         <h2>تسجيل الدخول</h2>
         <form action="login.php" method="post">
             <label for="email">البريد الإلكتروني:</label>
@@ -162,7 +188,22 @@ body {
             <input type="password" id="password" name="password" required>
             <button type="submit">دخول</button>
             <p>ليس لديك حساب؟ <a href="register.php">سجّل الآن</a></p>
+            <p style="margin-top:10px;text-align:center;">
+              <a href="#" id="forgotPasswordLink" style="color:var(--color-primary);text-decoration:underline;">هل نسيت كلمة المرور؟</a>
+            </p>
         </form>
+        <div id="forgotPasswordModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0007;z-index:9999;align-items:center;justify-content:center;">
+          <div style="background:#fff;padding:2rem 1.5rem;border-radius:1.2rem;max-width:350px;width:90vw;position:relative;box-shadow:0 4px 24px #0005;direction:rtl;">
+            <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="position:absolute;top:1rem;left:1rem;background:none;border:none;font-size:1.3rem;cursor:pointer;"><i class="fa fa-times"></i></button>
+            <h3 style="margin-bottom:1rem;color:var(--color-primary);font-size:1.2rem;">استعادة كلمة المرور</h3>
+            <form id="forgotPasswordForm" method="post" autocomplete="off">
+              <label for="reset_email">أدخل بريدك الإلكتروني:</label>
+              <input type="email" id="reset_email" name="reset_email" required style="width:100%;margin-bottom:1rem;padding:8px 6px;border-radius:7px;border:1px solid #dbeafe;">
+              <button type="submit" style="width:100%;background:linear-gradient(90deg,#3a86ff 0%,#4262ed 100%);color:#fff;border:none;border-radius:8px;padding:10px 0;font-size:1.08rem;font-weight:bold;cursor:pointer;">إرسال رابط إعادة التعيين</button>
+              <div id="resetMsg" style="margin-top:1rem;font-size:1.01rem;"></div>
+            </form>
+          </div>
+        </div>
         <?php
         if (!empty($error)) {
             echo '<p style="color:red;">' . htmlspecialchars($error) . '</p>';
@@ -199,6 +240,30 @@ body {
         themeToggle.innerHTML = isDark ? '<i class="fa fa-moon"></i>' : '<i class="fa fa-sun"></i>';
       };
     }
+    document.getElementById('forgotPasswordLink').onclick = function(e) {
+      e.preventDefault();
+      document.getElementById('forgotPasswordModal').style.display = 'flex';
+    };
+    document.getElementById('forgotPasswordForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('reset_email').value.trim();
+      const msg = document.getElementById('resetMsg');
+      msg.textContent = 'جاري الإرسال...';
+      // إرسال الطلب إلى ملف PHP لمعالجة الإيميل
+      const res = await fetch('send_reset.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'email=' + encodeURIComponent(email)
+      });
+      const data = await res.json();
+      if(data.success) {
+        msg.style.color = '#198754';
+        msg.textContent = 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني (إذا كان مسجلاً).';
+      } else {
+        msg.style.color = '#e63946';
+        msg.textContent = data.message || 'حدث خطأ، حاول مرة أخرى.';
+      }
+    };
     </script>
 </body>
 </html>

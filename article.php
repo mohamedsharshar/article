@@ -429,7 +429,7 @@ if (!empty($article['user_id'])) {
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
   <script>
-    // دارك مود موحد
+    // دارك مود موحد لجميع الصفحات
     function setDarkMode(on) {
       if(on) {
         document.documentElement.setAttribute('data-theme', 'dark');
@@ -439,24 +439,35 @@ if (!empty($article['user_id'])) {
         localStorage.setItem('darkMode', '0');
       }
     }
-    const themeToggle = document.querySelector('.theme-toggle');
-    if(themeToggle) {
-      if(localStorage.getItem('darkMode') === null) {
-        setDarkMode(true);
-        themeToggle.innerHTML = '<i class="fa fa-sun"></i>';
-      } else if(localStorage.getItem('darkMode') === '1') {
-        setDarkMode(true);
-        themeToggle.innerHTML = '<i class="fa fa-sun"></i>';
-      } else {
-        setDarkMode(false);
-        themeToggle.innerHTML = '<i class="fa fa-moon"></i>';
-      }
-      themeToggle.onclick = function() {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        setDarkMode(!isDark);
-        themeToggle.innerHTML = isDark ? '<i class="fa fa-moon"></i>' : '<i class="fa fa-sun"></i>';
-      };
+    function updateThemeIcon() {
+      const themeToggle = document.querySelector('.theme-toggle');
+      if (!themeToggle) return;
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      themeToggle.innerHTML = isDark ? '<i class="fa fa-sun"></i>' : '<i class="fa fa-moon"></i>';
     }
+    document.addEventListener('DOMContentLoaded', function() {
+      let darkPref = localStorage.getItem('darkMode');
+      if (darkPref === null) {
+        setDarkMode(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      } else {
+        setDarkMode(darkPref === '1');
+      }
+      updateThemeIcon();
+      var themeToggleBtn = document.querySelector('.theme-toggle');
+      if(themeToggleBtn) {
+        themeToggleBtn.onclick = function() {
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+          setDarkMode(!isDark);
+          updateThemeIcon();
+        };
+      }
+    });
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'darkMode') {
+        setDarkMode(e.newValue === '1');
+        updateThemeIcon();
+      }
+    });
   </script>
 </head>
 <body>

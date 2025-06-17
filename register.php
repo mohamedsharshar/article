@@ -171,11 +171,37 @@ body {
 [data-theme="dark"] .register-container a.login-link {
   color: #60A5FA !important;
 }
+.back-home-btn {
+  display: inline-block;
+  margin-bottom: 1.2rem;
+  color: var(--color-primary);
+  background: var(--color-slate-100);
+  padding: 7px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.back-home-btn:hover {
+  background: var(--color-primary);
+  color: #fff !important;
+}
+[data-theme="dark"] .back-home-btn {
+  background: #334155 !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .back-home-btn:hover {
+  background: #3B82F6 !important;
+  color: #fff !important;
+}
     </style>
 </head>
 <body style="direction: rtl; text-align: right;">
     <div class="register-container">
         <button class="theme-toggle" aria-label="تبديل الوضع" type="button"><i class="fa fa-moon"></i></button>
+        <a href="index.php" class="back-home-btn" style="display:inline-block;margin-bottom:1.2rem;color:var(--color-primary);background:var(--color-slate-100);padding:7px 18px;border-radius:8px;text-decoration:none;font-weight:bold;transition:background 0.2s;">
+          <i class="fa fa-home"></i> العودة للرئيسية
+        </a>
         <h2>إنشاء حساب جديد</h2>
         <div class="desc">سجّل الآن وابدأ في كتابة وقراءة المقالات المميزة!</div>
         <form action="register.php" method="post">
