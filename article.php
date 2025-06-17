@@ -520,10 +520,10 @@ if (!empty($article['user_id'])) {
             $isAdmin = $c['is_admin'] == 1;
             $commentAuthor = $isAdmin ? 'مشرف' : 'مستخدم';
             if ($isAdmin && !empty($c['admin_id'])) {
-              $stmt = $pdo->prepare('SELECT username FROM admins WHERE id = ?');
+              $stmt = $pdo->prepare('SELECT adminname FROM admins WHERE id = ?');
               $stmt->execute([$c['admin_id']]);
               $a = $stmt->fetch(PDO::FETCH_ASSOC);
-              if ($a) $commentAuthor = $a['username'] . ' (مشرف)';
+              if ($a) $commentAuthor = $a['adminname'] . ' (مشرف)';
             } elseif (!$isAdmin && !empty($c['user_id'])) {
               $stmt = $pdo->prepare('SELECT username FROM users WHERE id = ?');
               $stmt->execute([$c['user_id']]);
