@@ -51,20 +51,134 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بروفايلي</title>
     <link rel="stylesheet" href="css/register.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-      .profile-container { max-width: 400px; margin: 60px auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 32px 28px 24px 28px; }
-      .profile-container h2 { text-align: center; color: #2d3142; margin-bottom: 24px; letter-spacing: 1px; }
-      .profile-container label { display: block; margin-bottom: 6px; color: #4f5d75; font-weight: 600; text-align: right; }
-      .profile-container input[type="text"], .profile-container input[type="email"], .profile-container input[type="password"] { width: 95%; display: block; margin: 0 0 18px 0; padding: 10px 8px; border: 1px solid #dbeafe; border-radius: 8px; background: #f1f5f9; font-size: 1rem; transition: border 0.2s; text-align: right; }
-      .profile-container input:focus { border-color: #3a86ff; outline: none; }
-      .profile-container button { width: 100%; padding: 12px; background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%); color: #fff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-      .profile-container button:hover { background: linear-gradient(90deg, #4361ee 0%, #3a86ff 100%); }
-      .profile-container .success { color: #198754; text-align: center; margin-bottom: 10px; }
-      .profile-container .error { color: #e63946; text-align: center; margin-bottom: 10px; }
+:root {
+  --color-primary: #3B82F6;
+  --color-primary-dark: #2563EB;
+  --color-slate-50: #F8FAFC;
+  --color-slate-100: #F1F5F9;
+  --color-slate-200: #E2E8F0;
+  --color-slate-300: #CBD5E1;
+  --color-slate-400: #94A3B8;
+  --color-slate-500: #64748B;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1E293B;
+  --color-slate-900: #0F172A;
+  --color-white: #FFFFFF;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Merriweather', Georgia, serif;
+}
+body {
+  font-family: var(--font-sans);
+  color: var(--color-primary);
+  background-color: var(--color-slate-50);
+  line-height: 1.5;
+  min-height: 100vh;
+  transition: background 0.2s, color 0.2s;
+}
+[data-theme="dark"] body {
+  background-color: #0F172A !important;
+  color: #fff !important;
+}
+.profile-container {
+  background: var(--color-white);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  padding: 32px 28px 24px 28px;
+  max-width: 400px;
+  margin: 60px auto;
+  position: relative;
+  box-sizing: border-box;
+}
+[data-theme="dark"] .profile-container {
+  background: #1E293B !important;
+  color: #fff !important;
+  box-shadow: 0 4px 24px #0008;
+}
+.profile-container h2 {
+  text-align: center;
+  color: var(--color-primary);
+  margin-bottom: 24px;
+  letter-spacing: 1px;
+  font-family: var(--font-serif);
+}
+[data-theme="dark"] .profile-container h2 {
+  color: #60A5FA !important;
+}
+.profile-container label {
+  display: block;
+  margin-bottom: 6px;
+  color: #4f5d75;
+  font-weight: 600;
+  text-align: right;
+}
+[data-theme="dark"] .profile-container label {
+  color: #CBD5E1 !important;
+}
+.profile-container input[type="text"], .profile-container input[type="email"], .profile-container input[type="password"] {
+  width: 95%;
+  display: block;
+  margin: 0 0 18px 0;
+  padding: 10px 8px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #f1f5f9;
+  font-size: 1rem;
+  transition: border 0.2s, background 0.2s, color 0.2s;
+  text-align: right;
+  color: #222;
+}
+[data-theme="dark"] .profile-container input[type="text"],
+[data-theme="dark"] .profile-container input[type="email"],
+[data-theme="dark"] .profile-container input[type="password"] {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+  color: #fff !important;
+}
+.profile-container input:focus {
+  border-color: #3a86ff;
+  outline: none;
+}
+.profile-container button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.profile-container button:hover {
+  background: linear-gradient(90deg, #4361ee 0%, #3a86ff 100%);
+}
+.profile-container .success { color: #198754; text-align: center; margin-bottom: 10px; }
+.profile-container .error { color: #e63946; text-align: center; margin-bottom: 10px; }
+.theme-toggle {
+  position: absolute;
+  left: 1.2rem;
+  top: 1.2rem;
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+[data-theme="dark"] .theme-toggle {
+  color: #fff !important;
+}
     </style>
 </head>
 <body>
   <div class="profile-container">
+    <button class="theme-toggle" aria-label="تبديل الوضع" type="button"><i class="fa fa-moon"></i></button>
     <h2>بروفايلي</h2>
     <?php if ($success): ?>
       <div class="success">تم تحديث بياناتك بنجاح.</div>
@@ -83,5 +197,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
     <a href="index.php" style="display:block;text-align:center;margin-top:18px;color:#3a86ff;text-decoration:none;">&larr; العودة للرئيسية</a>
   </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
+  <script>
+    // دارك مود موحد
+    function setDarkMode(on) {
+      if(on) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('darkMode', '1');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('darkMode', '0');
+      }
+    }
+    const themeToggle = document.querySelector('.theme-toggle');
+    if(themeToggle) {
+      if(localStorage.getItem('darkMode') === null) {
+        setDarkMode(true);
+        themeToggle.innerHTML = '<i class="fa fa-sun"></i>';
+      } else if(localStorage.getItem('darkMode') === '1') {
+        setDarkMode(true);
+        themeToggle.innerHTML = '<i class="fa fa-sun"></i>';
+      } else {
+        setDarkMode(false);
+        themeToggle.innerHTML = '<i class="fa fa-moon"></i>';
+      }
+      themeToggle.onclick = function() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        setDarkMode(!isDark);
+        themeToggle.innerHTML = isDark ? '<i class="fa fa-moon"></i>' : '<i class="fa fa-sun"></i>';
+      };
+    }
+  </script>
 </body>
 </html>

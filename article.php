@@ -32,6 +32,9 @@ if (!empty($article['user_id'])) {
   <title><?= htmlspecialchars($article['title']) ?> | مقالات</title>
   <link rel="stylesheet" href="./css/index.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --color-bg-light: #fff;
@@ -192,10 +195,14 @@ if (!empty($article['user_id'])) {
       cursor: pointer;
       transition: color 0.2s;
       margin-right: 0.5rem;
+      position: absolute;
+      left: 1.2rem;
+      top: 1.2rem;
+      z-index: 10;
     }
     html[data-theme="dark"] .theme-toggle,
     body[data-theme="dark"] .theme-toggle {
-      color: var(--color-text-dark);
+      color: #fff;
     }
     .header {
       background: transparent;
@@ -420,8 +427,9 @@ if (!empty($article['user_id'])) {
       }
     })(); */
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
   <script>
-    // Unified dark mode toggle logic
+    // دارك مود موحد
     function setDarkMode(on) {
       if(on) {
         document.documentElement.setAttribute('data-theme', 'dark');
@@ -431,45 +439,30 @@ if (!empty($article['user_id'])) {
         localStorage.setItem('darkMode', '0');
       }
     }
-    function updateThemeIcon() {
-      var themeToggle = document.getElementById('themeToggleBtn');
-      if (!themeToggle) return;
-      if(document.documentElement.getAttribute('data-theme') === 'dark') {
+    const themeToggle = document.querySelector('.theme-toggle');
+    if(themeToggle) {
+      if(localStorage.getItem('darkMode') === null) {
+        setDarkMode(true);
+        themeToggle.innerHTML = '<i class="fa fa-sun"></i>';
+      } else if(localStorage.getItem('darkMode') === '1') {
+        setDarkMode(true);
         themeToggle.innerHTML = '<i class="fa fa-sun"></i>';
       } else {
+        setDarkMode(false);
         themeToggle.innerHTML = '<i class="fa fa-moon"></i>';
       }
+      themeToggle.onclick = function() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        setDarkMode(!isDark);
+        themeToggle.innerHTML = isDark ? '<i class="fa fa-moon"></i>' : '<i class="fa fa-sun"></i>';
+      };
     }
-    document.addEventListener('DOMContentLoaded', function() {
-      let darkPref = localStorage.getItem('darkMode');
-      if(darkPref === null) {
-        setDarkMode(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      } else {
-        setDarkMode(darkPref === '1');
-      }
-      updateThemeIcon();
-      var themeToggle = document.getElementById('themeToggleBtn');
-      if(themeToggle) {
-        themeToggle.onclick = function() {
-          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-          setDarkMode(!isDark);
-          updateThemeIcon();
-        };
-      }
-    });
   </script>
 </head>
 <body>
   <header class="header">
     <div class="container">
-      <nav class="nav">
-        <a href="index.php" class="logo"><i class="fa fa-feather"></i>مقالات</a>
-        <div class="nav-actions">
-          <button class="theme-toggle" aria-label="تبديل الوضع" id="themeToggleBtn">
-            <i class="fa fa-moon"></i>
-          </button>
-        </div>
-      </nav>
+      <button class="theme-toggle" aria-label="تبديل الوضع" type="button"><i class="fa fa-moon"></i></button>
     </div>
   </header>
   <main>

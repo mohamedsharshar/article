@@ -1,8 +1,8 @@
 body {
-    background: linear-gradient(120deg, #f8fafc 0%, #e2eafc 100%);
     font-family: 'Cairo', Arial, sans-serif;
     margin: 0;
     padding: 0;
+    background: none !important;
 }
 .login {
     max-width: 370px;
