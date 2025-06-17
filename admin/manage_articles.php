@@ -9,7 +9,7 @@ $categories = $pdo->query('SELECT * FROM categories')->fetchAll(PDO::FETCH_ASSOC
 $current_admin_id = isset($_SESSION['admin_id']) ? intval($_SESSION['admin_id']) : null;
 
 // جلب كل الأدمنز والمستخدمين للاختيار في النموذج
-$all_admins = $pdo->query('SELECT id, username FROM admins')->fetchAll(PDO::FETCH_ASSOC);
+$all_admins = $pdo->query('SELECT id, adminname FROM admins')->fetchAll(PDO::FETCH_ASSOC);
 $all_users = $pdo->query('SELECT id, username FROM users')->fetchAll(PDO::FETCH_ASSOC);
 
 // معالجة إضافة مقال جديد من نفس الصفحة
@@ -99,7 +99,7 @@ if (isset($_POST['edit_article_id'])) {
 }
 
 // جلب المقالات مع اسم الناشر الحقيقي
-$articles = $pdo->query("SELECT articles.*, categories.name AS category_name, COALESCE(admins.username, users.username) AS author_name
+$articles = $pdo->query("SELECT articles.*, categories.name AS category_name, COALESCE(admins.adminname, users.username) AS author_name
 FROM articles
 LEFT JOIN categories ON articles.category_id = categories.id
 LEFT JOIN admins ON articles.admin_id = admins.id
@@ -472,7 +472,7 @@ ORDER BY articles.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
                     </select>
                     <select name="publisher_id" id="publisher_id_admin" style="margin-top:7px;display:block;">
                         <?php foreach($all_admins as $adm): ?>
-                            <option value="<?= $adm['id'] ?>" <?= ($adm['id'] == $current_admin_id ? 'selected' : '') ?>><?= htmlspecialchars($adm['username']) ?></option>
+                            <option value="<?= $adm['id'] ?>" <?= ($adm['id'] == $current_admin_id ? 'selected' : '') ?>><?= htmlspecialchars($adm['adminname']) ?></option>
                         <?php endforeach; ?>
                     </select>
                     <select name="publisher_id" id="publisher_id_user" style="margin-top:7px;display:none;">
@@ -523,7 +523,7 @@ ORDER BY articles.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
                     </select>
                     <select name="edit_publisher_id" id="edit_publisher_id_admin" style="margin-top:7px;display:block;">
                         <?php foreach($all_admins as $adm): ?>
-                            <option value="<?= $adm['id'] ?>"><?= htmlspecialchars($adm['username']) ?></option>
+                            <option value="<?= $adm['id'] ?>"><?= htmlspecialchars($adm['adminname']) ?></option>
                         <?php endforeach; ?>
                     </select>
                     <select name="edit_publisher_id" id="edit_publisher_id_user" style="margin-top:7px;display:none;">

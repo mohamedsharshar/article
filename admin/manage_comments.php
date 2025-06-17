@@ -25,7 +25,14 @@ if (isset($_POST['delete_comment_id'])) {
 // جلب المقالات لاستخدامها في نموذج إضافة تعليق
 $articles_list = $pdo->query('SELECT id, title FROM articles ORDER BY created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
 
-$comments = $pdo->query("SELECT c.*, a.title, IF(is_admin=1,'مشرف','مستخدم') as author_type FROM comments c JOIN articles a ON c.article_id = a.id ORDER BY c.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+$comments = $pdo->query("SELECT c.*, a.title,
+    admins.adminname AS admin_name,
+    users.username AS user_name
+FROM comments c
+JOIN articles a ON c.article_id = a.id
+LEFT JOIN admins ON c.admin_id = admins.id
+LEFT JOIN users ON c.user_id = users.id
+ORDER BY c.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="ar">
@@ -415,7 +422,17 @@ $comments = $pdo->query("SELECT c.*, a.title, IF(is_admin=1,'مشرف','مستخ
             <tr>
                 <td><?= htmlspecialchars($comment['content']) ?></td>
                 <td><?= htmlspecialchars($comment['title']) ?></td>
-                <td><?= $comment['author_type'] ?></td>
+                <td>
+                    <?php
+                        if ($comment['is_admin'] == 1 && $comment['admin_name']) {
+                            echo htmlspecialchars($comment['admin_name']) . ' (أدمن)';
+                        } elseif ($comment['is_admin'] == 0 && $comment['user_name']) {
+                            echo htmlspecialchars($comment['user_name']) . ' (مستخدم)';
+                        } else {
+                            echo '-';
+                        }
+                    ?>
+                </td>
                 <td><?= htmlspecialchars($comment['created_at']) ?></td>
                 <td>
                     <button type="button" class="action-btn delete-btn" onclick="openDeleteCommentModal(<?= $comment['id'] ?>, '<?= htmlspecialchars(addslashes($comment['content'])) ?>')"><i class="fa fa-trash"></i></button>

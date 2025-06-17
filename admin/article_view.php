@@ -7,7 +7,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 }
 $id = intval($_GET['id']);
 // جلب المقال مع اسم الناشر الحقيقي
-$stmt = $pdo->prepare("SELECT articles.*, categories.name AS category_name, COALESCE(admins.username, users.username) AS author_name
+$stmt = $pdo->prepare("SELECT articles.*, categories.name AS category_name, COALESCE(admins.adminname, users.username) AS author_name
 FROM articles
 LEFT JOIN categories ON articles.category_id = categories.id
 LEFT JOIN admins ON articles.admin_id = admins.id

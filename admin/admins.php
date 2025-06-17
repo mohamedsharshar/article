@@ -8,7 +8,7 @@ function is_superadmin($admin) {
 // جلب بيانات الأدمن الحالي من السيشن
 function get_current_admin($pdo) {
     if (!isset($_SESSION['admin_username'])) return null;
-    $stmt = $pdo->prepare('SELECT * FROM admins WHERE username = ?');
+    $stmt = $pdo->prepare('SELECT * FROM admins WHERE adminname = ?');
     $stmt->execute([$_SESSION['admin_username']]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
@@ -389,7 +389,7 @@ $admins = $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll
         <tbody id="adminsTable">
             <?php foreach($admins as $admin): ?>
             <tr>
-                <td><?= htmlspecialchars($admin['username']) ?></td>
+                <td><?= htmlspecialchars($admin['adminname']) ?></td>
                 <td><?= htmlspecialchars($admin['email']) ?></td>
                 <td><?= htmlspecialchars($admin['created_at']) ?></td>
                 <td>
@@ -413,8 +413,8 @@ $admins = $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll
                             <i class="fa <?= $admin['is_active'] ? 'fa-user-slash' : 'fa-user-check' ?>"></i>
                         </button>
                     </form>
-                    <button class="action-btn edit-btn" onclick="openEditAdminModal(<?= $admin['id'] ?>, '<?= htmlspecialchars(addslashes($admin['username'])) ?>', '<?= htmlspecialchars(addslashes($admin['email'])) ?>')"><i class="fa fa-edit"></i></button>
-                    <button class="action-btn delete-btn" onclick="openDeleteAdminModal(<?= $admin['id'] ?>, '<?= htmlspecialchars(addslashes($admin['username'])) ?>')"><i class="fa fa-trash"></i></button>
+                    <button class="action-btn edit-btn" onclick="openEditAdminModal(<?= $admin['id'] ?>, '<?= htmlspecialchars(addslashes($admin['adminname'])) ?>', '<?= htmlspecialchars(addslashes($admin['email'])) ?>')"><i class="fa fa-edit"></i></button>
+                    <button class="action-btn delete-btn" onclick="openDeleteAdminModal(<?= $admin['id'] ?>, '<?= htmlspecialchars(addslashes($admin['adminname'])) ?>')"><i class="fa fa-trash"></i></button>
                     <button class="action-btn add-admin-btn" style="background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;padding:7px 16px;font-size:1rem;margin-right:6px;display:inline-flex;align-items:center;gap:5px;" onclick="document.querySelector('.add-admin-modal').classList.add('active')"><i class="fa fa-plus"></i> إضافة</button>
                 </td>
             </tr>
