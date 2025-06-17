@@ -561,6 +561,9 @@ body {
         <div class="nav-links">
           <a href="index.php" class="active">الرئيسية</a>
           <a href="#categories">التصنيفات</a>
+          <?php if (isset($_SESSION['user_id'])): ?>
+            <a href="add_article.php">إضافة مقال</a>
+          <?php endif; ?>
           <a href="#about">عن الموقع</a>
           <a href="#contact">تواصل</a>
         </div>

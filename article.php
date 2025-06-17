@@ -528,7 +528,7 @@ if (!empty($article['user_id'])) {
               $stmt = $pdo->prepare('SELECT username FROM users WHERE id = ?');
               $stmt->execute([$c['user_id']]);
               $u = $stmt->fetch(PDO::FETCH_ASSOC);
-              if ($u) $commentAuthor = $u['username'];
+              if ($u) $commentAuthor = $u['username'] . ' (مستخدم)';
             }
             echo '<li class="comment-item'.($isAdmin ? ' admin-comment' : '').'">'
               .'<div class="comment-content">'.nl2br(htmlspecialchars($c['content'])).'</div>'
