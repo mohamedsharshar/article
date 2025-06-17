@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'db.php';
+$error = '';
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $article = $pdo->prepare("SELECT * FROM articles WHERE id = ?");
 $article->execute([$id]);
@@ -24,6 +25,9 @@ if (!empty($article['user_id'])) {
     $a = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($a) $authorName = $a['username'];
 }
+
+// السماح فقط للمستخدم المسجل بإضافة تعليق
+$isUserLoggedIn = isset($_SESSION['user_id']);
 ?><!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -544,6 +548,7 @@ if (!empty($article['user_id'])) {
         ?>
         <hr style="margin:2.5rem 0 1.5rem 0;opacity:.13;">
         <h3 class="add-comment-title"><i class="fa fa-plus"></i> أضف تعليقك</h3>
+        <?php if ($isUserLoggedIn): ?>
         <form class="add-comment-form" method="post" action="" id="addCommentForm">
           <textarea name="user_comment" required placeholder="اكتب تعليقك هنا..." maxlength="500"></textarea>
           <button type="submit" class="add-comment-btn"><i class="fa fa-paper-plane"></i> إرسال</button>
@@ -581,6 +586,9 @@ if (!empty($article['user_id'])) {
           }
         });
         </script>
+        <?php else: ?>
+        <div style="color:#e63946;text-align:center;font-weight:bold;margin:1.5rem 0;">يجب تسجيل الدخول كـ مستخدم لإضافة تعليق.</div>
+        <?php endif; ?>
       </div>
     </div>
   </main>
