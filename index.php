@@ -757,9 +757,9 @@ body {
       <div class="footer-bottom">
         <p>&copy; <?php echo date("Y");?> مقالات. جميع الحقوق محفوظة.</p>
         <ul class="footer-links">
-          <li><a href="#">سياسة الخصوصية</a></li>
-          <li><a href="#">الشروط</a></li>
-          <li><a href="#">سياسة الكوكيز</a></li>
+          <li><a href="privacy.php">سياسة الخصوصية</a></li>
+          <li><a href="terms.php">الشروط</a></li>
+          <li><a href="cookies.php">سياسة الكوكيز</a></li>
         </ul>
       </div>
     </div>
