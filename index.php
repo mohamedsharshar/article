@@ -21,6 +21,7 @@ ORDER BY articles.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-ki8lwT3YlXkQ6p+2Q6lQwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6Qw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
 :root {
   --color-primary: #3B82F6;
@@ -656,10 +657,10 @@ body {
           <h3>مقالات</h3>
           <p>منصة عصرية لمقالات ملهمة ورؤى في التقنية، التصميم، وأكثر.</p>
           <div class="social-links">
-            <a href="#" aria-label="فيسبوك"><i class="fa fa-facebook"></i></a>
-            <a href="#" aria-label="تويتر"><i class="fa fa-twitter"></i></a>
-            <a href="#" aria-label="انستجرام"><i class="fa fa-instagram"></i></a>
-            <a href="#" aria-label="يوتيوب"><i class="fa fa-youtube"></i></a>
+            <a href="#" aria-label="فيسبوك"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="تويتر"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="انستجرام"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="يوتيوب"><i class="fab fa-youtube"></i></a>
           </div>
         </div>
         <div class="footer-nav">
@@ -695,7 +696,7 @@ body {
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2025 مقالات. جميع الحقوق محفوظة.</p>
+        <p>&copy; <?php echo date("Y");?> مقالات. جميع الحقوق محفوظة.</p>
         <ul class="footer-links">
           <li><a href="#">سياسة الخصوصية</a></li>
           <li><a href="#">الشروط</a></li>
