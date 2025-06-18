@@ -685,13 +685,14 @@ body {
         <div class="footer-subscribe">
           <h4>اشترك</h4>
           <p>اشترك في النشرة البريدية لأحدث المقالات والتحديثات.</p>
-          <form class="subscribe-form">
+          <form class="subscribe-form" id="footerSubscribeForm" onsubmit="return false;">
             <div class="input-group">
-              <input type="email" placeholder="بريدك الإلكتروني">
+              <input type="email" id="footerSubscribeEmail" placeholder="بريدك الإلكتروني" required>
               <button type="submit" aria-label="اشترك">
                 <i class="fa fa-envelope"></i>
               </button>
             </div>
+            <div id="footerSubscribeMsg" style="margin-top:0.7rem;font-size:1rem;"></div>
           </form>
         </div>
       </div>
@@ -979,6 +980,33 @@ body {
     // تفعيل البحث والفلترة عند التحميل
     renderFeatured();
     renderArticles();
+
+    // تفعيل نموذج الاشتراك في الفوتر
+    const footerSubscribeForm = document.getElementById('footerSubscribeForm');
+    if (footerSubscribeForm) {
+      footerSubscribeForm.onsubmit = async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('footerSubscribeEmail').value.trim();
+        const msg = document.getElementById('footerSubscribeMsg');
+        msg.textContent = 'جاري الإرسال...';
+        msg.style.color = '#3B82F6';
+        const res = await fetch('subscribe.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'email=' + encodeURIComponent(email)
+        });
+        let data = {};
+        try { data = await res.json(); } catch { data = { success: false, message: 'خطأ في الاتصال بالخادم.' }; }
+        if(data.success) {
+          msg.style.color = '#198754';
+          msg.textContent = `تم الاشتراك بنجاح بالبريد: ${email}`;
+          footerSubscribeForm.reset();
+        } else {
+          msg.style.color = '#e63946';
+          msg.textContent = data.message || 'حدث خطأ، حاول مرة أخرى.';
+        }
+      };
+    }
   </script>
 </body>
 </html>
