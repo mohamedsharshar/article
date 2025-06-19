@@ -199,9 +199,6 @@ $isUserLoggedIn = isset($_SESSION['user_id']);
       cursor: pointer;
       transition: color 0.2s;
       margin-right: 0.5rem;
-      position: absolute;
-      left: 1.2rem;
-      top: 1.2rem;
       z-index: 10;
     }
     html[data-theme="dark"] .theme-toggle,
@@ -218,11 +215,7 @@ $isUserLoggedIn = isset($_SESSION['user_id']);
       margin: 0 auto;
       padding: 0 1.2rem;
     }
-    .nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+  
     .logo {
       font-size: 1.5rem;
       font-weight: bold;
@@ -476,7 +469,8 @@ $isUserLoggedIn = isset($_SESSION['user_id']);
 </head>
 <body>
   <header class="header">
-    <div class="container">
+    <div class="container nav" style="display:flex;align-items:center;justify-content:space-between;">
+      <a href="index.php" class="logo" style="font-size:1.3rem;font-weight:bold;color:var(--color-primary);text-decoration:none;display:flex;align-items:center;gap:0.5em;"><i class="fa fa-home"></i> الرئيسية</a>
       <button class="theme-toggle" aria-label="تبديل الوضع" type="button"><i class="fa fa-moon"></i></button>
     </div>
   </header>

@@ -623,8 +623,8 @@ body {
           <?php if (isset($_SESSION['user_id'])): ?>
             <a href="add_article.php">إضافة مقال</a>
           <?php endif; ?>
-          <a href="#about">عن الموقع</a>
-          <a href="#contact">تواصل</a>
+          <a href="about.php">عن الموقع</a>
+          <a href="contact.php">تواصل</a>
         </div>
         <div class="nav-actions">
           
@@ -706,6 +706,8 @@ body {
         </article>
       </div>
     </section>
+
+   
   </main>
 
   <footer class="footer">
@@ -1065,6 +1067,18 @@ body {
         }
       };
     }
+
+    // تمرير سلس عند الضغط على الروابط
+const smoothLinks = document.querySelectorAll('a[href^="#about"],a[href^="#contact"]');
+smoothLinks.forEach(link => {
+  link.addEventListener('click', function(e) {
+    const target = document.querySelector(this.getAttribute('href'));
+    if(target) {
+      e.preventDefault();
+      target.scrollIntoView({behavior:'smooth'});
+    }
+  });
+});
   </script>
 </body>
 </html>
