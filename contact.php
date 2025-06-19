@@ -16,6 +16,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: background 0.2s, color 0.2s;
+    }
+    [data-theme="dark"] body {
+      background: linear-gradient(120deg, #0F172A 0%, #1E293B 100%) !important;
+      color: #fff !important;
     }
     .contact-section {
       background: #fff;
@@ -29,8 +34,15 @@
       flex-direction: column;
       align-items: center;
       gap: 1.2rem;
+      transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+    }
+    [data-theme="dark"] .contact-section {
+      background: #1E293B !important;
+      color: #fff !important;
+      box-shadow: 0 8px 32px #0008;
     }
     h1 { color: #3B82F6; margin-bottom: 1.5rem; }
+    [data-theme="dark"] h1 { color: #3B82F6; }
     .contact-section p {
       font-size: 1.1rem;
       margin-bottom: 1.2rem;
@@ -38,6 +50,7 @@
       line-height: 2.1;
       color: #334155;
     }
+    [data-theme="dark"] .contact-section p { color: #CBD5E1; }
     .contact-section form {
       margin-top: 1.5rem;
       max-width: 500px;
@@ -55,6 +68,12 @@
       background: #f8fafc;
       color: #222;
       resize: none;
+      transition: background 0.2s, color 0.2s, border 0.2s;
+    }
+    [data-theme="dark"] .contact-section input, [data-theme="dark"] .contact-section textarea {
+      background: #222e3a;
+      color: #fff;
+      border: 1px solid #334155;
     }
     .contact-section textarea { min-height: 90px; }
     .contact-section button {
@@ -82,14 +101,46 @@
 <body>
   <section class="contact-section">
     <h1>تواصل معنا</h1>
-    <p>لأي استفسار أو اقتراح أو شراكة، يمكنك التواصل معنا عبر البريد الإلكتروني: <a href="mailto:info@maqalat.com" style="color:#3B82F6;text-decoration:underline;">info@maqalat.com</a> أو عبر نموذج التواصل أدناه.</p>
-    <form>
-      <input type="text" placeholder="اسمك" required>
-      <input type="email" placeholder="بريدك الإلكتروني" required>
-      <textarea placeholder="رسالتك" required></textarea>
+    <p>لأي استفسار أو اقتراح أو شراكة، يمكنك التواصل معنا عبر البريد الإلكتروني: <a href="mailto:mmshsh05@gmail.com" style="color:#3B82F6;text-decoration:underline;">mmshsh05@gmail.com</a> أو عبر نموذج التواصل أدناه.</p>
+    <form id="contactForm">
+      <input type="text" name="name" placeholder="اسمك" required>
+      <input type="email" name="email" placeholder="بريدك الإلكتروني" required>
+      <textarea name="message" placeholder="رسالتك" required></textarea>
       <button type="submit">إرسال</button>
+      <div id="contactMsg" style="margin-top:1rem;font-size:1.05rem;"></div>
     </form>
     <a href="index.php" class="back-home-btn" style="display:inline-block;margin-top:1.5rem;color:#3B82F6;background:#F1F5F9;padding:10px 28px;border-radius:1rem;text-decoration:none;font-weight:bold;transition:background 0.2s;">&larr; العودة للرئيسية</a>
   </section>
+  <script>
+    // تفعيل الدارك مود تلقائياً حسب localStorage أو النظام
+    if(localStorage.getItem('darkMode') === '1' || (localStorage.getItem('darkMode') === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    // تفعيل إرسال النموذج عبر AJAX
+    const contactForm = document.getElementById('contactForm');
+    if(contactForm) {
+      contactForm.onsubmit = async function(e) {
+        e.preventDefault();
+        const formData = new FormData(contactForm);
+        const msg = document.getElementById('contactMsg');
+        msg.textContent = 'جاري الإرسال...';
+        msg.style.color = '#3B82F6';
+        const res = await fetch('send_contact.php', {
+          method: 'POST',
+          body: formData
+        });
+        let data = {};
+        try { data = await res.json(); } catch { data = { success: false, message: 'خطأ في الاتصال بالخادم.' }; }
+        if(data.success) {
+          msg.style.color = '#198754';
+          msg.textContent = 'تم إرسال رسالتك بنجاح! سيتم الرد عليك قريباً.';
+          contactForm.reset();
+        } else {
+          msg.style.color = '#e63946';
+          msg.textContent = data.message || 'حدث خطأ، حاول مرة أخرى.';
+        }
+      };
+    }
+  </script>
 </body>
 </html>
