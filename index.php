@@ -753,7 +753,7 @@ body {
                 <img src="<?= $article['image'] ? 'uploads/articles/' . htmlspecialchars($article['image']) : 'https://source.unsplash.com/400x200/?arabic,writing,' . urlencode($article['category_name'] ?? 'article') ?>" alt="صورة المقال" loading="lazy">
                 <?php if(isset($_SESSION['user_id'])): ?>
                   <button class="fav-btn" data-article-id="<?= $article['id'] ?>" aria-label="أضف للمفضلة" style="position:absolute;top:10px;left:10px;background:none;border:none;cursor:pointer;font-size:1.5rem;z-index:2;">
-                    <span class="fav-icon" style="color:<?= in_array($article['id'], $favIds) ? '#e63946' : '#aaa' ?>;font-size:1.5rem;">
+                    <span class="fav-icon" style="color:<?= in_array($article['id'], $favIds) ? '#e63946' : '#bbb' ?>;font-size:1.5rem;">
                       <?= in_array($article['id'], $favIds) ? '♥' : '♡' ?>
                     </span>
                   </button>
@@ -1050,7 +1050,7 @@ body {
       filtered.forEach(article => {
         const imgSrc = article.image ? `uploads/articles/${article.image}` : `https://source.unsplash.com/400x200/?arabic,writing,${encodeURIComponent(article.category_name || 'article')}`;
         const isFav = Array.isArray(window.favIds) && window.favIds.includes(article.id);
-        const favBtn = username ? `<button class=\"fav-btn\" data-article-id=\"${article.id}\" aria-label=\"أضف للمفضلة\" style=\"position:absolute;top:10px;left:10px;background:none;border:none;cursor:pointer;font-size:1.5rem;z-index:2;\"><span class="fav-icon" style="color:${isFav ? '#e63946' : '#aaa'};font-size:1.5rem;">${isFav ? '♥' : '♡'}</span></button>` : '';
+        const favBtn = username ? `<button class=\"fav-btn\" data-article-id=\"${article.id}\" aria-label=\"أضف للمفضلة\" style=\"position:absolute;top:10px;left:10px;background:none;border:none;cursor:pointer;font-size:1.5rem;z-index:2;\"><span class="fav-icon" style="color:${isFav ? '#e63946' : '#bbb'};font-size:1.5rem;">${isFav ? '♥' : '♡'}</span></button>` : '';
         const card = document.createElement('article');
         card.className = 'article-card';
         card.tabIndex = 0;
@@ -1174,7 +1174,7 @@ body {
             btn.setAttribute('aria-label', 'إزالة من المفضلة');
           } else {
             icon.textContent = '♡';
-            icon.style.color = 'inherit';
+            icon.style.color = '#bbb';
             btn.setAttribute('aria-label', 'أضف للمفضلة');
           }
         }
@@ -1185,7 +1185,7 @@ body {
           var isFav = icon.textContent === '♥';
           if (isFav) {
             icon.textContent = '♡';
-            icon.style.color = 'inherit';
+            icon.style.color = '#bbb';
             this.setAttribute('aria-label', 'أضف للمفضلة');
           } else {
             icon.textContent = '♥';
@@ -1202,8 +1202,10 @@ body {
             if (window.favIds) {
               if (data.status === 'added') {
                 if (!window.favIds.includes(Number(articleId))) window.favIds.push(Number(articleId));
+                updateFavIdsStorage();
               } else if (data.status === 'removed') {
                 window.favIds = window.favIds.filter(id => id !== Number(articleId));
+                updateFavIdsStorage();
                 if (window.location.pathname.includes('favorites.php')) {
                   var card = btn.closest('.article-card');
                   if (card) card.remove();
@@ -1219,6 +1221,27 @@ body {
       });
     }
     activateFavButtons();
+
+    // مزامنة حالة زر المفضلة بين الصفحة الرئيسية وصفحة المقال
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'favIdsSync') {
+        // إعادة تفعيل القلوب وتحديثها بناءً على window.favIds
+        if (window.favIds) {
+          try {
+            window.favIds = JSON.parse(localStorage.getItem('favIds') || '[]');
+          } catch { window.favIds = []; }
+        }
+        if (typeof activateFavButtons === 'function') activateFavButtons();
+      }
+    });
+
+    // تحديث localStorage عند تغيير المفضلة
+    function updateFavIdsStorage() {
+      try {
+        localStorage.setItem('favIds', JSON.stringify(window.favIds || []));
+        localStorage.setItem('favIdsSync', Date.now()); // trigger event
+      } catch {}
+    }
 
     // تمرير سلس عند الضغط على الروابط
 const smoothLinks = document.querySelectorAll('a[href^="#about"],a[href^="#contact"]');
