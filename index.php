@@ -25,6 +25,19 @@ if ($topRatedId) {
   $stmt->execute([$topRatedId]);
   $featured = $stmt->fetch(PDO::FETCH_ASSOC);
 }
+
+// قواعد (rules) بسيطة: لا تظهر المقالات المحذوفة أو الفارغة العنوان/المحتوى
+$articles = array_filter($articles, function($a) {
+    return !empty($a['title']) && !empty($a['content']);
+});
+// Pagination
+$perPage = 6;
+$totalArticles = count($articles);
+$totalPages = ceil($totalArticles / $perPage);
+$page = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? (int)$_GET['page'] : 1;
+if ($page > $totalPages) $page = $totalPages;
+$start = ($page - 1) * $perPage;
+$articlesPage = array_slice($articles, $start, $perPage);
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -692,9 +705,36 @@ body {
       <div class="container">
         <h2>أحدث المقالات</h2>
         <div class="grid" id="articles-container">
-          <!-- سيتم تعبئة المقالات عبر جافاسكريبت لاحقاً -->
+          <?php foreach($articlesPage as $article): ?>
+            <article class="article-card" tabindex="0" aria-label="مقال: <?= htmlspecialchars($article['title']) ?>" onclick="window.location.href='article.php?id=<?= $article['id'] ?>'">
+              <div class="article-image">
+                <img src="<?= $article['image'] ? 'uploads/articles/' . htmlspecialchars($article['image']) : 'https://source.unsplash.com/400x200/?arabic,writing,' . urlencode($article['category_name'] ?? 'article') ?>" alt="صورة المقال" loading="lazy">
+              </div>
+              <div class="article-content">
+                <h3><?= htmlspecialchars($article['title']) ?></h3>
+                <p><?= htmlspecialchars(mb_substr($article['content'],0,100)) ?><?= mb_strlen($article['content']) > 100 ? '...' : '' ?></p>
+                <div class="meta-info">
+                  <span><i class="fa fa-calendar-alt"></i> <?= htmlspecialchars(substr($article['created_at'],0,10)) ?></span>
+                  <?php if($article['category_name']): ?><span class="category-tag"> <?= htmlspecialchars($article['category_name']) ?> </span><?php endif; ?>
+                </div>
+              </div>
+            </article>
+          <?php endforeach; ?>
         </div>
-      </div>
+        <!-- Pagination -->
+        <?php if($totalPages > 1): ?>
+        <nav class="pagination" style="text-align:center;margin:2rem 0;">
+          <?php if($page > 1): ?>
+            <a href="?page=<?= $page-1 ?>" class="btn btn-outline">السابق</a>
+          <?php endif; ?>
+          <?php for($i=1;$i<=$totalPages;$i++): ?>
+            <a href="?page=<?= $i ?>" class="btn <?= $i==$page?'btn-primary':'btn-outline' ?>"><?= $i ?></a>
+          <?php endfor; ?>
+          <?php if($page < $totalPages): ?>
+            <a href="?page=<?= $page+1 ?>" class="btn btn-outline">التالي</a>
+          <?php endif; ?>
+        </nav>
+        <?php endif; ?>
     </section>
 
     <section class="featured-article">
