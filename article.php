@@ -28,6 +28,14 @@ if (!empty($article['user_id'])) {
 
 // السماح فقط للمستخدم المسجل بإضافة تعليق
 $isUserLoggedIn = isset($_SESSION['user_id']);
+
+// جلب حالة المفضلة لهذا المقال للمستخدم الحالي
+$isFavorite = false;
+if (isset($_SESSION['user_id'])) {
+    $stmt = $pdo->prepare('SELECT 1 FROM favorite_articles WHERE user_id = ? AND article_id = ?');
+    $stmt->execute([$_SESSION['user_id'], $article['id']]);
+    $isFavorite = $stmt->fetchColumn() ? true : false;
+}
 ?><!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -482,6 +490,13 @@ $isUserLoggedIn = isset($_SESSION['user_id']);
       ?>
       <div style="position:relative;">
         <img src="<?= $imgSrc ?>" alt="صورة المقال" class="article-page-image">
+        <?php if ($isUserLoggedIn): ?>
+          <button class="fav-btn" data-article-id="<?= $article['id'] ?>" aria-label="أضف للمفضلة" style="position:absolute;top:18px;left:18px;background:none;border:none;cursor:pointer;font-size:2rem;z-index:2;">
+            <span class="fav-icon" style="color:<?= $isFavorite ? '#e63946' : '#aaa' ?>;font-size:2rem;">
+              <?= $isFavorite ? '♥' : '♡' ?>
+            </span>
+          </button>
+        <?php endif; ?>
         <?php if (!empty($article['category'])): ?>
           <span class="category-tag" style="position:absolute;top:18px;right:18px;"> <?= htmlspecialchars($article['category']) ?> </span>
         <?php endif; ?>
@@ -742,6 +757,32 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   });
+  // تفعيل زر المفضلة للمقال المفرد
+  var favBtn = document.querySelector('.fav-btn');
+  if (favBtn) {
+    favBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var articleId = this.dataset.articleId;
+      var icon = this.querySelector('.fav-icon');
+      var isFav = icon.textContent === '♥';
+      // Toggle UI instantly
+      if (isFav) {
+        icon.textContent = '♡';
+        icon.style.color = '#aaa';
+        this.setAttribute('aria-label', 'أضف للمفضلة');
+      } else {
+        icon.textContent = '♥';
+        icon.style.color = '#e63946';
+        this.setAttribute('aria-label', 'إزالة من المفضلة');
+      }
+      // Send request in background
+      fetch('toggle_favorite.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'article_id=' + articleId
+      });
+    });
+  }
 });
   </script>
 </body>

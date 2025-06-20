@@ -38,6 +38,14 @@ $page = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ?
 if ($page > $totalPages) $page = $totalPages;
 $start = ($page - 1) * $perPage;
 $articlesPage = array_slice($articles, $start, $perPage);
+
+// جلب المقالات المفضلة للمستخدم الحالي (إن وجد)
+$favIds = [];
+if (isset($_SESSION['user_id'])) {
+  $stmt = $pdo->prepare('SELECT article_id FROM favorite_articles WHERE user_id = ?');
+  $stmt->execute([$_SESSION['user_id']]);
+  $favIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -49,7 +57,8 @@ $articlesPage = array_slice($articles, $start, $perPage);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-ki8lwT3YlXkQ6p+2Q6lQwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6QwQ6Qw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
 :root {
   --color-primary: #3B82F6;
@@ -707,8 +716,15 @@ body {
         <div class="grid" id="articles-container">
           <?php foreach($articlesPage as $article): ?>
             <article class="article-card" tabindex="0" aria-label="مقال: <?= htmlspecialchars($article['title']) ?>" onclick="window.location.href='article.php?id=<?= $article['id'] ?>'">
-              <div class="article-image">
+              <div class="article-image" style="position:relative;">
                 <img src="<?= $article['image'] ? 'uploads/articles/' . htmlspecialchars($article['image']) : 'https://source.unsplash.com/400x200/?arabic,writing,' . urlencode($article['category_name'] ?? 'article') ?>" alt="صورة المقال" loading="lazy">
+                <?php if(isset($_SESSION['user_id'])): ?>
+                  <button class="fav-btn" data-article-id="<?= $article['id'] ?>" aria-label="أضف للمفضلة" style="position:absolute;top:10px;left:10px;background:none;border:none;cursor:pointer;font-size:1.5rem;z-index:2;">
+                    <span class="fav-icon" style="color:<?= in_array($article['id'], $favIds) ? '#e63946' : '#aaa' ?>;font-size:1.5rem;">
+                      <?= in_array($article['id'], $favIds) ? '♥' : '♡' ?>
+                    </span>
+                  </button>
+                <?php endif; ?>
               </div>
               <div class="article-content">
                 <h3><?= htmlspecialchars($article['title']) ?></h3>
@@ -840,6 +856,7 @@ body {
           </button>
           <ul class="user-dropdown" id="userDropdown">
             <li><a href="profile.php"><i class="fa fa-user"></i> بروفايلي</a></li>
+            <li><a href="favorites.php"><i class="fa fa-heart"></i> المفضلة</a></li>
             <li><a href="#" id="logoutLink"><i class="fa fa-sign-out-alt"></i> تسجيل الخروج</a></li>
           </ul>
         </div>
@@ -884,18 +901,21 @@ body {
     if (menuToggle && navLinks) {
       menuToggle.addEventListener('click', function() {
         navLinks.classList.toggle('open');
-        menuToggle.querySelector('i').className = navLinks.classList.contains('open') ? 'fa fa-times' : 'fa fa-bars';
+        const icon = menuToggle.querySelector('i');
+        if (icon) icon.className = navLinks.classList.contains('open') ? 'fa fa-times' : 'fa fa-bars';
       });
       document.addEventListener('click', function(e) {
         if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
           navLinks.classList.remove('open');
-          menuToggle.querySelector('i').className = 'fa fa-bars';
+          const icon = menuToggle.querySelector('i');
+          if (icon) icon.className = 'fa fa-bars';
         }
       });
       navLinks.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
           navLinks.classList.remove('open');
-          menuToggle.querySelector('i').className = 'fa fa-bars';
+          const icon = menuToggle.querySelector('i');
+          if (icon) icon.className = 'fa fa-bars';
         });
       });
     }
@@ -996,26 +1016,30 @@ body {
       }
       filtered.forEach(article => {
         const imgSrc = article.image ? `uploads/articles/${article.image}` : `https://source.unsplash.com/400x200/?arabic,writing,${encodeURIComponent(article.category_name || 'article')}`;
+        const isFav = Array.isArray(window.favIds) && window.favIds.includes(article.id);
+        const favBtn = username ? `<button class=\"fav-btn\" data-article-id=\"${article.id}\" aria-label=\"أضف للمفضلة\" style=\"position:absolute;top:10px;left:10px;background:none;border:none;cursor:pointer;font-size:1.5rem;z-index:2;\"><span class="fav-icon" style="color:${isFav ? '#e63946' : '#aaa'};font-size:1.5rem;">${isFav ? '♥' : '♡'}</span></button>` : '';
         const card = document.createElement('article');
         card.className = 'article-card';
         card.tabIndex = 0;
         card.setAttribute('aria-label', 'مقال: ' + article.title);
         card.innerHTML = `
-          <div class="article-image">
-            <img src="${imgSrc}" alt="صورة المقال" loading="lazy">
+          <div class=\"article-image\">
+            <img src=\"${imgSrc}\" alt=\"صورة المقال\" loading=\"lazy\">
+            ${favBtn}
           </div>
-          <div class="article-content">
+          <div class=\"article-content\">
             <h3>${article.title}</h3>
             <p>${(article.content || '').substring(0, 100)}${(article.content && article.content.length > 100 ? '...' : '')}</p>
-            <div class="meta-info">
-              <span><i class="fa fa-calendar-alt"></i> ${article.created_at.split(' ')[0]}</span>
-              ${article.category_name ? `<span class="category-tag">${article.category_name}</span>` : ''}
+            <div class=\"meta-info\">
+              <span><i class=\"fa fa-calendar-alt\"></i> ${article.created_at.split(' ')[0]}</span>
+              ${article.category_name ? `<span class=\"category-tag\">${article.category_name}</span>` : ''}
             </div>
           </div>
         `;
         card.onclick = () => window.location.href = `article.php?id=${article.id}`;
         grid.appendChild(card);
       });
+      activateFavButtons();
     }
 
     // تفعيل المقال المميز ديناميكياً
@@ -1098,36 +1122,70 @@ body {
       themeToggle.innerHTML = isDark ? '<i class="fa fa-moon"></i>' : '<i class="fa fa-sun"></i>';
     };
 
-    // تفعيل البحث والفلترة عند التحميل
-    renderFeatured();
-    renderArticles();
+    // تمرير favIds من PHP إلى جافاسكريبت لاستخدامها في تلوين القلوب
+    window.favIds = <?php echo json_encode($favIds); ?>;
 
-    // تفعيل نموذج الاشتراك في الفوتر
-    const footerSubscribeForm = document.getElementById('footerSubscribeForm');
-    if (footerSubscribeForm) {
-      footerSubscribeForm.onsubmit = async function(e) {
-        e.preventDefault();
-        const email = document.getElementById('footerSubscribeEmail').value.trim();
-        const msg = document.getElementById('footerSubscribeMsg');
-        msg.textContent = 'جاري الإرسال...';
-        msg.style.color = '#3B82F6';
-        const res = await fetch('subscribe.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: 'email=' + encodeURIComponent(email)
-        });
-        let data = {};
-        try { data = await res.json(); } catch { data = { success: false, message: 'خطأ في الاتصال بالخادم.' }; }
-        if(data.success) {
-          msg.style.color = '#198754';
-          msg.textContent = `تم الاشتراك بنجاح بالبريد: ${email}`;
-          footerSubscribeForm.reset();
-        } else {
-          msg.style.color = '#e63946';
-          msg.textContent = data.message || 'حدث خطأ، حاول مرة أخرى.';
+    // تفعيل زر المفضلة لجميع المقالات في الصفحة الرئيسية
+    function activateFavButtons() {
+      document.querySelectorAll('.fav-btn').forEach(function(btn) {
+        btn.replaceWith(btn.cloneNode(true));
+      });
+      document.querySelectorAll('.fav-btn').forEach(function(btn) {
+        var icon = btn.querySelector('.fav-icon');
+        var articleId = btn.dataset.articleId;
+        // عند تحميل الصفحة: إذا المقال في المفضلة يكون القلب أحمر، غير ذلك بدون لون
+        if (icon) {
+          if (window.favIds && window.favIds.includes(Number(articleId))) {
+            icon.textContent = '♥';
+            icon.style.color = '#e63946';
+            btn.setAttribute('aria-label', 'إزالة من المفضلة');
+          } else {
+            icon.textContent = '♡';
+            icon.style.color = 'inherit';
+            btn.setAttribute('aria-label', 'أضف للمفضلة');
+          }
         }
-      };
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          var icon = this.querySelector('.fav-icon');
+          var articleId = this.dataset.articleId;
+          var isFav = icon.textContent === '♥';
+          if (isFav) {
+            icon.textContent = '♡';
+            icon.style.color = 'inherit';
+            this.setAttribute('aria-label', 'أضف للمفضلة');
+          } else {
+            icon.textContent = '♥';
+            icon.style.color = '#e63946';
+            this.setAttribute('aria-label', 'إزالة من المفضلة');
+          }
+          fetch('toggle_favorite.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'article_id=' + articleId
+          })
+          .then(r=>r.json())
+          .then(data => {
+            if (window.favIds) {
+              if (data.status === 'added') {
+                if (!window.favIds.includes(Number(articleId))) window.favIds.push(Number(articleId));
+              } else if (data.status === 'removed') {
+                window.favIds = window.favIds.filter(id => id !== Number(articleId));
+                if (window.location.pathname.includes('favorites.php')) {
+                  var card = btn.closest('.article-card');
+                  if (card) card.remove();
+                  if (document.querySelectorAll('.article-card').length === 0) {
+                    var grid = document.getElementById('articles-container');
+                    if (grid) grid.innerHTML = '<div class="no-articles">لا توجد مقالات مفضلة.</div>';
+                  }
+                }
+              }
+            }
+          });
+        };
+      });
     }
+    activateFavButtons();
 
     // تمرير سلس عند الضغط على الروابط
 const smoothLinks = document.querySelectorAll('a[href^="#about"],a[href^="#contact"]');
@@ -1139,6 +1197,10 @@ smoothLinks.forEach(link => {
       target.scrollIntoView({behavior:'smooth'});
     }
   });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  activateFavButtons();
 });
   </script>
 </body>
