@@ -584,6 +584,39 @@ body {
   list-style: none;
 }
 
+/* Pagination Custom Style */
+.pagination-custom {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 2rem 0;
+}
+.pagination-custom .page-link {
+  background: linear-gradient(90deg, #60A5FA 0%, #3B82F6 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5em 1.2em;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 2px 8px #60A5FA22;
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+  text-decoration: none;
+  cursor: pointer;
+}
+.pagination-custom .page-link.active,
+.pagination-custom .page-link:hover {
+  background: linear-gradient(90deg, #3B82F6 0%, #60A5FA 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px #3B82F622;
+}
+@media (max-width: 600px) {
+  .pagination-custom .page-link {
+    font-size: 0.95rem;
+    padding: 0.4em 0.7em;
+  }
+}
+
 /* Dark Mode */
 [data-theme="dark"] {
   --color-primary: #60A5FA;
@@ -739,15 +772,15 @@ body {
         </div>
         <!-- Pagination -->
         <?php if($totalPages > 1): ?>
-        <nav class="pagination" style="text-align:center;margin:2rem 0;">
+        <nav class="pagination-custom">
           <?php if($page > 1): ?>
-            <a href="?page=<?= $page-1 ?>" class="btn btn-outline">السابق</a>
+            <a href="?page=<?= $page-1 ?>" class="page-link">السابق</a>
           <?php endif; ?>
           <?php for($i=1;$i<=$totalPages;$i++): ?>
-            <a href="?page=<?= $i ?>" class="btn <?= $i==$page?'btn-primary':'btn-outline' ?>"><?= $i ?></a>
+            <a href="?page=<?= $i ?>" class="page-link <?= $i==$page?'active':'' ?>"><?= $i ?></a>
           <?php endfor; ?>
           <?php if($page < $totalPages): ?>
-            <a href="?page=<?= $page+1 ?>" class="btn btn-outline">التالي</a>
+            <a href="?page=<?= $page+1 ?>" class="page-link">التالي</a>
           <?php endif; ?>
         </nav>
         <?php endif; ?>

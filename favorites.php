@@ -69,7 +69,7 @@ $favorites = $stmt->fetchAll(PDO::FETCH_ASSOC);
         grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
         gap: 2rem;
         max-width: 1000px;
-        margin: 0 auto 2.5rem auto;
+        margin:   auto;
         padding: 0 1rem;
     }
     .favorite-card {
@@ -181,6 +181,25 @@ $favorites = $stmt->fetchAll(PDO::FETCH_ASSOC);
     html[data-theme="dark"] .favorites-header h2 {
         color: #60A5FA !important;
     }
+    html[data-theme="dark"] .favorites-header .btn {
+        background: linear-gradient(90deg, #4262ed 0%, #3a86ff 100%) !important;
+        color: #fff !important;
+    }
+    html[data-theme="dark"] .favorite-card .fav-heart {
+        background: #1E293B !important;
+        color: #e63946 !important;
+        box-shadow: 0 2px 8px #e6394622;
+    }
+    html[data-theme="dark"] .favorite-card .favorite-thumb {
+        box-shadow: 0 2px 12px #000a;
+    }
+    html[data-theme="dark"] .favorite-card .read-more {
+        background: #4262ed !important;
+        color: #fff !important;
+    }
+    html[data-theme="dark"] .favorite-card .read-more:hover {
+        background: #3a86ff !important;
+    }
     </style>
 </head>
 <body class="favorites-page">
@@ -194,9 +213,11 @@ $favorites = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php else: ?>
             <?php foreach ($favorites as $article): ?>
                 <div class="favorite-card">
-                    <span class="fav-heart"><i class="fa fa-heart"></i></span>
+                    <span class="fav-heart">♥</span>
                     <?php if (!empty($article['image'])): ?>
-                        <img src="<?= htmlspecialchars($article['image']) ?>" alt="صورة المقال" class="favorite-thumb">
+                        <img src="<?= (strpos($article['image'], 'uploads/') === 0 ? '' : 'uploads/articles/') . htmlspecialchars($article['image']) ?>" alt="صورة المقال" class="favorite-thumb">
+                    <?php else: ?>
+                        <img src="https://source.unsplash.com/400x200/?arabic,writing,article" alt="صورة المقال" class="favorite-thumb">
                     <?php endif; ?>
                     <h3><?= htmlspecialchars($article['title']) ?></h3>
                     <p class="article-excerpt">
@@ -207,5 +228,20 @@ $favorites = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
+    <script>
+    // تفعيل الدارك مود تلقائياً حسب تفضيل المستخدم
+    (function() {
+      let darkPref = localStorage.getItem('darkMode');
+      if (darkPref === null) {
+        if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } else if (darkPref === '1') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+    })();
+    </script>
 </body>
 </html>
