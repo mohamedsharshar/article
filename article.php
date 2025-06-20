@@ -491,6 +491,114 @@ $isUserLoggedIn = isset($_SESSION['user_id']);
         <span><i class="fa fa-calendar-alt"></i> <?= htmlspecialchars(substr($article['created_at'],0,10)) ?></span>
         <span><i class="fa fa-user"></i> <?= htmlspecialchars($authorName) ?></span>
       </div>
+      <!-- نظام تقييم المقال -->
+      <div class="article-rating-section" style="margin-bottom:1.5rem;">
+        <div id="articleRatingDisplay" style="font-size:1.15rem;margin-bottom:0.5rem;"></div>
+        <?php if ($isUserLoggedIn): ?>
+        <div id="userRatingInfo" style="margin-bottom:0.3rem;font-size:1rem;color:#3B82F6;"></div>
+        <div id="userRatingStars" style="direction:ltr;text-align:right;"></div>
+        <div id="ratingMsg" style="font-size:1rem;margin-top:0.3rem;"></div>
+        <script>
+<?php if ($isUserLoggedIn): ?>
+document.addEventListener('DOMContentLoaded', function() {
+  let userRating = 0;
+  let rated = false;
+  // جلب تقييم المستخدم الحالي
+  function fetchUserRating() {
+    fetch('rate_article.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'article_id=<?= $article['id'] ?>&get_user=1'
+    })
+    .then(r=>r.json()).then(function(data) {
+      userRating = data && data.user_rating ? parseInt(data.user_rating) : 0;
+      renderUserStars();
+      if(userRating > 0) {
+        document.getElementById('userRatingInfo').innerHTML = `تقييمك: <span style="color:#fbbf24;font-size:1.2rem;">${'★'.repeat(userRating)}${'☆'.repeat(5-userRating)}</span> (${userRating} من 5)`;
+        rated = true;
+      } else {
+        document.getElementById('userRatingInfo').innerHTML = '';
+        rated = false;
+      }
+    });
+  }
+  function renderUserStars() {
+    const container = document.getElementById('userRatingStars');
+    container.innerHTML = '';
+    for(let i=5;i>=1;i--) {
+      const star = document.createElement('span');
+      star.className = 'star';
+      star.dataset.value = i;
+      star.style.fontSize = '2rem';
+      star.style.cursor = rated ? 'not-allowed' : 'pointer';
+      star.style.color = i <= userRating ? '#fbbf24' : '#ccc';
+      star.textContent = '★';
+      if(!rated) {
+        star.addEventListener('mouseenter', function() {
+          highlightStars(i);
+        });
+        star.addEventListener('mouseleave', function() {
+          highlightStars(userRating);
+        });
+        star.addEventListener('click', function() {
+          if(rated) return;
+          rateArticle(i);
+        });
+      }
+      container.appendChild(star);
+    }
+  }
+  function highlightStars(val) {
+    document.querySelectorAll('#userRatingStars .star').forEach(s => {
+      s.style.color = parseInt(s.dataset.value) <= val ? '#fbbf24' : '#ccc';
+    });
+  }
+  function rateArticle(val) {
+    fetch('rate_article.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `article_id=<?= $article['id'] ?>&rating=${val}`
+    })
+    .then(r=>r.json()).then(function(data) {
+      if(data.success) {
+        userRating = val;
+        rated = true;
+        renderUserStars();
+        document.getElementById('userRatingInfo').innerHTML = `تقييمك: <span style=\"color:#fbbf24;font-size:1.2rem;\">${'★'.repeat(userRating)}${'☆'.repeat(5-userRating)}</span> (${userRating} من 5)`;
+        document.getElementById('ratingMsg').textContent = 'تم تسجيل تقييمك بنجاح.';
+        fetchRating();
+      } else {
+        document.getElementById('ratingMsg').textContent = data.message || 'حدث خطأ.';
+      }
+    });
+  }
+  fetchUserRating();
+  // تحديث التقييم العام
+  function fetchRating() {
+    fetch('rate_article.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'article_id=<?= $article['id'] ?>'
+    })
+    .then(r=>r.json()).then(function(data) {
+      if(data && data.avg_rating !== undefined) {
+        document.getElementById('articleRatingDisplay').innerHTML = `
+          <span style=\"color:#fbbf24;font-size:1.3rem;\">${'★'.repeat(Math.round(data.avg_rating))}${'☆'.repeat(5-Math.round(data.avg_rating))}</span>
+          <span style=\"color:#555;font-size:1rem;\">(${data.avg_rating} من 5 - ${data.total_ratings} تقييم)</span>
+        `;
+      } else {
+        document.getElementById('articleRatingDisplay').innerHTML = 'لم يتم تقييم هذا المقال بعد.';
+      }
+    });
+  }
+  fetchRating();
+});
+<?php endif; ?>
+        </script>
+        <?php else: ?>
+        <div style="color:#e63946;font-size:1rem;">سجّل الدخول لتقييم المقال.</div>
+        <?php endif; ?>
+      </div>
       <div class="article-page-content">
         <?= nl2br(htmlspecialchars($article['content'])) ?>
       </div>
@@ -586,5 +694,55 @@ $isUserLoggedIn = isset($_SESSION['user_id']);
       </div>
     </div>
   </main>
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // جلب متوسط التقييم وعدد التقييمات
+  function fetchRating() {
+    fetch('rate_article.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'article_id=<?= $article['id'] ?>'
+    })
+    .then(r=>r.json()).then(data => {
+      if(data && data.avg_rating !== undefined) {
+        document.getElementById('articleRatingDisplay').innerHTML = `
+          <span style="color:#fbbf24;font-size:1.3rem;">${'★'.repeat(Math.round(data.avg_rating))}${'☆'.repeat(5-Math.round(data.avg_rating))}</span>
+          <span style="color:#555;font-size:1rem;">(${data.avg_rating} من 5 - ${data.total_ratings} تقييم)</span>
+        `;
+      } else {
+        document.getElementById('articleRatingDisplay').innerHTML = 'لم يتم تقييم هذا المقال بعد.';
+      }
+    });
+  }
+  fetchRating();
+  // تفعيل التقييم للمستخدم
+  const stars = document.querySelectorAll('#userRatingStars .star');
+  stars.forEach(star => {
+    star.addEventListener('mouseenter', function() {
+      const val = parseInt(this.dataset.value);
+      stars.forEach(s => s.style.color = parseInt(s.dataset.value) <= val ? '#fbbf24' : '#ccc');
+    });
+    star.addEventListener('mouseleave', function() {
+      stars.forEach(s => s.style.color = '#ccc');
+    });
+    star.addEventListener('click', function() {
+      const val = parseInt(this.dataset.value);
+      fetch('rate_article.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `article_id=<?= $article['id'] ?>&rating=${val}`
+      })
+      .then(r=>r.json()).then(data => {
+        if(data.success) {
+          document.getElementById('ratingMsg').textContent = 'تم تسجيل تقييمك بنجاح.';
+          fetchRating();
+        } else {
+          document.getElementById('ratingMsg').textContent = data.message || 'حدث خطأ.';
+        }
+      });
+    });
+  });
+});
+  </script>
 </body>
 </html>

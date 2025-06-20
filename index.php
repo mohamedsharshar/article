@@ -10,6 +10,21 @@ LEFT JOIN categories ON articles.category_id = categories.id
 LEFT JOIN admins ON articles.admin_id = admins.id
 LEFT JOIN users ON articles.user_id = users.id
 ORDER BY articles.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+// جلب المقال الأعلى تقييماً بناءً على جدول article_ratings فقط
+$topRatedId = $pdo->query("SELECT article_id FROM article_ratings GROUP BY article_id HAVING COUNT(*) > 0 ORDER BY AVG(rating) DESC, COUNT(*) DESC LIMIT 1")->fetchColumn();
+$featured = null;
+if ($topRatedId) {
+  $stmt = $pdo->prepare("SELECT a.*, categories.name AS category_name, COALESCE(admins.adminname, users.username) AS author_name,
+    (SELECT AVG(rating) FROM article_ratings WHERE article_id = a.id) as avg_rating,
+    (SELECT COUNT(*) FROM article_ratings WHERE article_id = a.id) as total_ratings
+    FROM articles a
+    LEFT JOIN categories ON a.category_id = categories.id
+    LEFT JOIN admins ON a.admin_id = admins.id
+    LEFT JOIN users ON a.user_id = users.id
+    WHERE a.id = ? LIMIT 1");
+  $stmt->execute([$topRatedId]);
+  $featured = $stmt->fetch(PDO::FETCH_ASSOC);
+}
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -625,6 +640,7 @@ body {
           <?php endif; ?>
           <a href="about.php">عن الموقع</a>
           <a href="contact.php">تواصل</a>
+          <a href="top_rated_articles.php">الأعلى تقييماً</a>
         </div>
         <div class="nav-actions">
           
@@ -684,26 +700,31 @@ body {
     <section class="featured-article">
       <div class="container">
         <h2>مقال مميز</h2>
+        <?php if ($featured): ?>
         <article class="featured-card">
           <div class="featured-image">
-            <img src="https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg" alt="مستقبل تطوير الويب">
+            <img src="<?= $featured['image'] ? 'uploads/articles/' . htmlspecialchars($featured['image']) : 'https://source.unsplash.com/900x400/?arabic,writing,' . urlencode($featured['category_name'] ?? 'article') ?>" alt="صورة المقال المميز" loading="lazy">
             <div class="featured-content">
-              <span class="category-tag">تقنية</span>
-              <h3>مستقبل تطوير الويب</h3>
-              <p>استكشاف الاتجاهات والتقنيات الناشئة التي تشكل مستقبل تطوير الويب.</p>
+              <?php if ($featured['category_name']): ?><span class="category-tag"><?= htmlspecialchars($featured['category_name']) ?></span><?php endif; ?>
+              <h3><?= htmlspecialchars($featured['title']) ?></h3>
+              <p><?= htmlspecialchars(mb_substr($featured['content'],0,120)) ?><?= mb_strlen($featured['content']) > 120 ? '...' : '' ?></p>
               <div class="article-meta">
                 <div class="author">
-                  <img src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg" alt="أحمد علي">
-                  <span>أحمد علي</span>
+                  <i class="fa fa-user"></i>
+                  <span><?= htmlspecialchars($featured['author_name'] ?: 'مجهول') ?></span>
                 </div>
                 <div class="meta-info">
-                  <span><i class="fa fa-calendar"></i>15 مايو 2025</span>
-                  <span><i class="fa fa-clock"></i>6 دقائق قراءة</span>
+                  <span><i class="fa fa-calendar"></i><?= htmlspecialchars(substr($featured['created_at'],0,10)) ?></span>
+                  <span><i class="fa fa-star" style="color:#fbbf24;"></i> <?= number_format($featured['avg_rating'],2) ?> (<?= $featured['total_ratings'] ?> تقييم)</span>
                 </div>
               </div>
+              <a href="article.php?id=<?= $featured['id'] ?>" class="btn btn-primary" style="margin-top:1rem;">اقرأ المزيد</a>
             </div>
           </div>
         </article>
+        <?php else: ?>
+        <div style="text-align:center;color:#888;">لا يوجد مقال مميز بعد.</div>
+        <?php endif; ?>
       </div>
     </section>
 
