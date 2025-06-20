@@ -27,193 +27,229 @@ $latest_articles = $pdo->query('SELECT * FROM articles ORDER BY created_at DESC 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        body, html {
-            font-family: 'Cairo', Tahoma, Arial, sans-serif;
-            background: #f7f8fa;
-            margin: 0;
-            padding: 0;
-            direction: rtl;
-        }
-        .dashboard {
-            min-height: 100vh;
-            background: #f7f8fa;            
-            position: relative;
-            transition: margin-inline-end 0.3s;
-        }
-        @media (max-width: 1100px) {
-            .dashboard {
-                margin-right: 0 !important;
-            }
-        }
-        .dashboard-header {
-            background: #fff;
-            box-shadow: 0 2px 8px #0001;
-            padding: 1.5rem 2rem 1rem 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .dashboard-header h1 {
-            margin: 0;
-            font-size: 2.2rem;
-            color: #2d3a4b;
-            font-weight: bold;
-        }
-        nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 1rem 0;
-            display: flex;
-            gap: 1.5rem;
-        }
-        nav ul li a {
-            color: #4e73df;
-            text-decoration: none;
-            font-weight: 500;
-            padding: 0.3rem 1rem;
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
-        nav ul li a.active, nav ul li a:hover {
-            background: #e9f0fb;
-        }
-        .dashboard-actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
-        }
-        .dashboard-action-btn {
-            background: #fff;
-            color: #2d3a4b;
-            border: 1px solid #e3e6f0;
-            border-radius: 8px;
-            padding: 0.7rem 1.2rem;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 1px 4px #0001;
-            transition: background 0.2s, color 0.2s;
-        }
-        .dashboard-action-btn:hover {
-            background: #4e73df;
-            color: #fff;
-        }
-        .main-content {
-            padding: 2rem 2.5vw 1rem 2.5vw;
-            margin-right: 0;
-            max-width: 1100px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        @media (max-width: 900px) {
-            .main-content {
-                padding: 1rem 1vw;
-                margin-right: 0 !important;
-                margin-left: 0 !important;
-                max-width: 100vw;
-            }
-        }
-        .dashboard-title {
-            font-size: 2rem;
-            color: #2d3a4b;
-            margin-bottom: 2rem;
-            font-weight: bold;
-        }
-        .stats-cards {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px #0001;
-            padding: 1.5rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 1.2rem;
-            min-width: 220px;
-            flex: 1 1 220px;
-            margin-bottom: 1rem;
-        }
-        .stat-card i {
-            font-size: 2.5rem;
-            color: #4e73df;
-        }
-        .stat-card span {
-            color: #888;
-            font-size: 1.1rem;
-        }
-        .stat-card h2 {
-            margin: 0;
-            font-size: 2.1rem;
-            color: #2d3a4b;
-            font-weight: bold;
-        }
-        .charts-section {
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 4px 24px #4262ed14;
-            padding: 2.5rem 2rem 2.5rem 2rem;
-            margin-top: 2.5rem;
-            max-width: 800px;
-            margin-right: auto;
-            margin-left: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2.5rem;
-        }
-        .charts-section h2 {
-            text-align: center;
-            color: #4262ed;
-            font-size: 1.25rem;
-            font-weight: bold;
-            margin-bottom: 18px;
-            margin-top: 0;
-            letter-spacing: 0.01em;
-        }
-        .charts-section canvas {
-            background: #f8fafc;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px #4262ed0a;
-            margin-bottom: 0;
-            max-width: 100%;
-        }
-        .charts-section hr {
-            width: 80%;
-            border: none;
-            border-top: 1.5px solid #e3e6f0;
-            margin: 32px 0 24px 0;
-        }
-        @media (max-width: 700px) {
-            .charts-section {
-                padding: 1rem 0.5rem;
-                max-width: 100vw;
-            }
-        }
-        @media (max-width: 900px) {
-            .stats-cards {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            .main-content {
-                padding: 1rem 1vw;
-            }
-        }
-        @media (max-width: 600px) {
-            .dashboard-header, .main-content, .charts-section {
-                padding: 1rem 0.5rem;
-            }
-            .stat-card {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
-        }
+body {
+    direction: rtl;
+    font-family: 'Cairo', Arial, sans-serif;
+    background: #f8fafc;
+}
+.dashboard {
+    max-width: 1200px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(67,97,238,0.13);
+    padding: 0;
+    overflow: hidden;
+    display: block;
+    min-height: 80vh;
+}
+.dashboard-header {
+    background: linear-gradient(90deg, #3a86ff 0%, #4361ee 100%);
+    color: #fff;
+    padding: 32px 32px 16px 32px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+    box-shadow: 0 2px 12px rgba(67,97,238,0.08);
+}
+.dashboard-header h1 {
+    margin: 0 0 12px 0;
+    font-size: 2.2rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: fadeInDown 1s;
+}
+.dashboard-header nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 18px;
+}
+.dashboard-header nav ul li a {
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 6px 18px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    font-size: 1.08rem;
+    display: inline-block;
+}
+.dashboard-header nav ul li a.active,
+.dashboard-header nav ul li a:hover {
+    background: #4361ee;
+    color: #fff;
+}
+.main-content {
+    flex: 1;
+    padding: 40px 40px 32px 40px;
+    background: #f8fafc;
+    min-height: 80vh;
+    animation: fadeIn 1.2s;
+    margin-right: 0;
+}
+.dashboard-title {
+    color: #2d3142;
+    margin-bottom: 32px;
+    font-size: 2.2rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.stats-cards {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+.stat-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(67,97,238,0.07);
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-width: 200px;
+    flex: 1;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    animation: fadeInUp 1s;
+}
+.stat-card:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 8px 32px rgba(67,97,238,0.13);
+    background: #e2eafc;
+}
+.stat-card i {
+    font-size: 2.5rem;
+    color: #3a86ff;
+    animation: bounceIn 1.2s;
+}
+.stat-card span {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+.stat-card h2 {
+    margin: 0;
+    color: #2d3142;
+    font-size: 2rem;
+}
+.charts-section {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(67,97,238,0.07);
+    padding: 24px;
+    margin-top: 24px;
+    animation: fadeIn 1.2s;
+}
+.dashboard-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+.dashboard-action-btn {
+    background: #fff;
+    color: #3a86ff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-weight: bold;
+    font-size: 1rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(67,97,238,0.07);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.dashboard-action-btn:hover {
+    background: #4361ee;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(67,97,238,0.13);
+}
+[data-theme="dark"] body,
+[data-theme="dark"] html {
+    background: #0f172a !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .dashboard {
+    background: #1e293b !important;
+    color: #fff !important;
+    box-shadow: 0 8px 32px #0004 !important;
+}
+[data-theme="dark"] .dashboard-header {
+    background: #1e293b !important;
+    color: #fff !important;
+    box-shadow: 0 2px 12px #0006 !important;
+}
+[data-theme="dark"] .dashboard-header nav ul li a {
+    color: #fff !important;
+}
+[data-theme="dark"] .dashboard-header nav ul li a.active,
+[data-theme="dark"] .dashboard-header nav ul li a:hover {
+    background: #0f172a !important;
+    color: #60a5fa !important;
+}
+[data-theme="dark"] .stat-card {
+    background: #1e293b !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px #0006 !important;
+}
+[data-theme="dark"] .stat-card i {
+    color: #60a5fa !important;
+}
+[data-theme="dark"] .stat-card span {
+    color: #b0b8c9 !important;
+}
+[data-theme="dark"] .stat-card h2 {
+    color: #fff !important;
+}
+[data-theme="dark"] .charts-section {
+    background: #1e293b !important;
+    color: #fff !important;
+    box-shadow: 0 4px 24px #0006 !important;
+}
+[data-theme="dark"] .charts-section h2 {
+    color: #60a5fa !important;
+}
+[data-theme="dark"] .charts-section canvas {
+    background: #0f172a !important;
+}
+[data-theme="dark"] .dashboard-action-btn {
+    background: #1e293b !important;
+    color: #fff !important;
+    border-color: #232a36 !important;
+}
+[data-theme="dark"] .dashboard-action-btn:hover {
+    background: #60a5fa !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .dashboard-title {
+    color: #fff !important;
+}
+[data-theme="dark"] .main-content {
+    background: #1e293b !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .sidebar {
+    background: #1e293b !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px #0006 !important;
+}
+[data-theme="dark"] nav ul li a {
+    color: #fff !important;
+}
+[data-theme="dark"] nav ul li a.active,
+[data-theme="dark"] nav ul li a:hover {
+    background: #0f172a !important;
+    color: #60a5fa !important;
+}
     </style>
 </head>
 
@@ -276,7 +312,7 @@ $latest_articles = $pdo->query('SELECT * FROM articles ORDER BY created_at DESC 
         <canvas id="commentsChart"></canvas>
     </div>
 </main>
-
+<button id="themeToggle" aria-label="تبديل الوضع" style="position:absolute;left:2rem;top:1.5rem;background:none;border:none;cursor:pointer;font-size:1.5rem;z-index:10;"><i class="fa fa-moon"></i></button>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -340,6 +376,30 @@ fetch('api_comments_stats.php')
       }
     });
   });
+    // نظام الوضع الليلي للوحة التحكم
+    function setDarkMode(on) {
+      if(on) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('adminDarkMode', '1');
+        document.getElementById('themeToggle').innerHTML = '<i class="fa fa-sun"></i>';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('adminDarkMode', '0');
+        document.getElementById('themeToggle').innerHTML = '<i class="fa fa-moon"></i>';
+      }
+    }
+    const themeToggle = document.getElementById('themeToggle');
+    if(localStorage.getItem('adminDarkMode') === null) {
+      setDarkMode(false);
+    } else if(localStorage.getItem('adminDarkMode') === '1') {
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+    themeToggle.onclick = function() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      setDarkMode(!isDark);
+    };
 </script>
 </body>
 

@@ -396,3 +396,74 @@ body {
         font-size: 1.3rem;
     }
 }
+[data-theme="dark"] body,
+[data-theme="dark"] html {
+    background: #0f172a !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .dashboard {
+    background: #1e293b !important;
+    color: #fff !important;
+    box-shadow: 0 8px 32px #0004 !important;
+}
+[data-theme="dark"] .dashboard-header {
+    background: #1e293b !important;
+    color: #fff !important;
+    box-shadow: 0 2px 12px #0006 !important;
+}
+[data-theme="dark"] .dashboard-header nav ul li a {
+    color: #fff !important;
+}
+[data-theme="dark"] .dashboard-header nav ul li a.active,
+[data-theme="dark"] .dashboard-header nav ul li a:hover {
+    background: #0f172a !important;
+    color: #60a5fa !important;
+}
+[data-theme="dark"] .stat-card {
+    background: #1e293b !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px #0006 !important;
+}
+[data-theme="dark"] .stat-card i {
+    color: #60a5fa !important;
+}
+[data-theme="dark"] .stat-card span {
+    color: #b0b8c9 !important;
+}
+[data-theme="dark"] .stat-card h2 {
+    color: #fff !important;
+}
+[data-theme="dark"] .charts-section {
+    background: #1e293b !important;
+    color: #fff !important;
+    box-shadow: 0 4px 24px #0006 !important;
+}
+[data-theme="dark"] .charts-section h2 {
+    color: #60a5fa !important;
+}
+[data-theme="dark"] .charts-section canvas {
+    background: #0f172a !important;
+}
+[data-theme="dark"] .dashboard-action-btn {
+    background: #1e293b !important;
+    color: #fff !important;
+    border-color: #232a36 !important;
+}
+[data-theme="dark"] .dashboard-action-btn:hover {
+    background: #60a5fa !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .dashboard-title {
+    color: #fff !important;
+}
+[data-theme="dark"] .main-content {
+    color: #fff !important;
+}
+[data-theme="dark"] nav ul li a {
+    color: #fff !important;
+}
+[data-theme="dark"] nav ul li a.active,
+[data-theme="dark"] nav ul li a:hover {
+    background: #0f172a !important;
+    color: #60a5fa !important;
+}

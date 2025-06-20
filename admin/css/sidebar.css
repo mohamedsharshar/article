@@ -67,3 +67,27 @@
     margin-right: 0 !important;
   }
 }
+[data-theme="dark"] .sidebar {
+  background: #232a36 !important;
+  color: #e3e6f0 !important;
+  box-shadow: 0 2px 8px #0006 !important;
+}
+[data-theme="dark"] .sidebar-logo {
+  color: #60a5fa !important;
+}
+[data-theme="dark"] .sidebar ul li a {
+  color: #b0b8c9 !important;
+}
+[data-theme="dark"] .sidebar ul li a.active,
+[data-theme="dark"] .sidebar ul li a:hover {
+  background: #232a36 !important;
+  color: #60a5fa !important;
+}
+[data-theme="dark"] .user-info {
+  background: #181c24 !important;
+  color: #e3e6f0 !important;
+  border-color: #232a36 !important;
+}
+[data-theme="dark"] .user-info .fa-user-circle {
+  color: #60a5fa !important;
+}
