@@ -666,7 +666,7 @@ document.addEventListener('DOMContentLoaded', function() {
           btn.disabled = true;
           btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> جارٍ الإرسال...';
           try {
-            const res = await fetch('', {
+            const res = await fetch(window.location.href, {
               method: 'POST',
               headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
               body: 'user_comment=' + encodeURIComponent(comment)
