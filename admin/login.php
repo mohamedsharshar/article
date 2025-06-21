@@ -66,9 +66,61 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         color: #4f5d75;
         font-weight: 600;
       }
+      body {
+    direction: rtl;
+    font-family: 'Cairo', Arial, sans-serif;
+    background: #f8fafc;
+}
+.login, .main-content {
+    background: #fff;
+    color: #222;
+}
+[data-theme="dark"] body,
+[data-theme="dark"] html {
+    background: #0f172a !important;
+    color: #fff !important;
+}
+[data-theme="dark"] .login, [data-theme="dark"] .main-content {
+    background: #1e293b !important;
+    color: #fff !important;
+}
+[data-theme="dark"] input, [data-theme="dark"] input[type="email"], [data-theme="dark"] input[type="password"] {
+    background: #232a36 !important;
+    color: #fff !important;
+    border-color: #334155 !important;
+}
+[data-theme="dark"] label {
+    color: #fff !important;
+}
     </style>
 </head>
 <body>
+    <button id="themeToggle" aria-label="تبديل الوضع" style="position:absolute;left:2rem;top:1.5rem;background:none;border:none;cursor:pointer;font-size:1.5rem;z-index:10;"><i class="fa fa-moon" style="color:#222;"></i></button>
+    <script>
+function setDarkMode(on) {
+  if(on) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('adminDarkMode', '1');
+    document.getElementById('themeToggle').innerHTML = '<i class="fa fa-sun" style="color:#fff;"></i>';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('adminDarkMode', '0');
+    document.getElementById('themeToggle').innerHTML = '<i class="fa fa-moon" style="color:#222;"></i>';
+  }
+}
+const themeToggle = document.getElementById('themeToggle');
+if(localStorage.getItem('adminDarkMode') === null) {
+  setDarkMode(false);
+} else if(localStorage.getItem('adminDarkMode') === '1') {
+  setDarkMode(true);
+} else {
+  setDarkMode(false);
+}
+themeToggle.onclick = function() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  setDarkMode(!isDark);
+};
+    </script>
     <div class="login">
         <h2>تسجيل دخول الأدمن</h2>
         <form action="login.php" method="post">

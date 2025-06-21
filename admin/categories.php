@@ -179,7 +179,103 @@ if (isset($_GET['edit'])) {
                 padding: 8px 6px;
             }
         }
+        [data-theme="dark"] .categories-container {
+            background: #1e293b !important;
+            color: #fff !important;
+            box-shadow: 0 8px 32px #0f172a99 !important;
+        }
+        [data-theme="dark"] .categories-title {
+            color: #fff !important;
+        }
+        [data-theme="dark"] .category-form input[type="text"] {
+            background: #22304a !important;
+            color: #fff !important;
+            border: 1px solid #334155 !important;
+        }
+        [data-theme="dark"] .category-form input[type="text"]:focus {
+            border: 1.5px solid #60a5fa !important;
+        }
+        [data-theme="dark"] .category-form button, [data-theme="dark"] .category-form a {
+            background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%) !important;
+            color: #fff !important;
+        }
+        [data-theme="dark"] .category-form button:hover, [data-theme="dark"] .category-form a:hover {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%) !important;
+        }
+        [data-theme="dark"] .data-table {
+            background: #1e293b !important;
+            color: #fff !important;
+            border-color: #334155 !important;
+        }
+        [data-theme="dark"] .data-table thead tr {
+            background: linear-gradient(90deg, #334155 0%, #1e293b 100%) !important;
+            color: #fff !important;
+        }
+        [data-theme="dark"] .data-table th, [data-theme="dark"] .data-table td {
+            border-bottom: 1px solid #334155 !important;
+            color: #fff !important;
+        }
+        [data-theme="dark"] .data-table tr:last-child td {
+            border-bottom: none !important;
+        }
+        [data-theme="dark"] .data-table a {
+            color: #60a5fa !important;
+        }
+        [data-theme="dark"] .data-table a:hover {
+            color: #fff !important;
+            text-decoration: underline;
+        }
+        [data-theme="dark"] .sidebar {
+            background: #1e293b !important;
+            color: #fff !important;
+        }
+        [data-theme="dark"] .categories-container::-webkit-scrollbar {
+            background: #22304a;
+        }
+        [data-theme="dark"] .categories-container::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+        [data-theme="dark"] .categories-container::-webkit-scrollbar-thumb:hover {
+            background: #60a5fa;
+        }
+        [data-theme="dark"] body,
+        [data-theme="dark"] html {
+            background: #0f172a !important;
+            color: #fff !important;
+        }
+        [data-theme="dark"] p[style*="color:red"] {
+            color: #ff6b6b !important;
+        }
+        [data-theme="dark"] p[style*="color:green"] {
+            color: #4ade80 !important;
+        }
     </style>
+    <button id="themeToggle" aria-label="تبديل الوضع" style="position:absolute;left:2rem;top:1.5rem;background:none;border:none;cursor:pointer;font-size:1.5rem;z-index:10;"><i class="fa fa-moon" style="color:#222;"></i></button>
+    <script>
+    function setDarkMode(on) {
+      if(on) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('adminDarkMode', '1');
+        document.getElementById('themeToggle').innerHTML = '<i class="fa fa-sun" style="color:#fff;"></i>';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('adminDarkMode', '0');
+        document.getElementById('themeToggle').innerHTML = '<i class="fa fa-moon" style="color:#222;"></i>';
+      }
+    }
+    const themeToggle = document.getElementById('themeToggle');
+    if(localStorage.getItem('adminDarkMode') === null) {
+      setDarkMode(false);
+    } else if(localStorage.getItem('adminDarkMode') === '1') {
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+    themeToggle.onclick = function() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      setDarkMode(!isDark);
+    };
+    </script>
 </head>
 <body>
     <div class="categories-container">
