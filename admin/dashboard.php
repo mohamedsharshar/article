@@ -381,11 +381,11 @@ fetch('api_comments_stats.php')
       if(on) {
         document.documentElement.setAttribute('data-theme', 'dark');
         localStorage.setItem('adminDarkMode', '1');
-        document.getElementById('themeToggle').innerHTML = '<i class="fa fa-sun"></i>';
+        document.getElementById('themeToggle').innerHTML = '<i class="fa fa-sun" style="color:#fff;"></i>';
       } else {
         document.documentElement.removeAttribute('data-theme');
         localStorage.setItem('adminDarkMode', '0');
-        document.getElementById('themeToggle').innerHTML = '<i class="fa fa-moon"></i>';
+        document.getElementById('themeToggle').innerHTML = '<i class="fa fa-moon" style="color:#222;"></i>';
       }
     }
     const themeToggle = document.getElementById('themeToggle');
