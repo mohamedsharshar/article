@@ -33,6 +33,7 @@ if (!$article) {
             font-family: 'Cairo', Tahoma, Arial, sans-serif;
             margin: 0;
             padding: 0;
+            transition: background 0.2s, color 0.2s;
         }
         .admin-article-container {
             max-width: 800px;
@@ -108,6 +109,42 @@ if (!$article) {
             color: #1E293B;
             text-decoration: underline;
         }
+        /* --- Dark Mode Styles --- */
+        [data-theme="dark"] body {
+            background: #0f172a !important;
+            color: #fff !important;
+        }
+        [data-theme="dark"] .admin-article-container {
+            background: #1e293b !important;
+            color: #fff !important;
+            box-shadow: 0 4px 24px #0008;
+        }
+        [data-theme="dark"] .admin-article-title {
+            color: #60a5fa !important;
+        }
+        [data-theme="dark"] .admin-article-meta {
+            color: #b0b8c9 !important;
+        }
+        [data-theme="dark"] .admin-article-meta .category-tag {
+            background: #2563eb !important;
+            color: #fff !important;
+            box-shadow: 0 2px 8px #2563eb33;
+        }
+        [data-theme="dark"] .admin-article-content {
+            background: #22304a !important;
+            color: #fff !important;
+            box-shadow: 0 1px 4px #0f172a33 !important;
+        }
+        [data-theme="dark"] .admin-article-back {
+            color: #60a5fa !important;
+        }
+        [data-theme="dark"] .admin-article-back:hover {
+            color: #fff !important;
+        }
+        [data-theme="dark"] .admin-article-image {
+            background: #22304a !important;
+        }
+        /* --- End Dark Mode Styles --- */
         @media (max-width: 900px) {
             .admin-article-container {
                 padding: 1.2rem 0.5rem;
@@ -134,9 +171,25 @@ if (!$article) {
                 padding: 0.7rem 0.2rem;
             }
         }
+        .theme-toggle {
+            position: absolute;
+            left: 2rem;
+            top: 2rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #2563eb;
+            cursor: pointer;
+            z-index: 10;
+            transition: color 0.2s;
+        }
+        [data-theme="dark"] .theme-toggle {
+            color: #fff !important;
+        }
     </style>
 </head>
 <body>
+    <button class="theme-toggle" aria-label="تبديل الوضع" type="button"><i class="fa fa-moon"></i></button>
     <div class="admin-article-container">
         <a href="manage_articles.php" class="admin-article-back"><i class="fa fa-arrow-right"></i> العودة للإدارة</a>
         <?php
@@ -157,5 +210,35 @@ if (!$article) {
             <?= nl2br(htmlspecialchars($article['content'])) ?>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
+    <script>
+    function setDarkMode(on) {
+      if(on) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('adminDarkMode', '1');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('adminDarkMode', '0');
+      }
+    }
+    const themeToggle = document.querySelector('.theme-toggle');
+    if(themeToggle) {
+      if(localStorage.getItem('adminDarkMode') === null) {
+        setDarkMode(false);
+        themeToggle.innerHTML = '<i class="fa fa-moon"></i>';
+      } else if(localStorage.getItem('adminDarkMode') === '1') {
+        setDarkMode(true);
+        themeToggle.innerHTML = '<i class="fa fa-sun"></i>';
+      } else {
+        setDarkMode(false);
+        themeToggle.innerHTML = '<i class="fa fa-moon"></i>';
+      }
+      themeToggle.onclick = function() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        setDarkMode(!isDark);
+        themeToggle.innerHTML = isDark ? '<i class="fa fa-moon"></i>' : '<i class="fa fa-sun"></i>';
+      };
+    }
+    </script>
 </body>
 </html>
