@@ -112,7 +112,7 @@ if (isset($_SESSION['user_id'])) {
 body {
   font-family: var(--font-sans);
   color: #3B82F6 ;
-  background-color: var(--color-slate-50); /* سيتم استبدالها بقيمة ديناميكية حسب الثيم */
+  background-color: var(--color-slate-50); 
   line-height: 1.5;
 }
 
@@ -321,6 +321,7 @@ body {
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  text-decoration: none !important;
 }
 
 .category-btn:hover {
@@ -375,10 +376,12 @@ body {
   display: inline-block;
   padding: 0.25rem 0.75rem;
   background-color: var(--color-primary);
+  color:#fff !important;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 500;
   margin-bottom: 1rem;
+  
 }
 
 .featured-content h3 {
@@ -692,6 +695,9 @@ body {
 [data-theme="dark"] .category-btn:hover {
   background-color: #334155 !important;
 }
+[data-theme="dark"] .category-tag{
+  color:white !important;
+}
 [data-theme="dark"] .footer a {
   color: #94A3B8 !important;
 }
@@ -769,7 +775,15 @@ body {
 
     <section class="articles-grid">
       <div class="container">
-        <h2>أحدث المقالات</h2>
+        <h2>
+          <?php
+            if ($selectedCategoryId && isset($categories[$selectedCategoryId])) {
+              echo "مقالات تصنيف: " . htmlspecialchars($categories[$selectedCategoryId]);
+            } else {
+              echo "أحدث المقالات";
+            }
+          ?>
+        </h2>
         <div class="grid" id="articles-container">
           <?php foreach($articlesPage as $article): ?>
             <article class="article-card" tabindex="0" aria-label="مقال: <?= htmlspecialchars($article['title']) ?>" onclick="window.location.href='article.php?id=<?= $article['id'] ?>'">

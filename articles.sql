@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jun 22, 2025 at 02:57 PM
+-- Generation Time: Jun 22, 2025 at 05:33 PM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -20,6 +20,32 @@ SET time_zone = "+00:00";
 --
 -- Database: `blog`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admins`
+--
+
+CREATE TABLE `admins` (
+  `id` int NOT NULL,
+  `adminname` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_active` tinyint(1) DEFAULT '1',
+  `superadmin` tinyint(1) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admins`
+--
+
+INSERT INTO `admins` (`id`, `adminname`, `email`, `password`, `created_at`, `updated_at`, `is_active`, `superadmin`) VALUES
+(1, 'admin', 'admin@example.com', '$2y$10$a355BwkHYFfgO4SrJWI6euG/HHpetOKATLDWQSAm2bADhB/VwHJGW', '2025-05-25 11:56:19', '2025-06-17 22:24:14', 1, 0),
+(2, 'admin2', 'admin2@example.com', '$2y$10$rB4PnmfUHAtsWcB/HDnIBOQTHqVivYg8r4FlAqFP.Pzf6N8gFu2rO', '2025-05-26 17:57:00', '2025-06-22 20:10:38', 1, 0),
+(3, 'superadmin', 'superadmin@example.com', '$2y$10$A8poqqi2Ke4QGmxCcGq5fuCDeTKaeC0cCvrggrcr1du.ikVwqLgNm', '2025-06-16 12:51:12', '2025-06-16 15:51:12', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -57,11 +83,209 @@ INSERT INTO `articles` (`id`, `title`, `content`, `image`, `created_at`, `catego
 (28, 'sad', 'sad', 'art_68581276ad314.jpeg', '2025-06-22 14:25:58', NULL, 1, NULL),
 (29, 'user article', 'aslkdnsakjdas', 'art_685818abc01fd.jpeg', '2025-06-22 14:52:27', 9, 1, NULL),
 (30, 'asd', 'sad', 'art_6858190c69eea5.47565030.jpeg', '2025-06-22 14:54:04', 9, NULL, 3),
-(31, 'سشيش', 'سشيسشي', 'art_6858198d3b6cd.jpeg', '2025-06-22 14:56:13', 9, 1, NULL);
+(31, 'سشيش', 'سشيسشي', 'art_6858198d3b6cd.jpeg', '2025-06-22 14:56:13', 9, 1, NULL),
+(32, 'شسي', 'يشسيسش', 'art_68581a6f5893b.png', '2025-06-22 14:59:59', 9, 1, NULL),
+(33, 'jhhhhhh', 'asd', 'art_68581c3237a5a9.40452724.png', '2025-06-22 15:07:30', 2, NULL, 3),
+(34, 'sadsadasdsa', 'sadasdsadsad', 'art_68581d8df0200.jpg', '2025-06-22 15:13:17', 4, 1, NULL),
+(35, 'm,', 'lk,.', 'art_685828bc11bea.png', '2025-06-22 16:01:00', 4, 1, NULL),
+(36, 'sadas', 'sadsad', 'art_685832a158e3e.jpeg', '2025-06-22 16:43:13', 4, 1, NULL),
+(37, 'سشي', 'شسي', 'art_6858334c430f7.jpg', '2025-06-22 16:46:04', 7, 1, NULL),
+(38, 'dsfdsf', 'dsfdfs', 'art_68583437dfdff4.36936732.png', '2025-06-22 16:49:59', 4, NULL, 3);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `article_ratings`
+--
+
+CREATE TABLE `article_ratings` (
+  `id` int NOT NULL,
+  `article_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `rating` tinyint NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ;
+
+--
+-- Dumping data for table `article_ratings`
+--
+
+INSERT INTO `article_ratings` (`id`, `article_id`, `user_id`, `rating`, `created_at`) VALUES
+(1, 22, 1, 3, '2025-06-20 13:09:51'),
+(2, 12, 1, 5, '2025-06-20 13:14:07'),
+(3, 11, 1, 5, '2025-06-20 13:21:26'),
+(4, 23, 1, 4, '2025-06-20 14:53:12'),
+(5, 10, 1, 5, '2025-06-20 14:58:07'),
+(6, 24, 1, 5, '2025-06-20 15:04:18'),
+(7, 24, 2, 5, '2025-06-20 15:04:55'),
+(8, 11, 2, 5, '2025-06-20 15:07:20'),
+(9, 26, 1, 5, '2025-06-20 17:32:47'),
+(10, 28, 1, 5, '2025-06-22 14:32:16'),
+(11, 29, 1, 5, '2025-06-22 14:52:42'),
+(12, 30, 1, 2, '2025-06-22 14:55:57');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `categories`
+--
+
+CREATE TABLE `categories` (
+  `id` int NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `slug` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `categories`
+--
+
+INSERT INTO `categories` (`id`, `name`, `slug`) VALUES
+(2, 'تصميم', 'design'),
+(4, 'تطوير', 'development'),
+(6, 'تقنية', 'tech'),
+(7, 'العاب', 'games'),
+(9, 'ذكاء اصطناعي', 'ai');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `comments`
+--
+
+CREATE TABLE `comments` (
+  `id` int NOT NULL,
+  `article_id` int NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `admin_id` int DEFAULT NULL,
+  `content` text COLLATE utf8mb4_general_ci NOT NULL,
+  `is_admin` tinyint(1) DEFAULT '0',
+  `status` enum('pending','approved','rejected') COLLATE utf8mb4_general_ci DEFAULT 'approved',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `comments`
+--
+
+INSERT INTO `comments` (`id`, `article_id`, `user_id`, `admin_id`, `content`, `is_admin`, `status`, `created_at`) VALUES
+(4, 10, NULL, 1, 'this content about hacker', 1, 'approved', '2025-06-04 12:54:47'),
+(5, 11, NULL, 1, 'this is gaming article', 1, 'approved', '2025-06-04 12:56:52'),
+(6, 10, 1, NULL, 'حلو اووي', 0, 'approved', '2025-06-04 13:07:31'),
+(7, 10, 1, NULL, 'انا انبسطت اووي لما قرات المقال دا', 0, 'approved', '2025-06-04 13:09:43'),
+(21, 10, NULL, 3, 'this content about hacker', 1, 'approved', '2025-06-17 19:12:52'),
+(25, 10, 1, NULL, 'f', 0, 'approved', '2025-06-17 19:40:14'),
+(26, 23, 1, NULL, 'sadasd', 0, 'approved', '2025-06-17 20:24:03'),
+(27, 22, 1, NULL, 'calfonia', 0, 'approved', '2025-06-17 20:24:42'),
+(28, 23, 1, NULL, 'dfdsfdsfsdf', 0, 'approved', '2025-06-18 14:13:04'),
+(29, 22, 1, NULL, 'ببرر', 0, 'approved', '2025-06-18 16:03:44'),
+(30, 22, 1, NULL, 'good', 0, 'approved', '2025-06-20 13:07:18'),
+(31, 10, 1, NULL, 'شسشس', 0, 'approved', '2025-06-20 14:58:13'),
+(32, 24, 1, NULL, 'سشيشسي', 0, 'approved', '2025-06-20 15:03:08'),
+(33, 24, 1, NULL, 'يسشي', 0, 'approved', '2025-06-20 15:03:11'),
+(34, 24, 1, NULL, 'شسيسششيشسيشسيسشي', 0, 'approved', '2025-06-20 15:04:22'),
+(35, 11, 2, NULL, 'goood', 0, 'approved', '2025-06-20 15:05:16'),
+(36, 11, 2, NULL, 'f', 0, 'approved', '2025-06-20 15:05:21'),
+(37, 11, 2, NULL, 'سشي', 0, 'approved', '2025-06-20 15:06:37'),
+(38, 11, 2, NULL, 'سشي', 0, 'approved', '2025-06-20 15:06:38'),
+(39, 11, 2, NULL, 'سشي', 0, 'approved', '2025-06-20 15:06:39'),
+(40, 11, 2, NULL, 'سشي', 0, 'approved', '2025-06-20 15:06:39'),
+(41, 11, 2, NULL, 'سشي', 0, 'approved', '2025-06-20 15:06:42'),
+(42, 11, 2, NULL, 'سيش', 0, 'approved', '2025-06-20 15:06:49'),
+(43, 11, 2, NULL, 'اهلا', 0, 'approved', '2025-06-20 15:07:01'),
+(44, 28, 1, NULL, 'dsf', 0, 'approved', '2025-06-22 14:30:00'),
+(45, 28, NULL, 3, 'asdsadsadsad', 1, 'approved', '2025-06-22 14:30:37'),
+(47, 28, NULL, 3, 'hello world', 1, 'approved', '2025-06-22 14:49:26'),
+(48, 11, 1, NULL, 'hello world', 0, 'approved', '2025-06-22 14:51:14');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `favorite_articles`
+--
+
+CREATE TABLE `favorite_articles` (
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `article_id` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `favorite_articles`
+--
+
+INSERT INTO `favorite_articles` (`id`, `user_id`, `article_id`, `created_at`) VALUES
+(77, 1, 12, '2025-06-20 17:25:58'),
+(78, 1, 11, '2025-06-20 17:28:14'),
+(79, 1, 10, '2025-06-20 17:28:15'),
+(80, 1, 8, '2025-06-20 17:28:27'),
+(81, 1, 7, '2025-06-20 17:28:28'),
+(85, 1, 22, '2025-06-20 17:32:01'),
+(94, 1, 24, '2025-06-20 17:39:15'),
+(95, 1, 26, '2025-06-20 17:39:20'),
+(97, 1, 23, '2025-06-22 14:24:31'),
+(99, 1, 36, '2025-06-22 16:45:16');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `subscriptions`
+--
+
+CREATE TABLE `subscriptions` (
+  `id` int NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `subscribed_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `subscriptions`
+--
+
+INSERT INTO `subscriptions` (`id`, `email`, `subscribed_at`) VALUES
+(1, 'mmshsh05@gmail.com', '2025-06-18 17:48:12'),
+(2, 'mohamedsharshar624@gmail.com', '2025-06-22 17:29:30'),
+(3, 'admin@mail.com', '2025-06-22 17:51:41');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int NOT NULL,
+  `username` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_active` tinyint(1) DEFAULT '1',
+  `reset_token` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `reset_expires` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `created_at`, `updated_at`, `is_active`, `reset_token`, `reset_expires`) VALUES
+(1, 'mohamed', 'mmshsh05@gmail.com', '$2y$10$/RxYqQGwBGeEjKdxlN6pg.NWjcAGqjcyJLrMKxzkJPsmartos4AXe', '2025-05-25 11:44:06', '2025-06-22 20:20:21', 1, 'b86e84da8fd142e487bc3b801586c087c58f094a95199001c2bcece97eba2de4', '2025-06-17 13:56:51'),
+(2, 'sharshar', 'user@example.com', '$2y$10$fAC4YSWM8Gs1GLWg03wGy.TAJ/BHbtJgZiuMkrirYmCEDFmF87ktS', '2025-05-26 17:44:54', '2025-06-22 20:20:23', 1, NULL, NULL);
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `admins`
+--
+ALTER TABLE `admins`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`adminname`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `username_2` (`adminname`);
 
 --
 -- Indexes for table `articles`
@@ -71,14 +295,106 @@ ALTER TABLE `articles`
   ADD KEY `fk_articles_category` (`category_id`);
 
 --
+-- Indexes for table `article_ratings`
+--
+ALTER TABLE `article_ratings`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_rating` (`article_id`,`user_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `categories`
+--
+ALTER TABLE `categories`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`),
+  ADD UNIQUE KEY `slug` (`slug`);
+
+--
+-- Indexes for table `comments`
+--
+ALTER TABLE `comments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `article_id` (`article_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `admin_id` (`admin_id`);
+
+--
+-- Indexes for table `favorite_articles`
+--
+ALTER TABLE `favorite_articles`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_fav` (`user_id`,`article_id`),
+  ADD KEY `article_id` (`article_id`);
+
+--
+-- Indexes for table `subscriptions`
+--
+ALTER TABLE `subscriptions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `email_2` (`email`),
+  ADD UNIQUE KEY `username_2` (`username`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `admins`
+--
+ALTER TABLE `admins`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `articles`
 --
 ALTER TABLE `articles`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+
+--
+-- AUTO_INCREMENT for table `article_ratings`
+--
+ALTER TABLE `article_ratings`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `categories`
+--
+ALTER TABLE `categories`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `comments`
+--
+ALTER TABLE `comments`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+
+--
+-- AUTO_INCREMENT for table `favorite_articles`
+--
+ALTER TABLE `favorite_articles`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
+
+--
+-- AUTO_INCREMENT for table `subscriptions`
+--
+ALTER TABLE `subscriptions`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
@@ -89,6 +405,28 @@ ALTER TABLE `articles`
 --
 ALTER TABLE `articles`
   ADD CONSTRAINT `fk_articles_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `article_ratings`
+--
+ALTER TABLE `article_ratings`
+  ADD CONSTRAINT `article_ratings_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `article_ratings_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `comments`
+--
+ALTER TABLE `comments`
+  ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`admin_id`) REFERENCES `admins` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `favorite_articles`
+--
+ALTER TABLE `favorite_articles`
+  ADD CONSTRAINT `favorite_articles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `favorite_articles_ibfk_2` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

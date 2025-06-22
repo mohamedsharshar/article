@@ -18,14 +18,14 @@ if (isset($_POST['add_admin'])) {
     if (!is_superadmin($current_admin)) {
         $error = 'غير مصرح لك بإضافة مشرفين. هذه العملية متاحة فقط للسوبر أدمن.';
     } else {
-        $username = trim($_POST['username']);
+        $adminname = trim($_POST['adminname']);
         $email = trim($_POST['email']);
         $password = trim($_POST['password']);
         $superadmin = ($email === 'superadmin@example.com') ? 1 : 0;
-        if ($username && $email && $password) {
+        if ($adminname && $email && $password) {
             $hashed = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare('INSERT INTO admins (username, email, password, created_at, superadmin) VALUES (?, ?, ?, NOW(), ?)');
-            $stmt->execute([$username, $email, $hashed, $superadmin]);
+            $stmt = $pdo->prepare('INSERT INTO admins (adminname, email, password, created_at, superadmin) VALUES (?, ?, ?, NOW(), ?)');
+            $stmt->execute([$adminname, $email, $hashed, $superadmin]);
             $success = 'تمت إضافة المشرف بنجاح.';
             header('Location: admins.php?success_msg=' . urlencode($success));
             exit();
@@ -51,7 +51,7 @@ if (isset($_POST['delete_admin_id'])) {
 // تعديل مشرف (فقط سوبر أدمن)
 if (isset($_POST['edit_admin_id'])) {
     $id = intval($_POST['edit_admin_id']);
-    $username = trim($_POST['edit_username']);
+    $adminname = trim($_POST['edit_adminname']);
     $email = trim($_POST['edit_email']);
     $password = trim($_POST['edit_password']);
     $stmt = $pdo->prepare('SELECT * FROM admins WHERE id = ?');
@@ -61,16 +61,16 @@ if (isset($_POST['edit_admin_id'])) {
         $error = 'غير مصرح لك بتعديل المشرفين. هذه العملية متاحة فقط للسوبر أدمن.';
     } elseif (is_superadmin($target) && !is_superadmin($current_admin)) {
         $error = 'لا يمكن تعديل سوبر أدمن إلا من سوبر أدمن.';
-    } elseif ($username && $email) {
+    } elseif ($adminname && $email) {
         // لا تنفذ أي تعديل إذا لم يكن المستخدم الحالي سوبر أدمن
     } else {
         if ($password) {
             $hashed = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare('UPDATE admins SET username = ?, email = ?, password = ? WHERE id = ?');
-            $stmt->execute([$username, $email, $hashed, $id]);
+            $stmt = $pdo->prepare('UPDATE admins SET adminname = ?, email = ?, password = ? WHERE id = ?');
+            $stmt->execute([$adminname, $email, $hashed, $id]);
         } else {
-            $stmt = $pdo->prepare('UPDATE admins SET username = ?, email = ? WHERE id = ?');
-            $stmt->execute([$username, $email, $id]);
+            $stmt = $pdo->prepare('UPDATE admins SET adminname = ?, email = ? WHERE id = ?');
+            $stmt->execute([$adminname, $email, $id]);
         }
         header('Location: admins.php?edited=1');
         exit();
@@ -90,7 +90,7 @@ if (isset($_POST['toggle_active_id'])) {
         $new_active = $admin['is_active'] ? 0 : 1;
         $stmt = $pdo->prepare('UPDATE admins SET is_active = ? WHERE id = ?');
         $stmt->execute([$new_active, $id]);
-        if ($new_active == 0 && isset($_SESSION['username']) && $_SESSION['username'] === $admin['username']) {
+        if ($new_active == 0 && isset($_SESSION['adminname']) && $_SESSION['adminname'] === $admin['adminname']) {
             session_unset();
             session_destroy();
         }
@@ -119,6 +119,7 @@ $admins = $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll
         .main-content {
             padding: 2rem 2vw 1rem 2vw;
             margin-right: 220px;
+
         }
         @media (max-width: 900px) {
             .main-content {
@@ -563,8 +564,8 @@ $admins = $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll
             <div class="modal-content">
                 <div class="modal-header">إضافة مشرف جديد</div>
                 <div class="form-group">
-                    <label for="username">اسم المشرف</label>
-                    <input type="text" name="username" id="username" required>
+                    <label for="adminname">اسم المشرف</label>
+                    <input type="text" name="adminname" id="adminname" required>
                 </div>
                 <div class="form-group">
                     <label for="email">البريد الإلكتروني</label>
@@ -588,8 +589,8 @@ $admins = $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll
                 <div class="modal-header">تعديل مشرف</div>
                 <input type="hidden" name="edit_admin_id" id="edit_admin_id">
                 <div class="form-group">
-                    <label for="edit_username">اسم المشرف</label>
-                    <input type="text" name="edit_username" id="edit_username" required>
+                    <label for="edit_adminname">اسم المشرف</label>
+                    <input type="text" name="edit_adminname" id="edit_adminname" required>
                 </div>
                 <div class="form-group">
                     <label for="edit_email">البريد الإلكتروني</label>
@@ -658,19 +659,19 @@ themeToggle.onclick = function() {
 };
 </script>
 <script>
-function openEditAdminModal(id, username, email) {
+function openEditAdminModal(id, adminname, email) {
     document.querySelector('.edit-admin-modal').classList.add('active');
     document.getElementById('edit_admin_id').value = id;
-    document.getElementById('edit_username').value = username;
+    document.getElementById('edit_adminname').value = adminname;
     document.getElementById('edit_email').value = email;
     document.getElementById('edit_password').value = '';
 }
 document.querySelectorAll('.close-edit-modal').forEach(btn => {
     btn.onclick = () => document.querySelector('.edit-admin-modal').classList.remove('active');
 });
-function openDeleteAdminModal(id, username) {
+function openDeleteAdminModal(id, adminname) {
     document.getElementById('delete_admin_id').value = id;
-    document.getElementById('deleteAdminName').textContent = username;
+    document.getElementById('deleteAdminName').textContent = adminname;
     document.getElementById('deleteAdminModal').classList.add('active');
 }
 document.querySelectorAll('.close-delete-modal').forEach(btn => {
@@ -700,9 +701,9 @@ const searchBtn = document.getElementById('searchAdminBtn');
 function filterAdmins() {
     const value = searchInput.value.trim().toLowerCase();
     document.querySelectorAll('#adminsTable tr').forEach(row => {
-        const username = row.children[0].textContent.toLowerCase();
+        const adminname = row.children[0].textContent.toLowerCase();
         const email = row.children[1].textContent.toLowerCase();
-        row.style.display = (username.includes(value) || email.includes(value)) ? '' : 'none';
+        row.style.display = (adminname.includes(value) || email.includes(value)) ? '' : 'none';
     });
 }
 searchInput.addEventListener('input', filterAdmins);
