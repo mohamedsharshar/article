@@ -764,7 +764,11 @@ body {
                 <p><?= htmlspecialchars(mb_substr($article['content'],0,100)) ?><?= mb_strlen($article['content']) > 100 ? '...' : '' ?></p>
                 <div class="meta-info">
                   <span><i class="fa fa-calendar-alt"></i> <?= htmlspecialchars(substr($article['created_at'],0,10)) ?></span>
-                  <?php if($article['category_name']): ?><span class="category-tag"> <?= htmlspecialchars($article['category_name']) ?> </span><?php endif; ?>
+                  <?php if($article['category_name']): ?>
+                    <span class="category-tag"> <?= htmlspecialchars($article['category_name']) ?> </span>
+                  <?php else: ?>
+                    <span class="category-tag uncategorized-tag" style="cursor:pointer;" onclick="filterUncategorized(event)">غير مصنف حالياً</span>
+                  <?php endif; ?>
                 </div>
               </div>
             </article>
@@ -795,6 +799,7 @@ body {
             <img src="<?= $featured['image'] ? 'uploads/articles/' . htmlspecialchars($featured['image']) : 'https://source.unsplash.com/900x400/?arabic,writing,' . urlencode($featured['category_name'] ?? 'article') ?>" alt="صورة المقال المميز" loading="lazy">
             <div class="featured-content">
               <?php if ($featured['category_name']): ?><span class="category-tag"><?= htmlspecialchars($featured['category_name']) ?></span><?php endif; ?>
+              <span class="category-tag"><?= $featured['category_name'] ? htmlspecialchars($featured['category_name']) : 'بدون تصنيف' ?></span>
               <h3><?= htmlspecialchars($featured['title']) ?></h3>
               <p><?= htmlspecialchars(mb_substr($featured['content'],0,120)) ?><?= mb_strlen($featured['content']) > 120 ? '...' : '' ?></p>
               <div class="article-meta">
@@ -804,7 +809,7 @@ body {
                 </div>
                 <div class="meta-info">
                   <span><i class="fa fa-calendar"></i><?= htmlspecialchars(substr($featured['created_at'],0,10)) ?></span>
-                  <span><i class="fa fa-star" style="color:#fbbf24;"></i> <?= number_format($featured['avg_rating'],2) ?> (<?= $featured['total_ratings'] ?> تقييم)</span>
+                  <span><i class="fa fa-clock"></i>قراءة سريعة</span>
                 </div>
               </div>
               <a href="article.php?id=<?= $featured['id'] ?>" class="btn btn-primary" style="margin-top:1rem;">اقرأ المزيد</a>
@@ -995,7 +1000,13 @@ body {
       btn.onclick = function() {
         categoryFilters.querySelectorAll('button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        currentCategoryId = btn.dataset.id === 'all' ? null : btn.dataset.id;
+        if(btn.dataset.id === 'all') {
+          currentCategoryId = null;
+        } else if(btn.dataset.id === 'uncategorized') {
+          currentCategoryId = 'uncategorized';
+        } else {
+          currentCategoryId = btn.dataset.id;
+        }
         renderArticles();
       };
     });
@@ -1025,6 +1036,8 @@ body {
 
     // تفعيل الفلترة عند الضغط على زر تصنيف
     function renderArticles() {
+      // تأكد أن كل مقال ليس له category_id يأخذ القيمة null
+      articles.forEach(a => { if (a.category_id === undefined) a.category_id = null; });
       // تحديث أزرار التصنيفات
       categoryFilters.querySelectorAll('button').forEach(btn => {
         btn.classList.remove('active');
@@ -1032,7 +1045,11 @@ body {
       });
       // تصفية المقالات
       let filtered = articles;
-      if (currentCategoryId) filtered = filtered.filter(a => a.category_id == currentCategoryId);
+      if (currentCategoryId && currentCategoryId !== 'uncategorized') {
+        filtered = filtered.filter(a => a.category_id == currentCategoryId);
+      } else if (currentCategoryId === 'uncategorized') {
+        filtered = filtered.filter(a => !a.category_id || a.category_id === null || a.category_id === "" || a.category_id === 0 || a.category_id === "0");
+      }
       if (currentQuery) {
         const q = currentQuery.toLowerCase();
         filtered = filtered.filter(a => (a.title && a.title.toLowerCase().includes(q)) || (a.content && a.content.toLowerCase().includes(q)));
@@ -1056,19 +1073,8 @@ body {
         card.tabIndex = 0;
         card.setAttribute('aria-label', 'مقال: ' + article.title);
         card.innerHTML = `
-          <div class=\"article-image\">
-            <img src=\"${imgSrc}\" alt=\"صورة المقال\" loading=\"lazy\">
-            ${favBtn}
-          </div>
-          <div class=\"article-content\">
-            <h3>${article.title}</h3>
-            <p>${(article.content || '').substring(0, 100)}${(article.content && article.content.length > 100 ? '...' : '')}</p>
-            <div class=\"meta-info\">
-              <span><i class=\"fa fa-calendar-alt\"></i> ${article.created_at.split(' ')[0]}</span>
-              ${article.category_name ? `<span class=\"category-tag\">${article.category_name}</span>` : ''}
-            </div>
-          </div>
-        `;
+          <div class=\"article-image\">\n            <img src=\"${imgSrc}\" alt=\"صورة المقال\" loading=\"lazy\">\n            ${favBtn}\n          </div>\n          <div class=\"article-content\">\n            <h3>${article.title}</h3>\n            <p>${(article.content || '').substring(0, 100)}${(article.content && article.content.length > 100 ? '...' : '')}</p>\n            <div class=\"meta-info\">\n              <span><i class=\"fa fa-calendar-alt\"></i> ${article.created_at.split(' ')[0]}</span>\n              ${article.category_name ? `<span class=\"category-tag\">${article.category_name}</span>` : `<span class=\"category-tag uncategorized-tag\" style=\"cursor:pointer;\" onclick=\"filterUncategorized(event)\">غير مصنف حالياً</span>`}
+            </div>\n          </div>\n        `;
         card.onclick = () => window.location.href = `article.php?id=${article.id}`;
         grid.appendChild(card);
       });
@@ -1086,6 +1092,7 @@ body {
           <img src="${imgSrc}" alt="صورة المقال المميز" loading="lazy">
           <div class="featured-content">
             ${featured.category ? `<span class="category-tag">${featured.category}</span>` : ''}
+            <span class="category-tag"><?= $featured['category_name'] ? htmlspecialchars($featured['category_name']) : 'بدون تصنيف' ?></span>
             <h3>${featured.title}</h3>
             <p>${(featured.content || '').substring(0, 120)}${(featured.content && featured.content.length > 120 ? '...' : '')}</p>
             <div class="article-meta">
@@ -1127,7 +1134,7 @@ body {
       modal.onclick = e => { if (e.target === modal) modal.remove(); };
     }
 
-    // الوضع الليلي (ثابت على الموقع حتى يغيره المستخدم يدوياً)
+    // تفعيل الوضع الليلي (ثابت على الموقع حتى يغيره المستخدم يدوياً)
     function setDarkMode(on) {
       if(on) {
         document.documentElement.setAttribute('data-theme', 'dark');
@@ -1290,6 +1297,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+    function filterUncategorized(e) {
+      if(e) e.stopPropagation();
+      currentCategoryId = 'uncategorized';
+      renderArticles();
+      // تفعيل الزر في الفلاتر
+      document.querySelectorAll('.category-filters .category-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if(btn.dataset.id === 'uncategorized') btn.classList.add('active');
+      });
+    }
   </script>
 </body>
 </html>
