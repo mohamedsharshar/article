@@ -208,3 +208,28 @@
         padding: 18px 8px 16px 8px;
     }
 }
+@media (max-width: 500px) {
+    .data-table {
+        font-size: 0.95rem;
+        overflow-x: auto !important;
+        display: block;
+    }
+    .data-table th, .data-table td {
+        padding: 7px 3px;
+        font-size: 0.93rem;
+    }
+    .add-article-modal form,
+    .edit-article-modal form,
+    .view-article-modal .view-content,
+    .delete-article-modal .delete-content {
+        min-width: 98vw;
+        padding: 8px 2px 8px 2px;
+    }
+    .add-article-btn, .action-btn, .delete-btn-confirm, .close-modal, .close-edit-modal, .close-view-modal, .close-delete-modal {
+        width: 100% !important;
+        min-width: 0 !important;
+        font-size: 0.98rem !important;
+        padding: 10px 0 !important;
+        margin-bottom: 6px !important;
+    }
+}

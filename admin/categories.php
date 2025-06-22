@@ -167,6 +167,9 @@ if (isset($_GET['edit'])) {
         .data-table a:hover {
             text-decoration: underline;
         }
+        .data-table tbody tr:hover {
+            background: #e0edff !important;
+        }
         @media (max-width: 700px) {
             .categories-container {
                 padding: 12px 2vw;
@@ -224,6 +227,9 @@ if (isset($_GET['edit'])) {
         [data-theme="dark"] .data-table a:hover {
             color: #fff !important;
             text-decoration: underline;
+        }
+        [data-theme="dark"] .data-table tbody tr:hover {
+            background: #223a5a !important;
         }
         [data-theme="dark"] .sidebar {
             background: #1e293b !important;
