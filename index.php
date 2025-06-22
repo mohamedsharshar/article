@@ -802,7 +802,11 @@ body {
                 <p><?= htmlspecialchars(mb_substr($article['content'],0,100)) ?><?= mb_strlen($article['content']) > 100 ? '...' : '' ?></p>
                 <div class="meta-info">
                   <span><i class="fa fa-calendar-alt"></i> <?= htmlspecialchars(substr($article['created_at'],0,10)) ?></span>
-                  <?php if($article['category_name']): ?><span class="category-tag"> <?= htmlspecialchars($article['category_name']) ?> </span><?php endif; ?>
+                  <?php if($article['category_name']): ?>
+                    <span class="category-tag"> <?= htmlspecialchars($article['category_name']) ?> </span>
+                  <?php else: ?>
+                    <span class="category-tag" style="background:#64748B;">غير مصنف</span>
+                  <?php endif; ?>
                 </div>
               </div>
             </article>

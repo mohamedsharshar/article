@@ -1,4 +1,5 @@
 <?php
+session_start();
 // admin/categories.php
 require_once '../db.php';
 
@@ -167,6 +168,14 @@ if (isset($_GET['edit'])) {
         .data-table a:hover {
             text-decoration: underline;
         }
+        .data-table tbody tr {
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .data-table tbody tr:hover {
+            background: #e9f0fb !important;
+            box-shadow: 0 2px 12px #3a86ff22;
+            cursor: pointer;
+        }
         @media (max-width: 700px) {
             .categories-container {
                 padding: 12px 2vw;
@@ -225,6 +234,10 @@ if (isset($_GET['edit'])) {
             color: #fff !important;
             text-decoration: underline;
         }
+        [data-theme="dark"] .data-table tbody tr:hover {
+            background: #22304a !important;
+            box-shadow: 0 2px 12px #60a5fa22;
+        }
         [data-theme="dark"] .sidebar {
             background: #1e293b !important;
             color: #fff !important;
@@ -278,6 +291,8 @@ if (isset($_GET['edit'])) {
     </script>
 </head>
 <body>
+<?php include 'sidebar.php'; ?>
+<main class="main-content">
     <div class="categories-container">
         <a href="dashboard.php" style="display:inline-block;margin-bottom:18px;background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:bold;box-shadow:0 2px 8px rgba(67,97,238,0.07);transition:background 0.2s,box-shadow 0.2s;">&larr; الرجوع للوحة التحكم</a>
         <?php if (!empty($error)): ?>
@@ -350,5 +365,6 @@ if (isset($_GET['edit'])) {
             </tbody>
         </table>
     </div>
+</main>
 </body>
 </html>
