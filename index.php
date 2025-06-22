@@ -1257,6 +1257,38 @@ smoothLinks.forEach(link => {
 
 document.addEventListener('DOMContentLoaded', function() {
   activateFavButtons();
+  var form = document.getElementById('footerSubscribeForm');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var email = document.getElementById('footerSubscribeEmail').value.trim();
+      var msg = document.getElementById('footerSubscribeMsg');
+      msg.textContent = '';
+      msg.style.color = '#e63946';
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        msg.textContent = 'يرجى إدخال بريد إلكتروني صحيح.';
+        return;
+      }
+      fetch('subscribe.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'email=' + encodeURIComponent(email)
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          msg.textContent = 'تم الاشتراك بنجاح!';
+          msg.style.color = '#16a34a';
+          document.getElementById('footerSubscribeEmail').value = '';
+        } else {
+          msg.textContent = data.message || 'حدث خطأ، حاول مرة أخرى.';
+        }
+      })
+      .catch(() => {
+        msg.textContent = 'حدث خطأ في الاتصال.';
+      });
+    });
+  }
 });
   </script>
 </body>
