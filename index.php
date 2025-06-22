@@ -1160,33 +1160,46 @@ body {
       modal.onclick = e => { if (e.target === modal) modal.remove(); };
     }
 
-    // الوضع الليلي (ثابت على الموقع حتى يغيره المستخدم يدوياً)
-    function setDarkMode(on) {
-      if(on) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('darkMode', '1');
-      } else {
-        document.documentElement.removeAttribute('data-theme');
-        localStorage.setItem('darkMode', '0');
-      }
+    // تفعيل نموذج الاشتراك في الفوتر
+    const footerSubscribeForm = document.getElementById('footerSubscribeForm');
+    if (footerSubscribeForm) {
+      footerSubscribeForm.onsubmit = async function(e) {
+        e.preventDefault();
+        const emailInput = document.getElementById('footerSubscribeEmail');
+        const msg = document.getElementById('footerSubscribeMsg');
+        const email = emailInput.value.trim();
+        if (!email) {
+          msg.textContent = 'يرجى إدخال بريدك الإلكتروني.';
+          msg.style.color = '#e63946';
+          return;
+        }
+        msg.textContent = 'جاري الاشتراك...';
+        msg.style.color = '#3B82F6';
+        emailInput.disabled = true;
+        footerSubscribeForm.querySelector('button[type="submit"]').disabled = true;
+        try {
+          const res = await fetch('subscribe.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'email=' + encodeURIComponent(email)
+          });
+          const data = await res.json();
+          if (data.success) {
+            msg.textContent = 'تم الاشتراك بنجاح!';
+            msg.style.color = '#198754';
+            emailInput.value = '';
+          } else {
+            msg.textContent = data.message || 'حدث خطأ أثناء الاشتراك.';
+            msg.style.color = '#e63946';
+          }
+        } catch {
+          msg.textContent = 'حدث خطأ أثناء الاتصال بالخادم.';
+          msg.style.color = '#e63946';
+        }
+        emailInput.disabled = false;
+        footerSubscribeForm.querySelector('button[type="submit"]').disabled = false;
+      };
     }
-    // تفعيل الوضع الليلي دائماً عند التحميل (إلا إذا اختار المستخدم وضع آخر)
-    if(localStorage.getItem('darkMode') === null) {
-      setDarkMode(true);
-      document.querySelector('.theme-toggle').innerHTML = '<i class="fa fa-sun"></i>';
-    } else if(localStorage.getItem('darkMode') === '1') {
-      setDarkMode(true);
-      document.querySelector('.theme-toggle').innerHTML = '<i class="fa fa-sun"></i>';
-    } else {
-      setDarkMode(false);
-      document.querySelector('.theme-toggle').innerHTML = '<i class="fa fa-moon"></i>';
-    }
-    // زر تبديل الوضع
-    themeToggle.onclick = function() {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      setDarkMode(!isDark);
-      themeToggle.innerHTML = isDark ? '<i class="fa fa-moon"></i>' : '<i class="fa fa-sun"></i>';
-    };
 
     // تمرير favIds من PHP إلى جافاسكريبت لاستخدامها في تلوين القلوب
     window.favIds = <?php echo json_encode($favIds); ?>;
