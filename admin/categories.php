@@ -1,10 +1,5 @@
 <?php
 // admin/categories.php
-session_start();
-if (!isset($_SESSION['admin_logged_in'])) {
-    header('Location: login.php');
-    exit();
-}
 require_once '../db.php';
 
 // إضافة تصنيف جديد
@@ -172,9 +167,6 @@ if (isset($_GET['edit'])) {
         .data-table a:hover {
             text-decoration: underline;
         }
-        .data-table tbody tr:hover {
-            background: #e0edff !important;
-        }
         @media (max-width: 700px) {
             .categories-container {
                 padding: 12px 2vw;
@@ -233,9 +225,6 @@ if (isset($_GET['edit'])) {
             color: #fff !important;
             text-decoration: underline;
         }
-        [data-theme="dark"] .data-table tbody tr:hover {
-            background: #223a5a !important;
-        }
         [data-theme="dark"] .sidebar {
             background: #1e293b !important;
             color: #fff !important;
@@ -289,80 +278,77 @@ if (isset($_GET['edit'])) {
     </script>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
-    <div class="main-content">
-        <div class="categories-container">
-            <a href="dashboard.php" style="display:inline-block;margin-bottom:18px;background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:bold;box-shadow:0 2px 8px rgba(67,97,238,0.07);transition:background 0.2s,box-shadow 0.2s;">&larr; الرجوع للوحة التحكم</a>
-            <?php if (!empty($error)): ?>
-                <div style="background:#ffe0e0;color:#d32f2f;padding:10px 18px;border-radius:8px;margin-bottom:18px;font-weight:bold;">
-                    <?= $error ?>
-                </div>
-            <?php endif; ?>
-            <div class="categories-title"><i class="fa fa-tags"></i> إدارة التصنيفات</div>
-            <form method="get" id="searchForm" style="margin-bottom:18px;display:flex;gap:10px;width:100%;margin-right:auto;margin-left:auto;">
-                <input type="text" name="search" id="searchInput" value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" placeholder="ابحث عن تصنيف..." style="flex:8 1 0%;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0;font-size:1.08rem;">
-                <button type="submit" style="flex:2 1 0%;background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:1.08rem;font-weight:bold;cursor:pointer;">بحث</button>
-            </form>
-            <script>
-            const searchInput = document.getElementById('searchInput');
-            const searchForm = document.getElementById('searchForm');
-            let searchTimeout;
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    if (searchInput.value.trim() === '') {
-                        window.location.href = 'categories.php';
-                    } else {
-                        searchForm.submit();
-                    }
-                }, 350);
-            });
-            </script>
-            <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;">
-                <div style="flex:1;min-width:260px;">
-                    <form method="post" class="category-form">
-                        <?php if ($editCategory): ?>
-                            <input type="hidden" name="id" value="<?= $editCategory['id'] ?>">
-                            <input type="text" name="name" value="<?= $editCategory['name'] ?>" required placeholder="اسم التصنيف">
-                            <input type="text" name="slug" value="<?= $editCategory['slug'] ?>" required placeholder="Slug">
-                            <div style="display:flex;justify-content:space-between;gap:10px;">
-                                <button type="submit" name="edit" style="flex:1;margin-right:0;">تعديل</button>
-                                <a href="categories.php" style="flex:1;text-align:center;">إلغاء</a>
-                            </div>
-                        <?php else: ?>
-                            <input type="text" name="name" required placeholder="اسم التصنيف">
-                            <input type="text" name="slug" required placeholder="Slug">
-                            <div style="display:flex;justify-content:space-between;gap:10px;">
-                                <button type="submit" name="add" style="flex:1;margin-right:0;">إضافة</button>
-                            </div>
-                        <?php endif; ?>
-                    </form>
-                </div>
+    <div class="categories-container">
+        <a href="dashboard.php" style="display:inline-block;margin-bottom:18px;background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:bold;box-shadow:0 2px 8px rgba(67,97,238,0.07);transition:background 0.2s,box-shadow 0.2s;">&larr; الرجوع للوحة التحكم</a>
+        <?php if (!empty($error)): ?>
+            <div style="background:#ffe0e0;color:#d32f2f;padding:10px 18px;border-radius:8px;margin-bottom:18px;font-weight:bold;">
+                <?= $error ?>
             </div>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>الرقم</th>
-                        <th>الاسم</th>
-                        <th>Slug</th>
-                        <th>إجراءات</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($categories as $cat): ?>
-                        <tr>
-                            <td><?= $cat['id'] ?></td>
-                            <td><?= $cat['name'] ?></td>
-                            <td><?= $cat['slug'] ?></td>
-                            <td>
-                                <a href="categories.php?edit=<?= $cat['id'] ?>">تعديل</a> |
-                                <a href="categories.php?delete=<?= $cat['id'] ?>" onclick="return confirm('متأكد أنك عايز تحذف التصنيف؟');">حذف</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+        <?php endif; ?>
+        <div class="categories-title"><i class="fa fa-tags"></i> إدارة التصنيفات</div>
+        <form method="get" id="searchForm" style="margin-bottom:18px;display:flex;gap:10px;width:100%;margin-right:auto;margin-left:auto;">
+            <input type="text" name="search" id="searchInput" value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" placeholder="ابحث عن تصنيف..." style="flex:8 1 0%;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0;font-size:1.08rem;">
+            <button type="submit" style="flex:2 1 0%;background:linear-gradient(90deg,#3a86ff 0%,#4361ee 100%);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:1.08rem;font-weight:bold;cursor:pointer;">بحث</button>
+        </form>
+        <script>
+        const searchInput = document.getElementById('searchInput');
+        const searchForm = document.getElementById('searchForm');
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (searchInput.value.trim() === '') {
+                    window.location.href = 'categories.php';
+                } else {
+                    searchForm.submit();
+                }
+            }, 350);
+        });
+        </script>
+        <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;">
+            <div style="flex:1;min-width:260px;">
+                <form method="post" class="category-form">
+                    <?php if ($editCategory): ?>
+                        <input type="hidden" name="id" value="<?= $editCategory['id'] ?>">
+                        <input type="text" name="name" value="<?= $editCategory['name'] ?>" required placeholder="اسم التصنيف">
+                        <input type="text" name="slug" value="<?= $editCategory['slug'] ?>" required placeholder="Slug">
+                        <div style="display:flex;justify-content:space-between;gap:10px;">
+                            <button type="submit" name="edit" style="flex:1;margin-right:0;">تعديل</button>
+                            <a href="categories.php" style="flex:1;text-align:center;">إلغاء</a>
+                        </div>
+                    <?php else: ?>
+                        <input type="text" name="name" required placeholder="اسم التصنيف">
+                        <input type="text" name="slug" required placeholder="Slug">
+                        <div style="display:flex;justify-content:space-between;gap:10px;">
+                            <button type="submit" name="add" style="flex:1;margin-right:0;">إضافة</button>
+                        </div>
+                    <?php endif; ?>
+                </form>
+            </div>
         </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>الرقم</th>
+                    <th>الاسم</th>
+                    <th>Slug</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($categories as $cat): ?>
+                    <tr>
+                        <td><?= $cat['id'] ?></td>
+                        <td><?= $cat['name'] ?></td>
+                        <td><?= $cat['slug'] ?></td>
+                        <td>
+                            <a href="categories.php?edit=<?= $cat['id'] ?>">تعديل</a> |
+                            <a href="categories.php?delete=<?= $cat['id'] ?>" onclick="return confirm('متأكد أنك عايز تحذف التصنيف؟');">حذف</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </body>
 </html>

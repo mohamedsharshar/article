@@ -1,29 +1,53 @@
 <?php
 session_start();
 require_once 'db.php';
-// جلب جميع التصنيفات من قاعدة البيانات
-$categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
-// جلب جميع المقالات مع التصنيف واسم الناشر (من admins أو users)
-$articles = $pdo->query("SELECT articles.*, categories.name AS category_name, COALESCE(admins.adminname, users.username) AS author_name
-FROM articles
-LEFT JOIN categories ON articles.category_id = categories.id
-LEFT JOIN admins ON articles.admin_id = admins.id
-LEFT JOIN users ON articles.user_id = users.id
-ORDER BY articles.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+// جلب جميع التصنيفات كمصفوفة id=>name
+$categories = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC")->fetchAll(PDO::FETCH_KEY_PAIR);
+
+// تحديد التصنيف المختار من الرابط
+$selectedCategoryId = isset($_GET['category_id']) && is_numeric($_GET['category_id']) ? intval($_GET['category_id']) : null;
+
+// جلب المقالات حسب التصنيف المختار بدون أي JOIN
+if ($selectedCategoryId) {
+    $stmt = $pdo->prepare("SELECT * FROM articles WHERE category_id = ? ORDER BY created_at DESC");
+    $stmt->execute([$selectedCategoryId]);
+    $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $articles = $pdo->query("SELECT * FROM articles ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+}
+// إضافة اسم التصنيف لكل مقال
+foreach ($articles as &$article) {
+    $article['category_name'] = isset($categories[$article['category_id']]) ? $categories[$article['category_id']] : null;
+}
+unset($article);
 // جلب المقال الأعلى تقييماً بناءً على جدول article_ratings فقط
 $topRatedId = $pdo->query("SELECT article_id FROM article_ratings GROUP BY article_id HAVING COUNT(*) > 0 ORDER BY AVG(rating) DESC, COUNT(*) DESC LIMIT 1")->fetchColumn();
 $featured = null;
 if ($topRatedId) {
-  $stmt = $pdo->prepare("SELECT a.*, categories.name AS category_name, COALESCE(admins.adminname, users.username) AS author_name,
-    (SELECT AVG(rating) FROM article_ratings WHERE article_id = a.id) as avg_rating,
-    (SELECT COUNT(*) FROM article_ratings WHERE article_id = a.id) as total_ratings
-    FROM articles a
-    LEFT JOIN categories ON a.category_id = categories.id
-    LEFT JOIN admins ON a.admin_id = admins.id
-    LEFT JOIN users ON a.user_id = users.id
-    WHERE a.id = ? LIMIT 1");
-  $stmt->execute([$topRatedId]);
-  $featured = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $pdo->prepare("SELECT * FROM articles WHERE id = ? LIMIT 1");
+    $stmt->execute([$topRatedId]);
+    $featured = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($featured) {
+        // اسم التصنيف
+        $featured['category_name'] = isset($categories[$featured['category_id']]) ? $categories[$featured['category_id']] : null;
+        // التقييمات
+        $featured['avg_rating'] = $pdo->query("SELECT AVG(rating) FROM article_ratings WHERE article_id = " . intval($featured['id']))->fetchColumn();
+        $featured['total_ratings'] = $pdo->query("SELECT COUNT(*) FROM article_ratings WHERE article_id = " . intval($featured['id']))->fetchColumn();
+        // اسم الكاتب
+        $featured['author_name'] = '';
+        if (!empty($featured['user_id'])) {
+            $stmt = $pdo->prepare('SELECT username FROM users WHERE id = ?');
+            $stmt->execute([$featured['user_id']]);
+            $u = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($u) $featured['author_name'] = $u['username'];
+        } elseif (!empty($featured['admin_id'])) {
+            $stmt = $pdo->prepare('SELECT adminname FROM admins WHERE id = ?');
+            $stmt->execute([$featured['admin_id']]);
+            $a = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($a) $featured['author_name'] = $a['adminname'];
+        }
+        if (empty($featured['author_name'])) $featured['author_name'] = 'مجهول';
+    }
 }
 
 // قواعد (rules) بسيطة: لا تظهر المقالات المحذوفة أو الفارغة العنوان/المحتوى
@@ -735,9 +759,9 @@ body {
     <section class="categories-section" id="categories">
       <div class="container">
         <div class="category-filters">
-          <button class="category-btn active" data-id="all">الكل</button>
-          <?php foreach($categories as $cat): ?>
-            <button class="category-btn" data-id="<?= $cat['id'] ?>"> <?= htmlspecialchars($cat['name']) ?> </button>
+          <a href="index.php" class="category-btn<?= !$selectedCategoryId ? ' active' : '' ?>" data-id="all">الكل</a>
+          <?php foreach($categories as $catId => $catName): ?>
+            <a href="?category_id=<?= $catId ?>" class="category-btn<?= $selectedCategoryId == $catId ? ' active' : '' ?>" data-id="<?= $catId ?>"> <?= htmlspecialchars($catName) ?> </a>
           <?php endforeach; ?>
         </div>
       </div>
@@ -764,11 +788,7 @@ body {
                 <p><?= htmlspecialchars(mb_substr($article['content'],0,100)) ?><?= mb_strlen($article['content']) > 100 ? '...' : '' ?></p>
                 <div class="meta-info">
                   <span><i class="fa fa-calendar-alt"></i> <?= htmlspecialchars(substr($article['created_at'],0,10)) ?></span>
-                  <?php if($article['category_name']): ?>
-                    <span class="category-tag"> <?= htmlspecialchars($article['category_name']) ?> </span>
-                  <?php else: ?>
-                    <span class="category-tag uncategorized-tag" style="cursor:pointer;" onclick="filterUncategorized(event)">غير مصنف حالياً</span>
-                  <?php endif; ?>
+                  <?php if($article['category_name']): ?><span class="category-tag"> <?= htmlspecialchars($article['category_name']) ?> </span><?php endif; ?>
                 </div>
               </div>
             </article>
@@ -799,7 +819,6 @@ body {
             <img src="<?= $featured['image'] ? 'uploads/articles/' . htmlspecialchars($featured['image']) : 'https://source.unsplash.com/900x400/?arabic,writing,' . urlencode($featured['category_name'] ?? 'article') ?>" alt="صورة المقال المميز" loading="lazy">
             <div class="featured-content">
               <?php if ($featured['category_name']): ?><span class="category-tag"><?= htmlspecialchars($featured['category_name']) ?></span><?php endif; ?>
-              <span class="category-tag"><?= $featured['category_name'] ? htmlspecialchars($featured['category_name']) : 'بدون تصنيف' ?></span>
               <h3><?= htmlspecialchars($featured['title']) ?></h3>
               <p><?= htmlspecialchars(mb_substr($featured['content'],0,120)) ?><?= mb_strlen($featured['content']) > 120 ? '...' : '' ?></p>
               <div class="article-meta">
@@ -809,7 +828,7 @@ body {
                 </div>
                 <div class="meta-info">
                   <span><i class="fa fa-calendar"></i><?= htmlspecialchars(substr($featured['created_at'],0,10)) ?></span>
-                  <span><i class="fa fa-clock"></i>قراءة سريعة</span>
+                  <span><i class="fa fa-star" style="color:#fbbf24;"></i> <?= number_format($featured['avg_rating'],2) ?> (<?= $featured['total_ratings'] ?> تقييم)</span>
                 </div>
               </div>
               <a href="article.php?id=<?= $featured['id'] ?>" class="btn btn-primary" style="margin-top:1rem;">اقرأ المزيد</a>
@@ -990,9 +1009,6 @@ body {
 
     // بيانات المقالات من PHP إلى جافاسكريبت
     const articles = <?php echo json_encode($articles, JSON_UNESCAPED_UNICODE); ?>;
-    // استخراج التصنيفات الفريدة
-    const categories = Array.from(new Set(articles.map(a => a.category).filter(Boolean)));
-
     // تفعيل الفلاتر الديناميكية
     const categoryFilters = document.querySelector('.category-filters');
     let currentCategoryId = null;
@@ -1000,13 +1016,7 @@ body {
       btn.onclick = function() {
         categoryFilters.querySelectorAll('button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        if(btn.dataset.id === 'all') {
-          currentCategoryId = null;
-        } else if(btn.dataset.id === 'uncategorized') {
-          currentCategoryId = 'uncategorized';
-        } else {
-          currentCategoryId = btn.dataset.id;
-        }
+        currentCategoryId = btn.dataset.id === 'all' ? null : btn.dataset.id;
         renderArticles();
       };
     });
@@ -1036,20 +1046,8 @@ body {
 
     // تفعيل الفلترة عند الضغط على زر تصنيف
     function renderArticles() {
-      // تأكد أن كل مقال ليس له category_id يأخذ القيمة null
-      articles.forEach(a => { if (a.category_id === undefined) a.category_id = null; });
-      // تحديث أزرار التصنيفات
-      categoryFilters.querySelectorAll('button').forEach(btn => {
-        btn.classList.remove('active');
-        if ((currentCategoryId === null && btn.dataset.id === 'all') || btn.dataset.id == currentCategoryId) btn.classList.add('active');
-      });
-      // تصفية المقالات
       let filtered = articles;
-      if (currentCategoryId && currentCategoryId !== 'uncategorized') {
-        filtered = filtered.filter(a => a.category_id == currentCategoryId);
-      } else if (currentCategoryId === 'uncategorized') {
-        filtered = filtered.filter(a => !a.category_id || a.category_id === null || a.category_id === "" || a.category_id === 0 || a.category_id === "0");
-      }
+      if (currentCategoryId) filtered = filtered.filter(a => a.category_id == currentCategoryId);
       if (currentQuery) {
         const q = currentQuery.toLowerCase();
         filtered = filtered.filter(a => (a.title && a.title.toLowerCase().includes(q)) || (a.content && a.content.toLowerCase().includes(q)));
@@ -1073,8 +1071,19 @@ body {
         card.tabIndex = 0;
         card.setAttribute('aria-label', 'مقال: ' + article.title);
         card.innerHTML = `
-          <div class=\"article-image\">\n            <img src=\"${imgSrc}\" alt=\"صورة المقال\" loading=\"lazy\">\n            ${favBtn}\n          </div>\n          <div class=\"article-content\">\n            <h3>${article.title}</h3>\n            <p>${(article.content || '').substring(0, 100)}${(article.content && article.content.length > 100 ? '...' : '')}</p>\n            <div class=\"meta-info\">\n              <span><i class=\"fa fa-calendar-alt\"></i> ${article.created_at.split(' ')[0]}</span>\n              ${article.category_name ? `<span class=\"category-tag\">${article.category_name}</span>` : `<span class=\"category-tag uncategorized-tag\" style=\"cursor:pointer;\" onclick=\"filterUncategorized(event)\">غير مصنف حالياً</span>`}
-            </div>\n          </div>\n        `;
+          <div class=\"article-image\">
+            <img src=\"${imgSrc}\" alt=\"صورة المقال\" loading=\"lazy\">
+            ${favBtn}
+          </div>
+          <div class=\"article-content\">
+            <h3>${article.title}</h3>
+            <p>${(article.content || '').substring(0, 100)}${(article.content && article.content.length > 100 ? '...' : '')}</p>
+            <div class=\"meta-info\">
+              <span><i class=\"fa fa-calendar-alt\"></i> ${article.created_at.split(' ')[0]}</span>
+              ${article.category_name ? `<span class=\"category-tag\">${article.category_name}</span>` : ''}
+            </div>
+          </div>
+        `;
         card.onclick = () => window.location.href = `article.php?id=${article.id}`;
         grid.appendChild(card);
       });
@@ -1092,7 +1101,6 @@ body {
           <img src="${imgSrc}" alt="صورة المقال المميز" loading="lazy">
           <div class="featured-content">
             ${featured.category ? `<span class="category-tag">${featured.category}</span>` : ''}
-            <span class="category-tag"><?= $featured['category_name'] ? htmlspecialchars($featured['category_name']) : 'بدون تصنيف' ?></span>
             <h3>${featured.title}</h3>
             <p>${(featured.content || '').substring(0, 120)}${(featured.content && featured.content.length > 120 ? '...' : '')}</p>
             <div class="article-meta">
@@ -1134,7 +1142,7 @@ body {
       modal.onclick = e => { if (e.target === modal) modal.remove(); };
     }
 
-    // تفعيل الوضع الليلي (ثابت على الموقع حتى يغيره المستخدم يدوياً)
+    // الوضع الليلي (ثابت على الموقع حتى يغيره المستخدم يدوياً)
     function setDarkMode(on) {
       if(on) {
         document.documentElement.setAttribute('data-theme', 'dark');
@@ -1264,50 +1272,7 @@ smoothLinks.forEach(link => {
 
 document.addEventListener('DOMContentLoaded', function() {
   activateFavButtons();
-  var form = document.getElementById('footerSubscribeForm');
-  if (form) {
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      var email = document.getElementById('footerSubscribeEmail').value.trim();
-      var msg = document.getElementById('footerSubscribeMsg');
-      msg.textContent = '';
-      msg.style.color = '#e63946';
-      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        msg.textContent = 'يرجى إدخال بريد إلكتروني صحيح.';
-        return;
-      }
-      fetch('subscribe.php', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'email=' + encodeURIComponent(email)
-      })
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          msg.textContent = 'تم الاشتراك بنجاح!';
-          msg.style.color = '#16a34a';
-          document.getElementById('footerSubscribeEmail').value = '';
-        } else {
-          msg.textContent = data.message || 'حدث خطأ، حاول مرة أخرى.';
-        }
-      })
-      .catch(() => {
-        msg.textContent = 'حدث خطأ في الاتصال.';
-      });
-    });
-  }
 });
-
-    function filterUncategorized(e) {
-      if(e) e.stopPropagation();
-      currentCategoryId = 'uncategorized';
-      renderArticles();
-      // تفعيل الزر في الفلاتر
-      document.querySelectorAll('.category-filters .category-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if(btn.dataset.id === 'uncategorized') btn.classList.add('active');
-      });
-    }
   </script>
 </body>
 </html>
