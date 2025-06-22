@@ -45,26 +45,26 @@
 }
 @media (max-width: 900px) {
   .sidebar {
-    position: static;
-    width: 100%;
-    height: auto;
-    flex-direction: row;
-    justify-content: center;
+    width: 60px;
+    position: static !important;
+    padding: 1.5rem 0.2rem 1rem 0.2rem;
+    align-items: center;
     box-shadow: none;
-    padding: 12px 0;
+    height: auto;
   }
   .sidebar ul {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 8px;
-    width: auto;
+    width: 100%;
   }
   .sidebar ul li a {
-    padding: 10px 14px;
-    font-size: 1rem;
+    justify-content: center;
+    padding: 10px 0;
+    font-size: 1.2rem;
   }
-  .main-content {
-    margin-right: 0 !important;
+  .sidebar-logo, .sidebar .sidebar-header, .sidebar .sidebar-footer, .user-info {
+    display: none !important;
   }
 }
 @media (max-width: 500px) {
@@ -75,9 +75,9 @@
     flex-direction: row !important;
     align-items: center !important;
     justify-content: space-around !important;
-    position: fixed !important;
-    bottom: 0; right: 0; left: 0; top: auto;
-    z-index: 1000;
+    position: static !important;
+    bottom: auto; right: auto; left: auto; top: auto;
+    z-index: auto;
     padding: 0 !important;
     box-shadow: 0 -2px 8px #0002 !important;
   }

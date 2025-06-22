@@ -189,6 +189,8 @@ if (!$article) {
     </style>
 </head>
 <body>
+    <?php include 'sidebar.php'; ?>
+    <div class="main-content">
     <button class="theme-toggle" aria-label="تبديل الوضع" type="button"><i class="fa fa-moon"></i></button>
     <div class="admin-article-container">
         <a href="manage_articles.php" class="admin-article-back"><i class="fa fa-arrow-right"></i> العودة للإدارة</a>
@@ -210,6 +212,7 @@ if (!$article) {
             <?= nl2br(htmlspecialchars($article['content'])) ?>
         </div>
     </div>
+    </div> <!-- end .main-content -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
     <script>
     function setDarkMode(on) {

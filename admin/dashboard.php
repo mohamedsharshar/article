@@ -89,7 +89,20 @@ body {
     background: #f8fafc;
     min-height: 80vh;
     animation: fadeIn 1.2s;
-    margin-right: 0;
+    margin-right: 220px;
+    transition: margin-right 0.2s;
+}
+@media (max-width: 900px) {
+    .main-content {
+        margin-right: 0 !important;
+        padding: 18px 2vw 60px 2vw !important;
+        min-width: 0;
+    }
+}
+@media (max-width: 600px) {
+    .main-content {
+        padding: 8px 2vw 60px 2vw !important;
+    }
 }
 .dashboard-title {
     color: #2d3142;
@@ -236,19 +249,6 @@ body {
 [data-theme="dark"] .main-content {
     background: #1e293b !important;
     color: #fff !important;
-}
-[data-theme="dark"] .sidebar {
-    background: #1e293b !important;
-    color: #fff !important;
-    box-shadow: 0 2px 8px #0006 !important;
-}
-[data-theme="dark"] nav ul li a {
-    color: #fff !important;
-}
-[data-theme="dark"] nav ul li a.active,
-[data-theme="dark"] nav ul li a:hover {
-    background: #0f172a !important;
-    color: #60a5fa !important;
 }
     </style>
 </head>
